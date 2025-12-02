@@ -5,11 +5,11 @@
 class Dashboard {
     constructor() {
         this.selectedSensorsByType = {};  // 타입별 센서 저장: {'Fan': ['센서1', '센서2'], 'Temperature': [...]}
-        this.rangeProcessingEnabled = false;  // 선택 영역 신호처리 활성화 여부
         this.currentGraphType = 'timeseries';
         this.updateInterval = 10000;
         this.autoUpdateTimer = null;
         this.waveletFrequencyMode = false;
+        this.selectedRangeData = null;  // 선택된 영역 데이터 저장
         this.githubConfig = {
             username: 'YOUR_USERNAME',
             repo: 'YOUR_REPO',
@@ -163,14 +163,6 @@ class Dashboard {
         return labels[sensorType] || '값';
     }
     _setupEventListeners() {
-        // 선택 영역 신호처리 토글
-        document.getElementById('rangeProcessingToggle').addEventListener('change', (e) => {
-            this.rangeProcessingEnabled = e.target.checked;
-            if (this.rangeProcessingEnabled) {
-                this._showMessage('💡 그래프 영역을 드래그하여 신호처리할 영역을 선택하세요', 'info');
-            }
-        });
-        
         // 그래프 타입 선택
         document.getElementById('graphType').addEventListener('change', (e) => {
             this.currentGraphType = e.target.value;
@@ -211,6 +203,15 @@ class Dashboard {
                 };
                 fileInput.click();
             }
+        });
+
+        // 신호처리 UI 이벤트 리스너
+        document.getElementById('applySignalProcessingBtn').addEventListener('click', () => {
+            this._applySignalProcessing();
+        });
+
+        document.getElementById('cancelSignalProcessingBtn').addEventListener('click', () => {
+            this._hideSignalProcessingUI();
         });
     }
 
@@ -556,17 +557,23 @@ class Dashboard {
             // 단일타입 처리
             const sensorType = Object.keys(this.selectedSensorsByType)[0];
             const sensors = this.selectedSensorsByType[sensorType];
-            
+
             // 센서 배열 확인
             if (!sensors || sensors.length === 0) {
                 this._showMessage('선택된 센서가 없습니다', 'error');
                 return;
             }
-            
+
+            // 여러 센서가 선택되었고 시계열 그래프일 때는 다중 센서 표시
+            if (sensors.length > 1 && this.currentGraphType === 'timeseries') {
+                await this._renderMultiSensorTimeseries();
+                return;
+            }
+
             const firstSensor = sensors[0];
             this.currentSensor = firstSensor;  // 그래프 제목용
             const sensorData = dataLoader.getSensorData(firstSensor);
-            
+
             if (!sensorData || sensorData.length === 0) {
                 this._showMessage('센서 데이터가 없습니다', 'error');
                 return;
@@ -643,10 +650,9 @@ class Dashboard {
 
             // 분석 텍스트 업데이트
             this._updateAnalysisText(this.currentGraphType, values);
-            
-            // 선택 이벤트 바인딩 (단일타입 + 신호처리 가능한 타입 + 토글 활성)
-            const signalProcessingTypes = ['fft', 'stft', 'wavelet', 'hilbert'];
-            if (typeCount === 1 && signalProcessingTypes.includes(this.currentGraphType) && this.rangeProcessingEnabled) {
+
+            // 선택 이벤트 바인딩 (시계열 그래프에서 영역 선택 가능)
+            if (this.currentGraphType === 'timeseries') {
                 this._bindSelectionEvent(values);
             }
         } catch (error) {
@@ -662,61 +668,125 @@ class Dashboard {
      */
     /**
      * Plotly 그래프 선택 이벤트 바인딩
-     * 선택한 영역만 신호처리 수행
+     * 선택한 영역에 대해 신호처리 UI 표시
      */
     _bindSelectionEvent(fullSignal) {
         const mainGraph = document.getElementById('mainGraph');
-        
+
         // 이전 이벤트 리스너 제거 (중복 방지)
         if (mainGraph._selectionListener) {
             mainGraph.removeEventListener('plotly_selected', mainGraph._selectionListener);
         }
-        
+
         // 새 이벤트 리스너 등록
         const selectionListener = (data) => {
             if (!data.points || data.points.length === 0) return;
-            
+
             try {
                 // 선택된 x축 범위 추출
                 const xValues = data.points.map(p => p.x);
                 const xMin = Math.min(...xValues);
                 const xMax = Math.max(...xValues);
-                
+
                 // 샘플 간격
                 const sampleInterval = dataLoader.data.sample_interval_ms / 1000;
-                
+
                 // 배열 인덱스로 변환
                 const startIdx = Math.max(0, Math.floor(xMin / sampleInterval));
                 const endIdx = Math.min(fullSignal.length - 1, Math.ceil(xMax / sampleInterval));
-                
+
                 // 부분 신호 추출
                 const selectedSignal = fullSignal.slice(startIdx, endIdx + 1);
-                
+
                 if (selectedSignal.length < 2) {
                     this._showMessage('선택한 영역이 너무 작습니다 (최소 2개 샘플 필요)', 'warning');
                     return;
                 }
-                
+
                 // 선택 영역 정보 표시
                 const duration = (endIdx - startIdx + 1) * sampleInterval;
-                const info = `선택 영역: ${selectedSignal.length}개 샘플, ${duration.toFixed(2)}초`;
-                console.log(`[*] ${info}`);
-                
-                // 선택 영역 신호처리
-                this._processSelectedSignal(selectedSignal, this.currentGraphType, info, startIdx);
-                
+                const info = `${selectedSignal.length}개 샘플, ${duration.toFixed(2)}초`;
+
+                // 선택 영역 데이터 저장
+                this.selectedRangeData = {
+                    signal: selectedSignal,
+                    startIdx: startIdx,
+                    endIdx: endIdx,
+                    info: info
+                };
+
+                // 신호처리 UI 표시
+                this._showSignalProcessingUI(info);
+
             } catch (error) {
                 console.error('[ERROR] 선택 영역 처리 오류:', error);
                 this._showMessage('선택 영역 처리 실패: ' + error.message, 'error');
             }
         };
-        
+
         // 이벤트 리스너 저장 (이후 제거용)
         mainGraph._selectionListener = selectionListener;
         mainGraph.addEventListener('plotly_selected', selectionListener);
-        
+
         // 사용자 안내
         this._showMessage('💡 그래프 영역을 드래그하여 신호처리할 영역을 선택하세요', 'info');
+    }
+
+    /**
+     * 신호처리 UI 표시
+     */
+    _showSignalProcessingUI(rangeInfo) {
+        const panel = document.getElementById('signalProcessingPanel');
+        const infoSpan = document.getElementById('selectedRangeInfo');
+
+        infoSpan.textContent = `선택 영역: ${rangeInfo}`;
+
+        // 드롭박스 초기화
+        const select = document.getElementById('signalProcessingType');
+        select.value = '';
+
+        panel.style.display = 'block';
+
+        // 패널로 스크롤
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    /**
+     * 신호처리 UI 숨김
+     */
+    _hideSignalProcessingUI() {
+        const panel = document.getElementById('signalProcessingPanel');
+        panel.style.display = 'none';
+        this.selectedRangeData = null;
+    }
+
+    /**
+     * 신호처리 적용
+     */
+    _applySignalProcessing() {
+        if (!this.selectedRangeData) {
+            this._showMessage('선택된 영역이 없습니다', 'warning');
+            return;
+        }
+
+        const select = document.getElementById('signalProcessingType');
+        const processingType = select.value;
+
+        if (!processingType) {
+            this._showMessage('신호처리 방식을 선택해주세요', 'warning');
+            return;
+        }
+
+        // 신호처리 수행
+        this._processSelectedSignal(
+            this.selectedRangeData.signal,
+            processingType,
+            this.selectedRangeData.info,
+            this.selectedRangeData.startIdx
+        );
+
+        // UI 숨김
+        this._hideSignalProcessingUI();
     }
 
     /**
