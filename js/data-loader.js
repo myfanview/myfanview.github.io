@@ -261,6 +261,34 @@ class DataLoader {
     }
 
     /**
+     * 로컬 저장소 (root)에서 sampledata.json 로드
+     */
+    async loadSampleDataFromFile() {
+        try {
+            // 현재 페이지와 같은 경로에서 sampledata.json 로드
+            const response = await fetch('./sampledata.json');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            this.rawData = await response.json();
+            this._processData();
+            
+            console.log('[+] 샘플 데이터 로드 완료 (sampledata.json)');
+            return this.data;
+        } catch (error) {
+            console.error('[ERROR] 샘플 데이터 로드 실패:', error);
+            // 실패 시 합성 데이터로 폴백
+            console.log('[*] 합성 샘플 데이터로 폴백...');
+            const sampleData = DataLoader.generateSampleData();
+            this.rawData = sampleData;
+            this._processData();
+            return this.data;
+        }
+    }
+
+    /**
      * 샘플 데이터 생성 (테스트용)
      */
     static generateSampleData() {

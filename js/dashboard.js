@@ -202,10 +202,9 @@ class Dashboard {
      */
     async _loadSampleData() {
         try {
-            console.log('[*] 샘플 데이터 생성...');
-            const sampleData = DataLoader.generateSampleData();
-            dataLoader.rawData = sampleData;
-            dataLoader._processData();
+            console.log('[*] 샘플 데이터 로드 중...');
+            // sampledata.json 파일에서 로드 (또는 실패 시 합성 데이터 사용)
+            await dataLoader.loadSampleDataFromFile();
             
             this._updateUI();
             
