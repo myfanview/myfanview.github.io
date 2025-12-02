@@ -663,8 +663,9 @@ class Dashboard {
             // 분석 텍스트 업데이트
             this._updateAnalysisText(this.currentGraphType, values);
 
-            // 선택 이벤트 바인딩 (시계열 그래프에서 영역 선택 가능)
+            // 선택 이벤트 바인딩 (단일 센서 시계열 그래프에서만 영역 선택 가능)
             if (this.currentGraphType === 'timeseries') {
+                console.log('[*] 단일 센서 시계열: 신호처리 활성화');
                 this._bindSelectionEvent(values);
             }
         } catch (error) {
@@ -685,14 +686,27 @@ class Dashboard {
     _bindSelectionEvent(fullSignal) {
         const mainGraph = document.getElementById('mainGraph');
 
+        if (!mainGraph) {
+            console.error('[ERROR] mainGraph 요소를 찾을 수 없습니다');
+            return;
+        }
+
+        console.log('[*] _bindSelectionEvent 호출됨, 신호 길이:', fullSignal.length);
+
         // 이전 이벤트 리스너 제거 (중복 방지)
         if (mainGraph._selectionListener) {
             mainGraph.removeEventListener('plotly_selected', mainGraph._selectionListener);
+            console.log('[*] 이전 선택 이벤트 리스너 제거');
         }
 
         // 새 이벤트 리스너 등록
         const selectionListener = (data) => {
-            if (!data.points || data.points.length === 0) return;
+            console.log('[*] plotly_selected 이벤트 발생!', data);
+
+            if (!data || !data.points || data.points.length === 0) {
+                console.warn('[WARN] 선택된 포인트가 없습니다');
+                return;
+            }
 
             try {
                 // 선택된 x축 범위 추출
@@ -719,6 +733,8 @@ class Dashboard {
                 const duration = (endIdx - startIdx + 1) * sampleInterval;
                 const info = `${selectedSignal.length}개 샘플, ${duration.toFixed(2)}초`;
 
+                console.log('[*] 선택 영역:', info);
+
                 // 선택 영역 데이터 저장
                 this.selectedRangeData = {
                     signal: selectedSignal,
@@ -740,6 +756,8 @@ class Dashboard {
         mainGraph._selectionListener = selectionListener;
         mainGraph.addEventListener('plotly_selected', selectionListener);
 
+        console.log('[*] plotly_selected 이벤트 리스너 등록 완료');
+
         // 사용자 안내
         this._showMessage('💡 그래프 영역을 드래그하여 신호처리할 영역을 선택하세요', 'info');
     }
@@ -748,16 +766,33 @@ class Dashboard {
      * 신호처리 UI 표시
      */
     _showSignalProcessingUI(rangeInfo) {
+        console.log('[*] _showSignalProcessingUI 호출됨:', rangeInfo);
+
         const panel = document.getElementById('signalProcessingPanel');
         const infoSpan = document.getElementById('selectedRangeInfo');
+
+        if (!panel) {
+            console.error('[ERROR] signalProcessingPanel 요소를 찾을 수 없습니다');
+            return;
+        }
+
+        if (!infoSpan) {
+            console.error('[ERROR] selectedRangeInfo 요소를 찾을 수 없습니다');
+            return;
+        }
 
         infoSpan.textContent = `선택 영역: ${rangeInfo}`;
 
         // 드롭박스 초기화
         const select = document.getElementById('signalProcessingType');
-        select.value = '';
+        if (select) {
+            select.value = '';
+        } else {
+            console.error('[ERROR] signalProcessingType 요소를 찾을 수 없습니다');
+        }
 
         panel.style.display = 'block';
+        console.log('[*] 신호처리 UI 패널 표시됨');
 
         // 패널로 스크롤
         panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1052,20 +1087,24 @@ class Dashboard {
                 
                 // 타입이 처음 나타나면 새 y축 할당
                 if (!typeToYaxis[sensorType]) {
-                    typeToYaxis[sensorType] = yaxisCounter === 1 ? 'y' : `y${yaxisCounter}`;
-                    
+                    const yaxisKey = yaxisCounter === 1 ? 'y' : `y${yaxisCounter}`;
+                    typeToYaxis[sensorType] = yaxisKey;
+
                     // y축 설정 저장
                     let yaxisLabel = this._getYAxisLabelForType(sensorType);
+                    const layoutKey = yaxisCounter === 1 ? 'yaxis' : `yaxis${yaxisCounter}`;
+
                     if (yaxisCounter === 1) {
-                        yaxisConfigs.yaxis = {
+                        yaxisConfigs[layoutKey] = {
                             title: yaxisLabel,
                             side: 'left'
                         };
                     } else {
-                        yaxisConfigs[typeToYaxis[sensorType]] = {
+                        yaxisConfigs[layoutKey] = {
                             title: yaxisLabel,
                             overlaying: 'y',
-                            side: 'right'
+                            side: 'right',
+                            position: yaxisCounter === 2 ? 1.0 : 1.0 - (yaxisCounter - 2) * 0.1
                         };
                     }
                     yaxisCounter++;
@@ -1115,8 +1154,8 @@ class Dashboard {
             const firstValues = dataLoader.getSensorData(allSensors[0].name).map(r => r.value);
             this._updateStatistics(firstValues);
 
-            // 선택 이벤트 바인딩 (다중 센서 시계열에서도 영역 선택 가능)
-            this._bindSelectionEvent(firstValues);
+            // 다중 센서 시계열에서는 신호처리 비활성화 (어떤 센서를 처리할지 모호)
+            console.log('[*] 다중 센서 표시: 신호처리 비활성화');
             
         } catch (error) {
             console.error('[ERROR] 다중센서 그래프 렌더링 오류:', error);
