@@ -398,9 +398,7 @@ class Dashboard {
         });
 
         // 첫 번째 센서 기본 선택 (없으면 공)
-        if (sensors.length > 0 && this.selectedSensors.length === 0) {
-            // 초기 상태: 아무것도 선택 안함
-        }
+        // 초기 상태: 아무것도 선택 안함
 
         // checkbox 이벤트 바인딩
         this._bindSensorCheckboxes();
@@ -506,6 +504,7 @@ class Dashboard {
             const sensorType = Object.keys(this.selectedSensorsByType)[0];
             const sensors = this.selectedSensorsByType[sensorType];
             const firstSensor = sensors[0];
+            this.currentSensor = firstSensor;  // 그래프 제목용
             const sensorData = dataLoader.getSensorData(firstSensor);
             
             if (!sensorData || sensorData.length === 0) {
