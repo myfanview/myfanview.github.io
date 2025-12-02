@@ -260,11 +260,11 @@ class Dashboard {
 
                 case 'pwm-rpm':
                     await this._renderPwmVsRpm();
-                    return;
+                    break;
 
                 case '3d':
                     await this._render3DPlot();
-                    return;
+                    break;
 
                 case 'fft':
                     ({ trace, layout } = this._createFFTPlot(values));
@@ -337,13 +337,13 @@ class Dashboard {
      * FFT 플롯 생성
      */
     _createFFTPlot(values) {
-        const fftResult = signalProcessor.performFFT(values);
+        const fftResult = SignalProcessor.performFFT(values);
         if (!fftResult) {
             throw new Error('FFT 계산 실패');
         }
 
         const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
-        const freqs = signalProcessor.getFrequencies(values.length, sampleRate).slice(0, fftResult.magnitude.length / 2);
+        const freqs = SignalProcessor.getFrequencies(values.length, sampleRate).slice(0, fftResult.magnitude.length / 2);
         const magnitude = fftResult.magnitude.slice(0, fftResult.magnitude.length / 2);
 
         // dB 스케일
@@ -376,7 +376,7 @@ class Dashboard {
      * STFT 플롯 생성
      */
     _createSTFTPlot(values) {
-        const stftResult = signalProcessor.performSTFT(values, 128, 64);
+        const stftResult = SignalProcessor.performSTFT(values, 128, 64);
         if (!stftResult) {
             throw new Error('STFT 계산 실패');
         }
@@ -404,7 +404,7 @@ class Dashboard {
      * Wavelet 플롯 생성
      */
     _createWaveletPlot(values) {
-        const waveletResult = signalProcessor.performWavelet(values);
+        const waveletResult = SignalProcessor.performWavelet(values);
         if (!waveletResult) {
             throw new Error('Wavelet 계산 실패');
         }
@@ -437,7 +437,7 @@ class Dashboard {
      * Hilbert 포락선 플롯 생성
      */
     _createHilbertPlot(values) {
-        const hilbertResult = signalProcessor.performHilbert(values);
+        const hilbertResult = SignalProcessor.performHilbert(values);
         if (!hilbertResult) {
             throw new Error('Hilbert 계산 실패');
         }
@@ -489,6 +489,7 @@ class Dashboard {
 
         if (!pwmSensor || !rpmSensor) {
             this._showMessage('PWM 또는 RPM 데이터를 찾을 수 없습니다', 'error');
+            this._showLoading(false);  // ← 추가
             return;
         }
 
@@ -521,6 +522,7 @@ class Dashboard {
         };
 
         Plotly.newPlot('mainGraph', [trace], layout, {responsive: true});
+        this._showLoading(false);
     }
 
     /**
@@ -534,6 +536,7 @@ class Dashboard {
 
         if (!pwmSensor || !rpmSensor) {
             this._showMessage('필요한 데이터를 찾을 수 없습니다', 'error');
+            this._showLoading(false);
             return;
         }
 
@@ -569,13 +572,14 @@ class Dashboard {
         };
 
         Plotly.newPlot('mainGraph', [trace], layout, {responsive: true});
+        this._showLoading(false);
     }
 
     /**
      * 통계 업데이트
      */
     _updateStatistics(values) {
-        const stats = signalProcessor.getStatistics(values);
+        const stats = SignalProcessor.getStatistics(values);
         
         document.getElementById('statMean').textContent = stats.mean.toFixed(2);
         document.getElementById('statMin').textContent = stats.min.toFixed(2);
@@ -587,12 +591,12 @@ class Dashboard {
      * 분석 텍스트 업데이트
      */
     _updateAnalysisText(graphType, values) {
-        const stats = signalProcessor.getStatistics(values);
+        const stats = SignalProcessor.getStatistics(values);
         let analysisText = '';
 
         switch (graphType) {
             case 'fft':
-                const fftResult = signalProcessor.performFFT(values);
+                const fftResult = SignalProcessor.performFFT(values);
                 if (fftResult) {
                     const maxMagIdx = fftResult.magnitude.indexOf(Math.max(...fftResult.magnitude));
                     const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
