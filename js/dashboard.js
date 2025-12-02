@@ -4,14 +4,14 @@
 
 class Dashboard {
     constructor() {
-        this.currentSensor = null;
-        this.selectedSensors = [];  // 다중선택 센서 배열 (최대 2개)
+        this.selectedSensorsByType = {};  // 타입별 센서 저장: {'Fan': ['센서1', '센서2'], 'Temperature': [...]}
+        this.rangeProcessingEnabled = false;  // 선택 영역 신호처리 활성화 여부
         this.currentGraphType = 'timeseries';
         this.updateInterval = 10000;
         this.autoUpdateTimer = null;
-        this.waveletFrequencyMode = false;  // Wavelet y축 모드: false=스케일, true=주파수
+        this.waveletFrequencyMode = false;
         this.githubConfig = {
-            username: 'YOUR_USERNAME', // 사용자가 설정해야 함
+            username: 'YOUR_USERNAME',
             repo: 'YOUR_REPO',
             filepath: 'data/sensor_data.json'
         };
@@ -51,8 +51,16 @@ class Dashboard {
      * 선택된 센서의 타입 조회
      */
     _getCurrentSensorType() {
-        if (!this.currentSensor) return 'Unknown';
-        const sensorData = dataLoader.getSensorData(this.currentSensor);
+        // 단일 타입이 선택되었을 때만 사용
+        const types = Object.keys(this.selectedSensorsByType);
+        if (types.length !== 1) return 'Unknown';
+        
+        const sensorType = types[0];
+        const sensors = this.selectedSensorsByType[sensorType];
+        
+        if (sensors.length === 0) return 'Unknown';
+        
+        const sensorData = dataLoader.getSensorData(sensors[0]);
         if (sensorData && sensorData.length > 0) {
             return sensorData[0].type;
         }
@@ -61,25 +69,31 @@ class Dashboard {
 
     /**
      * 센서 타입별 허용 그래프 타입
-     * 다중센서(2개)일 때는 시계열만 허용
+     * 다중타입(2개)일 때는 시계열만 허용
      */
     _getAllowedGraphTypes() {
-        // 다중센서 선택 시 시계열만 허용
-        if (this.selectedSensors.length > 1) {
+        // 다중타입 선택 시 시계열만 허용
+        const typeCount = Object.keys(this.selectedSensorsByType).length;
+        if (typeCount > 1) {
             return [
                 { value: 'timeseries', label: '시계열 (다중센서)' }
             ];
         }
         
-        // 단일센서 선택 시 기존 그래프 타입 허용
+        // 타입 선택 안됨
+        if (typeCount === 0) {
+            return [
+                { value: 'timeseries', label: '시계열' }
+            ];
+        }
+        
+        // 단일타입 선택 시 모든 그래프 타입 허용
         const sensorType = this._getCurrentSensorType();
         
         const allowedTypes = {
-            // Temperature: 온도 변화 시계열만 필요 (신호처리 분석 불필요)
             'Temperature': [
                 { value: 'timeseries', label: '시계열 (온도)' }
             ],
-            // Fan: 시계열 + 주파수 분석 (RPM 변화 특성 분석)
             'Fan': [
                 { value: 'timeseries', label: '시계열 (RPM)' },
                 { value: 'fft', label: 'FFT 스펙트럼' },
@@ -87,20 +101,16 @@ class Dashboard {
                 { value: 'wavelet', label: 'Wavelet Transform' },
                 { value: 'hilbert', label: 'Hilbert 포락선' }
             ],
-            // Control: PWM 제어 신호 (GPU 팬 제어 신호 분석)
             'Control': [
                 { value: 'timeseries', label: '시계열 (PWM %)' },
                 { value: 'fft', label: 'FFT 스펙트럼' }
             ],
-            // Voltage: 전압 데이터 (수집되지 않음)
             'Voltage': [
                 { value: 'timeseries', label: '시계열 (전압)' }
             ],
-            // Power: 전력 데이터 (수집되지 않음)
             'Power': [
                 { value: 'timeseries', label: '시계열 (전력)' }
             ],
-            // Unknown: 기본 시계열만
             'Unknown': [
                 { value: 'timeseries', label: '시계열' }
             ]
@@ -153,8 +163,13 @@ class Dashboard {
         return labels[sensorType] || '값';
     }
     _setupEventListeners() {
-        // 센서 선택 (checkbox)
-        // 초기화 시점에서 동적으로 바인딩됨 (_updateUI에서)
+        // 선택 영역 신호처리 토글
+        document.getElementById('rangeProcessingToggle').addEventListener('change', (e) => {
+            this.rangeProcessingEnabled = e.target.checked;
+            if (this.rangeProcessingEnabled) {
+                this._showMessage('💡 그래프 영역을 드래그하여 신호처리할 영역을 선택하세요', 'info');
+            }
+        });
         
         // 그래프 타입 선택
         document.getElementById('graphType').addEventListener('change', (e) => {
@@ -200,7 +215,7 @@ class Dashboard {
     }
 
     /**
-     * 센서 checkbox 이벤트 바인딩 (_updateUI에서 호출)
+     * 센서 checkbox 이벤트 바인딩 (타입별 2개 제한)
      */
     _bindSensorCheckboxes() {
         const checkboxes = document.querySelectorAll('.sensor-checkbox-item input[type="checkbox"]');
@@ -208,24 +223,52 @@ class Dashboard {
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', (e) => {
                 const sensorName = e.target.value;
+                const sensorData = dataLoader.getSensorData(sensorName);
+                const sensorType = sensorData && sensorData.length > 0 ? sensorData[0].type : 'Unknown';
                 
                 if (e.target.checked) {
-                    // 최대 2개까지만 선택 가능
-                    if (this.selectedSensors.length < 2) {
-                        this.selectedSensors.push(sensorName);
-                    } else {
-                        // 초과 시 체크 취소
+                    // 이미 2개 타입이 선택되었는지 확인
+                    const selectedTypeCount = Object.keys(this.selectedSensorsByType).length;
+                    const typeAlreadySelected = this.selectedSensorsByType.hasOwnProperty(sensorType);
+                    
+                    if (selectedTypeCount >= 2 && !typeAlreadySelected) {
+                        // 2개 타입 이미 선택됨 + 새로운 타입 선택 시도
                         e.target.checked = false;
-                        this._showMessage('최대 2개의 센서만 선택할 수 있습니다', 'warning');
+                        this._showMessage('최대 2가지 센서 타입만 선택할 수 있습니다', 'warning');
+                        return;
+                    }
+                    
+                    // 타입별 배열 초기화
+                    if (!this.selectedSensorsByType[sensorType]) {
+                        this.selectedSensorsByType[sensorType] = [];
+                    }
+                    
+                    // 센서 추가
+                    if (!this.selectedSensorsByType[sensorType].includes(sensorName)) {
+                        this.selectedSensorsByType[sensorType].push(sensorName);
                     }
                 } else {
-                    // 선택 해제
-                    this.selectedSensors = this.selectedSensors.filter(s => s !== sensorName);
+                    // 센서 제거
+                    if (this.selectedSensorsByType[sensorType]) {
+                        this.selectedSensorsByType[sensorType] = 
+                            this.selectedSensorsByType[sensorType].filter(s => s !== sensorName);
+                        
+                        // 타입에 센서가 없으면 타입 제거
+                        if (this.selectedSensorsByType[sensorType].length === 0) {
+                            delete this.selectedSensorsByType[sensorType];
+                        }
+                    }
                 }
                 
-                // 2개 선택 후 나머지 비활성화
+                // 다른 타입 checkbox 활성/비활성화
+                const selectedTypeCount = Object.keys(this.selectedSensorsByType).length;
                 checkboxes.forEach(cb => {
-                    if (!cb.checked && this.selectedSensors.length >= 2) {
+                    const cbSensorData = dataLoader.getSensorData(cb.value);
+                    const cbSensorType = cbSensorData && cbSensorData.length > 0 ? cbSensorData[0].type : 'Unknown';
+                    const cbTypeSelected = this.selectedSensorsByType.hasOwnProperty(cbSensorType);
+                    
+                    if (selectedTypeCount >= 2 && !cb.checked && !cbTypeSelected) {
+                        // 2개 타입 선택되었고, 이 체크박스는 체크 안됨, 새로운 타입
                         cb.disabled = true;
                     } else {
                         cb.disabled = false;
@@ -441,7 +484,8 @@ class Dashboard {
      */
     async renderGraph() {
         // 선택된 센서 확인
-        if (this.selectedSensors.length === 0) {
+        const typeCount = Object.keys(this.selectedSensorsByType).length;
+        if (typeCount === 0) {
             this._showMessage('센서를 1개 이상 선택해주세요', 'warning');
             return;
         }
@@ -449,8 +493,8 @@ class Dashboard {
         this._showLoading(true);
 
         try {
-            // 다중센서일 때 시계열만 지원
-            if (this.selectedSensors.length > 1) {
+            // 다중타입일 때 시계열만 지원
+            if (typeCount > 1) {
                 if (this.currentGraphType !== 'timeseries') {
                     this.currentGraphType = 'timeseries';
                 }
@@ -458,9 +502,11 @@ class Dashboard {
                 return;
             }
 
-            // 단일센서 처리
-            const currentSensor = this.selectedSensors[0];
-            const sensorData = dataLoader.getSensorData(currentSensor);
+            // 단일타입 처리
+            const sensorType = Object.keys(this.selectedSensorsByType)[0];
+            const sensors = this.selectedSensorsByType[sensorType];
+            const firstSensor = sensors[0];
+            const sensorData = dataLoader.getSensorData(firstSensor);
             
             if (!sensorData || sensorData.length === 0) {
                 this._showMessage('센서 데이터가 없습니다', 'error');
@@ -539,9 +585,10 @@ class Dashboard {
             // 분석 텍스트 업데이트
             this._updateAnalysisText(this.currentGraphType, values);
             
-            // 선택 이벤트 바인딩 (단일센서 + 신호처리 가능한 타입)
+            // 선택 이벤트 바인딩 (단일타입 + 신호처리 가능한 타입 + 토글 활성)
             const signalProcessingTypes = ['fft', 'stft', 'wavelet', 'hilbert'];
-            if (this.selectedSensors.length === 1 && signalProcessingTypes.includes(this.currentGraphType)) {
+            const typeCount = Object.keys(this.selectedSensorsByType).length;
+            if (typeCount === 1 && signalProcessingTypes.includes(this.currentGraphType) && this.rangeProcessingEnabled) {
                 this._bindSelectionEvent(values);
             }
         } catch (error) {
@@ -821,64 +868,79 @@ class Dashboard {
             const traces = [];
             const yaxisConfigs = {}; // y축 설정 객체
             let yaxisCounter = 1; // yaxis, yaxis2, yaxis3 ...
-            const colors = ['#2196F3', '#FF9800', '#4CAF50']; // 센서 색상
+            const colors = ['#2196F3', '#FF9800', '#4CAF50', '#4CAF50', '#FF5722', '#9C27B0']; // 센서 색상
             
-            // 시간축 (첫 센서 기준)
-            const firstSensorData = dataLoader.getSensorData(this.selectedSensors[0]);
-            const timeAxis = firstSensorData[0] && dataLoader.data.sample_interval_ms 
+            // 모든 선택된 센서 수집
+            const allSensors = [];
+            const typeOrder = [];
+            
+            for (const [sensorType, sensors] of Object.entries(this.selectedSensorsByType)) {
+                typeOrder.push(sensorType);
+                sensors.forEach(sensorName => {
+                    allSensors.push({name: sensorName, type: sensorType});
+                });
+            }
+            
+            // 첫 센서 기준으로 시간축 설정
+            const firstSensorData = dataLoader.getSensorData(allSensors[0].name);
+            const timeAxis = firstSensorData && dataLoader.data.sample_interval_ms 
                 ? Array.from({length: firstSensorData.length}, (_, i) => i * dataLoader.data.sample_interval_ms / 1000)
                 : Array.from({length: firstSensorData.length}, (_, i) => i);
 
-            // 센서별 trace 생성
-            this.selectedSensors.forEach((sensorName, index) => {
-                const sensorData = dataLoader.getSensorData(sensorName);
+            // 타입별로 y축 설정
+            const typeToYaxis = {};
+            
+            allSensors.forEach((sensor, index) => {
+                const sensorData = dataLoader.getSensorData(sensor.name);
                 if (!sensorData || sensorData.length === 0) return;
 
                 const values = sensorData.map(r => r.value);
-                const sensorType = sensorData[0].type;
+                const sensorType = sensor.type;
                 
-                // y축 타입 결정
-                const yaxisName = yaxisCounter === 1 ? 'y' : `y${yaxisCounter}`;
+                // 타입이 처음 나타나면 새 y축 할당
+                if (!typeToYaxis[sensorType]) {
+                    typeToYaxis[sensorType] = yaxisCounter === 1 ? 'y' : `y${yaxisCounter}`;
+                    
+                    // y축 설정 저장
+                    let yaxisLabel = this._getYAxisLabelForType(sensorType);
+                    if (yaxisCounter === 1) {
+                        yaxisConfigs.yaxis = {
+                            title: yaxisLabel,
+                            side: 'left'
+                        };
+                    } else {
+                        yaxisConfigs[typeToYaxis[sensorType]] = {
+                            title: yaxisLabel,
+                            overlaying: 'y',
+                            side: 'right'
+                        };
+                    }
+                    yaxisCounter++;
+                }
+                
+                const yaxisName = typeToYaxis[sensorType];
                 
                 const trace = {
                     x: timeAxis,
                     y: values,
                     type: 'scatter',
                     mode: 'lines',
-                    name: sensorName,
+                    name: sensor.name,
                     line: {
                         color: colors[index % colors.length],
                         width: 2
                     },
                     yaxis: yaxisName,
-                    hovertemplate: `<b>${sensorName}:</b> %{y:.2f}<br><b>시간:</b> %{x:.2f}s<extra></extra>`
+                    hovertemplate: `<b>${sensor.name}:</b> %{y:.2f}<br><b>시간:</b> %{x:.2f}s<extra></extra>`
                 };
                 
                 traces.push(trace);
-
-                // y축 설정
-                let yaxisLabel = this._getYAxisLabelForType(sensorType);
-                let yaxisPosition = yaxisCounter === 1 ? undefined : 'right';
-                
-                if (yaxisCounter === 1) {
-                    yaxisConfigs.yaxis = {
-                        title: yaxisLabel,
-                        position: 'left'
-                    };
-                } else {
-                    yaxisConfigs[yaxisName] = {
-                        title: yaxisLabel,
-                        overlaying: 'y',
-                        side: 'right'
-                    };
-                }
-                
-                yaxisCounter++;
             });
 
             // 레이아웃 구성
+            const sensorNames = allSensors.map(s => s.name).join(', ');
             const layout = {
-                title: `${this.selectedSensors.join(', ')} - 시계열 (다중센서)`,
+                title: `${sensorNames} - 시계열 (다중센서)`,
                 xaxis: {title: '시간 (초)'},
                 hovermode: 'x unified',
                 plot_bgcolor: '#fafafa',
@@ -896,7 +958,7 @@ class Dashboard {
             Plotly.newPlot('mainGraph', traces, layout, {responsive: true});
             
             // 통계 업데이트 (첫 센서 기준)
-            const firstValues = dataLoader.getSensorData(this.selectedSensors[0]).map(r => r.value);
+            const firstValues = dataLoader.getSensorData(allSensors[0].name).map(r => r.value);
             this._updateStatistics(firstValues);
             
         } catch (error) {
