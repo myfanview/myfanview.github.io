@@ -1,0 +1,12 @@
+# LibreHardwareMonitor 센서 수집기 - 필수 라이브러리
+
+pythonnet
+numpy
+pandas
+scipy
+matplotlib
+
+# 선택 (예제 사용 시)
+flask
+aiofiles
+psutil
