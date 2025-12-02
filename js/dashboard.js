@@ -5,6 +5,7 @@
 class Dashboard {
     constructor() {
         this.currentSensor = null;
+        this.selectedSensors = [];  // 다중선택 센서 배열 (최대 2개)
         this.currentGraphType = 'timeseries';
         this.updateInterval = 10000;
         this.autoUpdateTimer = null;
@@ -60,8 +61,17 @@ class Dashboard {
 
     /**
      * 센서 타입별 허용 그래프 타입
+     * 다중센서(2개)일 때는 시계열만 허용
      */
     _getAllowedGraphTypes() {
+        // 다중센서 선택 시 시계열만 허용
+        if (this.selectedSensors.length > 1) {
+            return [
+                { value: 'timeseries', label: '시계열 (다중센서)' }
+            ];
+        }
+        
+        // 단일센서 선택 시 기존 그래프 타입 허용
         const sensorType = this._getCurrentSensorType();
         
         const allowedTypes = {
@@ -143,13 +153,9 @@ class Dashboard {
         return labels[sensorType] || '값';
     }
     _setupEventListeners() {
-        // 센서 선택
-        document.getElementById('sensorSelect').addEventListener('change', (e) => {
-            this.currentSensor = e.target.value;
-            this._updateGraphTypeOptions();  // 그래프 타입 옵션 업데이트
-            this.renderGraph();
-        });
-
+        // 센서 선택 (checkbox)
+        // 초기화 시점에서 동적으로 바인딩됨 (_updateUI에서)
+        
         // 그래프 타입 선택
         document.getElementById('graphType').addEventListener('change', (e) => {
             this.currentGraphType = e.target.value;
@@ -190,6 +196,46 @@ class Dashboard {
                 };
                 fileInput.click();
             }
+        });
+    }
+
+    /**
+     * 센서 checkbox 이벤트 바인딩 (_updateUI에서 호출)
+     */
+    _bindSensorCheckboxes() {
+        const checkboxes = document.querySelectorAll('.sensor-checkbox-item input[type="checkbox"]');
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const sensorName = e.target.value;
+                
+                if (e.target.checked) {
+                    // 최대 2개까지만 선택 가능
+                    if (this.selectedSensors.length < 2) {
+                        this.selectedSensors.push(sensorName);
+                    } else {
+                        // 초과 시 체크 취소
+                        e.target.checked = false;
+                        this._showMessage('최대 2개의 센서만 선택할 수 있습니다', 'warning');
+                    }
+                } else {
+                    // 선택 해제
+                    this.selectedSensors = this.selectedSensors.filter(s => s !== sensorName);
+                }
+                
+                // 2개 선택 후 나머지 비활성화
+                checkboxes.forEach(cb => {
+                    if (!cb.checked && this.selectedSensors.length >= 2) {
+                        cb.disabled = true;
+                    } else {
+                        cb.disabled = false;
+                    }
+                });
+                
+                // 그래프 업데이트
+                this._updateGraphTypeOptions();
+                this.renderGraph();
+            });
         });
     }
 
@@ -260,9 +306,9 @@ class Dashboard {
     _updateUI() {
         // 센서 목록 업데이트 (타입별 그룹화)
         const sensors = dataLoader.getSensorList();
-        const sensorSelect = document.getElementById('sensorSelect');
+        const sensorCheckboxes = document.getElementById('sensorCheckboxes');
         
-        sensorSelect.innerHTML = '';
+        sensorCheckboxes.innerHTML = '';
         
         // 센서를 타입별로 그룹화
         const sensorsByType = {};
@@ -276,30 +322,45 @@ class Dashboard {
             sensorsByType[type].push(sensor);
         });
 
-        // 드롭다운 구성 (타입별 옵션 그룹)
+        // checkbox 구성 (타입별 그룹)
         const typeOrder = ['Temperature', 'Fan', 'Control', 'Voltage', 'Power', 'Unknown'];
         
         typeOrder.forEach(type => {
             if (sensorsByType[type]) {
-                const optgroup = document.createElement('optgroup');
-                optgroup.label = this._getTypeLabel(type);
+                // 타입 헤더
+                const typeHeader = document.createElement('div');
+                typeHeader.style.cssText = 'font-weight: 600; padding-top: 10px; padding-bottom: 5px; border-top: 1px solid #ddd; margin-top: 10px;';
+                typeHeader.textContent = this._getTypeLabel(type);
+                sensorCheckboxes.appendChild(typeHeader);
                 
+                // 센서 checkbox
                 sensorsByType[type].sort().forEach(sensor => {
-                    const option = document.createElement('option');
-                    option.value = sensor;
-                    option.textContent = sensor;
-                    optgroup.appendChild(option);
+                    const checkboxItem = document.createElement('div');
+                    checkboxItem.className = 'sensor-checkbox-item';
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `sensor-${sensor}`;
+                    checkbox.value = sensor;
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = `sensor-${sensor}`;
+                    label.textContent = sensor;
+                    
+                    checkboxItem.appendChild(checkbox);
+                    checkboxItem.appendChild(label);
+                    sensorCheckboxes.appendChild(checkboxItem);
                 });
-                
-                sensorSelect.appendChild(optgroup);
             }
         });
 
-        if (sensors.length > 0) {
-            this.currentSensor = sensors[0];
-            sensorSelect.value = this.currentSensor;
-            this._updateGraphTypeOptions();  // 그래프 타입 필터링
+        // 첫 번째 센서 기본 선택 (없으면 공)
+        if (sensors.length > 0 && this.selectedSensors.length === 0) {
+            // 초기 상태: 아무것도 선택 안함
         }
+
+        // checkbox 이벤트 바인딩
+        this._bindSensorCheckboxes();
 
         // 메타데이터 업데이트
         const metadata = dataLoader.getMetadata();
@@ -379,12 +440,28 @@ class Dashboard {
      * 그래프 렌더링
      */
     async renderGraph() {
-        if (!this.currentSensor) return;
+        // 선택된 센서 확인
+        if (this.selectedSensors.length === 0) {
+            this._showMessage('센서를 1개 이상 선택해주세요', 'warning');
+            return;
+        }
 
         this._showLoading(true);
 
         try {
-            const sensorData = dataLoader.getSensorData(this.currentSensor);
+            // 다중센서일 때 시계열만 지원
+            if (this.selectedSensors.length > 1) {
+                if (this.currentGraphType !== 'timeseries') {
+                    this.currentGraphType = 'timeseries';
+                }
+                await this._renderMultiSensorTimeseries();
+                return;
+            }
+
+            // 단일센서 처리
+            const currentSensor = this.selectedSensors[0];
+            const sensorData = dataLoader.getSensorData(currentSensor);
+            
             if (!sensorData || sensorData.length === 0) {
                 this._showMessage('센서 데이터가 없습니다', 'error');
                 return;
@@ -461,6 +538,12 @@ class Dashboard {
 
             // 분석 텍스트 업데이트
             this._updateAnalysisText(this.currentGraphType, values);
+            
+            // 선택 이벤트 바인딩 (단일센서 + 신호처리 가능한 타입)
+            const signalProcessingTypes = ['fft', 'stft', 'wavelet', 'hilbert'];
+            if (this.selectedSensors.length === 1 && signalProcessingTypes.includes(this.currentGraphType)) {
+                this._bindSelectionEvent(values);
+            }
         } catch (error) {
             console.error('[ERROR] 그래프 렌더링 오류:', error);
             this._showMessage('그래프 렌더링 실패: ' + error.message, 'error');
@@ -472,7 +555,373 @@ class Dashboard {
     /**
      * 시계열 플롯 생성
      */
-    _createTimeseriesPlot(values, timestamps, ylabel = null) {
+    /**
+     * Plotly 그래프 선택 이벤트 바인딩
+     * 선택한 영역만 신호처리 수행
+     */
+    _bindSelectionEvent(fullSignal) {
+        const mainGraph = document.getElementById('mainGraph');
+        
+        // 이전 이벤트 리스너 제거 (중복 방지)
+        if (mainGraph._selectionListener) {
+            mainGraph.removeEventListener('plotly_selected', mainGraph._selectionListener);
+        }
+        
+        // 새 이벤트 리스너 등록
+        const selectionListener = (data) => {
+            if (!data.points || data.points.length === 0) return;
+            
+            try {
+                // 선택된 x축 범위 추출
+                const xValues = data.points.map(p => p.x);
+                const xMin = Math.min(...xValues);
+                const xMax = Math.max(...xValues);
+                
+                // 샘플 간격
+                const sampleInterval = dataLoader.data.sample_interval_ms / 1000;
+                
+                // 배열 인덱스로 변환
+                const startIdx = Math.max(0, Math.floor(xMin / sampleInterval));
+                const endIdx = Math.min(fullSignal.length - 1, Math.ceil(xMax / sampleInterval));
+                
+                // 부분 신호 추출
+                const selectedSignal = fullSignal.slice(startIdx, endIdx + 1);
+                
+                if (selectedSignal.length < 2) {
+                    this._showMessage('선택한 영역이 너무 작습니다 (최소 2개 샘플 필요)', 'warning');
+                    return;
+                }
+                
+                // 선택 영역 정보 표시
+                const duration = (endIdx - startIdx + 1) * sampleInterval;
+                const info = `선택 영역: ${selectedSignal.length}개 샘플, ${duration.toFixed(2)}초`;
+                console.log(`[*] ${info}`);
+                
+                // 선택 영역 신호처리
+                this._processSelectedSignal(selectedSignal, this.currentGraphType, info, startIdx);
+                
+            } catch (error) {
+                console.error('[ERROR] 선택 영역 처리 오류:', error);
+                this._showMessage('선택 영역 처리 실패: ' + error.message, 'error');
+            }
+        };
+        
+        // 이벤트 리스너 저장 (이후 제거용)
+        mainGraph._selectionListener = selectionListener;
+        mainGraph.addEventListener('plotly_selected', selectionListener);
+        
+        // 사용자 안내
+        this._showMessage('💡 그래프 영역을 드래그하여 신호처리할 영역을 선택하세요', 'info');
+    }
+
+    /**
+     * 선택된 신호에 대해 신호처리 수행
+     */
+    _processSelectedSignal(signal, graphType, info, startIdx) {
+        try {
+            let result = null;
+            
+            switch(graphType) {
+                case 'fft':
+                    result = SignalProcessor.performFFT(signal);
+                    if (result) {
+                        this._showSelectedFFT(result, signal, info, startIdx);
+                    }
+                    break;
+                    
+                case 'stft':
+                    result = SignalProcessor.performSTFT(signal);
+                    if (result) {
+                        this._showSelectedSTFT(result, signal, info, startIdx);
+                    }
+                    break;
+                    
+                case 'wavelet':
+                    result = SignalProcessor.performWavelet(signal);
+                    if (result) {
+                        this._showSelectedWavelet(result, signal, info, startIdx);
+                    }
+                    break;
+                    
+                case 'hilbert':
+                    result = SignalProcessor.performHilbert(signal);
+                    if (result) {
+                        this._showSelectedHilbert(result, signal, info, startIdx);
+                    }
+                    break;
+            }
+            
+            if (result) {
+                this._showMessage(`✅ 선택 영역 신호처리 완료: ${info}`, 'success');
+            }
+            
+        } catch (error) {
+            console.error('[ERROR] 신호처리 오류:', error);
+            this._showMessage('신호처리 실패: ' + error.message, 'error');
+        }
+    }
+
+    /**
+     * 선택 영역 FFT 결과 표시
+     */
+    _showSelectedFFT(fftResult, signal, info, startIdx) {
+        const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+        const freqs = SignalProcessor.getFrequencies(signal.length, sampleRate).slice(0, fftResult.magnitude.length);
+        const magnitudeDb = fftResult.magnitude.map(m => 20 * Math.log10(Math.max(m, 1e-10)));
+
+        const trace = {
+            x: freqs,
+            y: magnitudeDb,
+            type: 'scatter',
+            mode: 'lines',
+            fill: 'tozeroy',
+            name: `선택 영역 FFT (${info})`,
+            line: {color: '#FF9800', width: 2},
+            hovertemplate: '<b>주파수:</b> %{x:.3f} Hz<br><b>크기:</b> %{y:.2f} dB<extra></extra>'
+        };
+
+        const layout = {
+            title: `선택 영역 FFT 스펙트럼 - ${info}`,
+            xaxis: {title: '주파수 (Hz)'},
+            yaxis: {title: '크기 (dB)'},
+            plot_bgcolor: '#fafafa',
+            paper_bgcolor: 'white',
+            margin: {t: 40, b: 40, l: 60, r: 40}
+        };
+
+        Plotly.newPlot('mainGraph', [trace], layout, {responsive: true});
+    }
+
+    /**
+     * 선택 영역 STFT 결과 표시
+     */
+    _showSelectedSTFT(stftResult, signal, info, startIdx) {
+        const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+        
+        // 정규화
+        const minVal = Math.min(...stftResult.spectrogram.flat());
+        const maxVal = Math.max(...stftResult.spectrogram.flat());
+        const normalized = stftResult.spectrogram.map(row =>
+            row.map(v => (v - minVal) / (maxVal - minVal + 1e-10))
+        );
+
+        const trace = {
+            z: normalized,
+            x: Array.from({length: signal.length}, (_, i) => i),
+            type: 'heatmap',
+            colorscale: 'Viridis',
+            hovertemplate: '<b>시간</b> %{x}<br><b>주파수</b> %{y}<br><b>에너지</b> %{z:.3f}<extra></extra>'
+        };
+
+        const layout = {
+            title: `선택 영역 STFT 스펙트로그램 - ${info}`,
+            xaxis: {title: '시간 (샘플)'},
+            yaxis: {title: '주파수'},
+            plot_bgcolor: '#fafafa',
+            paper_bgcolor: 'white',
+            margin: {t: 40, b: 40, l: 60, r: 40}
+        };
+
+        Plotly.newPlot('mainGraph', [trace], layout, {responsive: true});
+    }
+
+    /**
+     * 선택 영역 Wavelet 결과 표시
+     */
+    _showSelectedWavelet(waveletResult, signal, info, startIdx) {
+        // 정규화
+        const normalized = waveletResult.coefficients.map(row =>
+            row.map(v => Math.log10(v + 1e-10))
+        );
+
+        // y축 데이터 (스케일 또는 주파수)
+        let yAxisData = waveletResult.scales;
+        let yAxisTitle = '스케일';
+        
+        if (this.waveletFrequencyMode && waveletResult.frequencies) {
+            yAxisData = waveletResult.frequencies;
+            yAxisTitle = '주파수 (Hz)';
+        }
+
+        const trace = {
+            z: normalized,
+            y: yAxisData,
+            x: Array.from({length: signal.length}, (_, i) => i),
+            type: 'heatmap',
+            colorscale: 'Viridis',
+            hovertemplate: '<b>시간</b> %{x}<br><b>' + yAxisTitle + '</b> %{y}<br><b>에너지</b> %{z:.2f}<extra></extra>'
+        };
+
+        const layout = {
+            title: `선택 영역 Wavelet Transform - ${info}`,
+            xaxis: {title: '시간 (샘플)'},
+            yaxis: {
+                title: yAxisTitle,
+                type: this.waveletFrequencyMode ? 'log' : 'linear'
+            },
+            plot_bgcolor: '#fafafa',
+            paper_bgcolor: 'white',
+            margin: {t: 40, b: 40, l: 60, r: 40}
+        };
+
+        Plotly.newPlot('mainGraph', [trace], layout, {responsive: true});
+    }
+
+    /**
+     * 선택 영역 Hilbert 결과 표시
+     */
+    _showSelectedHilbert(hilbertResult, signal, info, startIdx) {
+        const timeAxis = Array.from({length: signal.length}, (_, i) => i);
+
+        const traces = [
+            {
+                x: timeAxis,
+                y: signal,
+                name: '원본 신호',
+                type: 'scatter',
+                mode: 'lines',
+                line: {color: '#2196F3', width: 1},
+                hovertemplate: '<b>원본:</b> %{y:.2f}<extra></extra>'
+            },
+            {
+                x: timeAxis,
+                y: hilbertResult.envelope,
+                name: '포락선 (상)',
+                type: 'scatter',
+                mode: 'lines',
+                line: {color: '#FF5722', width: 2, dash: 'dash'},
+                hovertemplate: '<b>상단 포락선:</b> %{y:.2f}<extra></extra>'
+            },
+            {
+                x: timeAxis,
+                y: hilbertResult.envelope.map(v => -v),
+                name: '포락선 (하)',
+                type: 'scatter',
+                mode: 'lines',
+                line: {color: '#FF5722', width: 2, dash: 'dash'},
+                hovertemplate: '<b>하단 포락선:</b> %{y:.2f}<extra></extra>'
+            }
+        ];
+
+        const layout = {
+            title: `선택 영역 Hilbert 포락선 - ${info}`,
+            xaxis: {title: '시간 (샘플)'},
+            yaxis: {title: '진폭'},
+            hovermode: 'x unified',
+            plot_bgcolor: '#fafafa',
+            paper_bgcolor: 'white',
+            margin: {t: 40, b: 40, l: 60, r: 40}
+        };
+
+        Plotly.newPlot('mainGraph', traces, layout, {responsive: true});
+    }
+
+    async _renderMultiSensorTimeseries() {
+        try {
+            const traces = [];
+            const yaxisConfigs = {}; // y축 설정 객체
+            let yaxisCounter = 1; // yaxis, yaxis2, yaxis3 ...
+            const colors = ['#2196F3', '#FF9800', '#4CAF50']; // 센서 색상
+            
+            // 시간축 (첫 센서 기준)
+            const firstSensorData = dataLoader.getSensorData(this.selectedSensors[0]);
+            const timeAxis = firstSensorData[0] && dataLoader.data.sample_interval_ms 
+                ? Array.from({length: firstSensorData.length}, (_, i) => i * dataLoader.data.sample_interval_ms / 1000)
+                : Array.from({length: firstSensorData.length}, (_, i) => i);
+
+            // 센서별 trace 생성
+            this.selectedSensors.forEach((sensorName, index) => {
+                const sensorData = dataLoader.getSensorData(sensorName);
+                if (!sensorData || sensorData.length === 0) return;
+
+                const values = sensorData.map(r => r.value);
+                const sensorType = sensorData[0].type;
+                
+                // y축 타입 결정
+                const yaxisName = yaxisCounter === 1 ? 'y' : `y${yaxisCounter}`;
+                
+                const trace = {
+                    x: timeAxis,
+                    y: values,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: sensorName,
+                    line: {
+                        color: colors[index % colors.length],
+                        width: 2
+                    },
+                    yaxis: yaxisName,
+                    hovertemplate: `<b>${sensorName}:</b> %{y:.2f}<br><b>시간:</b> %{x:.2f}s<extra></extra>`
+                };
+                
+                traces.push(trace);
+
+                // y축 설정
+                let yaxisLabel = this._getYAxisLabelForType(sensorType);
+                let yaxisPosition = yaxisCounter === 1 ? undefined : 'right';
+                
+                if (yaxisCounter === 1) {
+                    yaxisConfigs.yaxis = {
+                        title: yaxisLabel,
+                        position: 'left'
+                    };
+                } else {
+                    yaxisConfigs[yaxisName] = {
+                        title: yaxisLabel,
+                        overlaying: 'y',
+                        side: 'right'
+                    };
+                }
+                
+                yaxisCounter++;
+            });
+
+            // 레이아웃 구성
+            const layout = {
+                title: `${this.selectedSensors.join(', ')} - 시계열 (다중센서)`,
+                xaxis: {title: '시간 (초)'},
+                hovermode: 'x unified',
+                plot_bgcolor: '#fafafa',
+                paper_bgcolor: 'white',
+                margin: {
+                    t: 40,
+                    b: 40,
+                    l: yaxisCounter > 2 ? 80 : 60,
+                    r: yaxisCounter > 2 ? 80 : 40
+                },
+                ...yaxisConfigs
+            };
+
+            // 그래프 렌더링
+            Plotly.newPlot('mainGraph', traces, layout, {responsive: true});
+            
+            // 통계 업데이트 (첫 센서 기준)
+            const firstValues = dataLoader.getSensorData(this.selectedSensors[0]).map(r => r.value);
+            this._updateStatistics(firstValues);
+            
+        } catch (error) {
+            console.error('[ERROR] 다중센서 그래프 렌더링 오류:', error);
+            this._showMessage('다중센서 그래프 렌더링 실패: ' + error.message, 'error');
+        } finally {
+            this._showLoading(false);
+        }
+    }
+
+    /**
+     * 센서 타입별 y축 레이블 반환
+     */
+    _getYAxisLabelForType(sensorType) {
+        const labels = {
+            'Temperature': '온도 (°C)',
+            'Fan': '회전수 (RPM)',
+            'Control': '제어 신호 (PWM %)',
+            'Voltage': '전압 (V)',
+            'Power': '전력 (W)',
+            'Unknown': '값'
+        };
+        return labels[sensorType] || '값';
+    }
+
         // Y축 레이블이 지정되지 않으면 센서 타입에 따라 자동 설정
         if (!ylabel) {
             ylabel = this._getYAxisLabel();

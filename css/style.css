@@ -145,6 +145,50 @@ body {
     box-shadow: 0 0 5px rgba(33, 150, 243, 0.3);
 }
 
+/* 센서 선택 checkbox 그룹 */
+.sensor-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: #fafafa;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.sensor-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sensor-checkbox-item input[type="checkbox"] {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-color);
+}
+
+.sensor-checkbox-item label {
+    cursor: pointer;
+    font-weight: normal;
+    margin: 0;
+    font-size: 0.95em;
+    flex: 1;
+}
+
+.sensor-checkbox-item input[type="checkbox"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.sensor-checkbox-item input[type="checkbox"]:disabled + label {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .button-group {
     display: flex;
     gap: 10px;
