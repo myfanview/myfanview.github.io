@@ -12,6 +12,7 @@ import time
 import json
 import csv
 import threading
+import argparse
 from datetime import datetime
 from collections import deque
 from typing import Dict, List, Optional
@@ -130,13 +131,13 @@ class HardwareSensorCollector:
                 
                 # 버퍼에 저장
                 with self.lock:
-                    for sensor_name, sensor_info in sensor_data['sensors'].items():  # ← 'sensor_info'로 변경
+                    for sensor_name, sensor_info in sensor_data['sensors'].items():
                         if sensor_name not in self.data_buffer:
-                            self.data_buffer[sensor_name] = deque(maxlen=10000)
+                            self.data_buffer[sensor_name] = deque(maxlen=10000)  # 최근 10K개 저장
                         
                         self.data_buffer[sensor_name].append({
                             'timestamp': timestamp,
-                            'value': sensor_info['value'],      # ← 이제 'sensor_info' 정의됨
+                            'value': sensor_info['value'],
                             'type': sensor_info['type']
                         })
                 
@@ -177,6 +178,98 @@ class HardwareSensorCollector:
         self.is_running = True
         self.collection_thread = threading.Thread(target=self._collect_data_loop, daemon=False)
         self.collection_thread.start()
+    
+    def start_collection_with_duration(self, duration_seconds: float) -> Dict:
+        """지정된 시간 동안 데이터 수집
+        
+        Args:
+            duration_seconds: 수집 시간 (초, 최대 300초)
+        
+        Returns:
+            수집된 데이터 요약
+        """
+        # 범위 검증
+        if duration_seconds <= 0:
+            print("[ERROR] 수집 시간은 0초보다 커야 합니다.")
+            return {}
+        
+        if duration_seconds > 300:
+            print("[!] 최대 수집 시간은 300초입니다. 300초로 조정됩니다.")
+            duration_seconds = 300
+        
+        print(f"\n[*] {duration_seconds}초 동안 데이터 수집을 시작합니다...")
+        print("=" * 70)
+        
+        # 기존 버퍼 초기화
+        self.data_buffer.clear()
+        
+        # 데이터 수집 시작
+        self.start_collection()
+        
+        # 진행 상황 표시
+        start_time = time.time()
+        last_count = 0
+        
+        try:
+            while time.time() - start_time < duration_seconds:
+                elapsed = time.time() - start_time
+                remaining = duration_seconds - elapsed
+                
+                # 진행 상황 막대
+                progress = elapsed / duration_seconds
+                bar_length = 40
+                filled = int(bar_length * progress)
+                bar = '█' * filled + '░' * (bar_length - filled)
+                
+                # 현재 수집된 샘플 수
+                with self.lock:
+                    current_count = sum(len(data) for data in self.data_buffer.values())
+                
+                # 시간당 샘플 수 계산
+                if elapsed > 0:
+                    samples_per_sec = current_count / elapsed
+                    avg_sample_interval = (1000 / samples_per_sec) if samples_per_sec > 0 else 0
+                else:
+                    avg_sample_interval = 0
+                
+                # 터미널에 진행 상황 표시
+                print(f"\r[{bar}] {progress*100:5.1f}% | "
+                      f"경과: {elapsed:6.1f}s / 남은: {remaining:6.1f}s | "
+                      f"샘플: {current_count:5d}개 | "
+                      f"간격: {avg_sample_interval:5.1f}ms   ",
+                      end='', flush=True)
+                
+                time.sleep(0.1)
+        
+        except KeyboardInterrupt:
+            print("\n[!] Ctrl+C로 중단되었습니다.")
+        
+        finally:
+            self.stop_collection()
+            elapsed = time.time() - start_time
+            print("\n" + "=" * 70)
+        
+        # 수집 결과 요약
+        with self.lock:
+            summary = {
+                'duration_requested': duration_seconds,
+                'duration_actual': elapsed,
+                'total_samples': sum(len(data) for data in self.data_buffer.values()),
+                'sensors_count': len(self.data_buffer),
+                'sensors': {}
+            }
+            
+            for sensor_name, data_list in self.data_buffer.items():
+                if len(data_list) > 0:
+                    values = [d['value'] for d in data_list]
+                    summary['sensors'][sensor_name] = {
+                        'sample_count': len(data_list),
+                        'min': min(values),
+                        'max': max(values),
+                        'avg': sum(values) / len(values)
+                    }
+        
+        return summary
     
     def stop_collection(self):
         """데이터 수집 중지"""
@@ -355,11 +448,12 @@ class SensorMonitoringCLI:
             print("  1. 현재 상태 조회")
             print("  2. 특정 팬 속도 조절")
             print("  3. 시계열 데이터 보기")
-            print("  4. JSON 저장")
-            print("  5. CSV 저장")
-            print("  6. 종료")
+            print("  4. x초 동안 데이터 수집 (최대 300초)")
+            print("  5. JSON 저장")
+            print("  6. CSV 저장")
+            print("  7. 종료")
             
-            cmd = input("\n명령어 선택 (1-6): ").strip()
+            cmd = input("\n명령어 선택 (1-7): ").strip()
             
             if cmd == '1':
                 self._show_current_status()
@@ -368,10 +462,12 @@ class SensorMonitoringCLI:
             elif cmd == '3':
                 self._show_timeseries()
             elif cmd == '4':
-                self.collector.export_to_json()
+                self._collect_for_duration()
             elif cmd == '5':
-                self.collector.export_to_csv()
+                self.collector.export_to_json()
             elif cmd == '6':
+                self.collector.export_to_csv()
+            elif cmd == '7':
                 break
             else:
                 print("[!] 잘못된 명령어입니다.")
@@ -465,13 +561,139 @@ class SensorMonitoringCLI:
                 print("[!] 잘못된 범위입니다.")
         except ValueError:
             print("[!] 숫자를 입력해주세요.")
+    
+    def _collect_for_duration(self):
+        """지정된 시간 동안 데이터 수집"""
+        print("\n[=] x초 동안 데이터 수집")
+        print("범위: 1~300초")
+        
+        try:
+            duration = float(input("\n수집 시간 입력 (초): ").strip())
+            
+            if duration <= 0:
+                print("[!] 0초보다 큰 값을 입력해주세요.")
+                return
+            
+            # 기존 수집 중단 (배경에서 계속 실행되는 것 중단)
+            was_running = self.collector.is_running
+            if was_running:
+                self.collector.stop_collection()
+                time.sleep(0.5)
+            
+            # 지정된 시간 동안 수집
+            summary = self.collector.start_collection_with_duration(duration)
+            
+            # 수집 결과 표시
+            if summary:
+                print("\n[=] 수집 결과 요약")
+                print("=" * 70)
+                print(f"요청 시간:    {summary['duration_requested']:.1f}초")
+                print(f"실제 시간:    {summary['duration_actual']:.2f}초")
+                print(f"수집된 샘플:  {summary['total_samples']:,}개")
+                print(f"센서 수:      {summary['sensors_count']}개")
+                
+                print("\n[센서별 통계]")
+                print("-" * 70)
+                
+                for sensor_name in sorted(summary['sensors'].keys()):
+                    stats = summary['sensors'][sensor_name]
+                    print(f"\n{sensor_name}")
+                    print(f"  샘플 수: {stats['sample_count']:5d}개")
+                    print(f"  최소값: {stats['min']:10.2f}")
+                    print(f"  최대값: {stats['max']:10.2f}")
+                    print(f"  평균값: {stats['avg']:10.2f}")
+                
+                print("\n" + "=" * 70)
+                
+                # 자동 저장 옵션
+                save_opt = input("\n자동으로 JSON 저장하시겠습니까? (y/n): ").strip().lower()
+                if save_opt == 'y':
+                    self.collector.export_to_json()
+            
+            # 배경 수집 재시작 (필요한 경우)
+            if was_running and not self.collector.is_running:
+                print("\n[*] 배경 데이터 수집을 재시작합니다...")
+                self.collector.start_collection()
+        
+        except ValueError:
+            print("[!] 숫자를 입력해주세요.")
 
 
 def main():
     """메인 함수"""
+    parser = argparse.ArgumentParser(
+        description='LibreHardwareMonitor 기반 센서 데이터 수집 프로그램'
+    )
+    parser.add_argument(
+        '--duration',
+        type=float,
+        default=None,
+        help='데이터 수집 시간 (초, 최대 300초). 이 옵션이 지정되면 CLI 대신 배치 모드로 실행됩니다.'
+    )
+    parser.add_argument(
+        '--interval',
+        type=int,
+        default=100,
+        help='샘플링 간격 (밀리초, 기본값: 100ms)'
+    )
+    parser.add_argument(
+        '--output',
+        type=str,
+        choices=['json', 'csv', 'both'],
+        default='json',
+        help='출력 형식 (기본값: json)'
+    )
+    
+    args = parser.parse_args()
+    
     try:
-        cli = SensorMonitoringCLI()
-        cli.run()
+        # 배치 모드 (--duration 지정된 경우)
+        if args.duration is not None:
+            print("\n" + "=" * 70)
+            print(" LibreHardwareMonitor 기반 센서 데이터 수집 (배치 모드)")
+            print("=" * 70)
+            
+            collector = HardwareSensorCollector(sample_interval_ms=args.interval)
+            
+            # 지정된 시간 동안 데이터 수집
+            summary = collector.start_collection_with_duration(args.duration)
+            
+            # 수집 결과 요약
+            if summary:
+                print("\n[=] 수집 결과 요약")
+                print("=" * 70)
+                print(f"요청 시간:    {summary['duration_requested']:.1f}초")
+                print(f"실제 시간:    {summary['duration_actual']:.2f}초")
+                print(f"수집된 샘플:  {summary['total_samples']:,}개")
+                print(f"센서 수:      {summary['sensors_count']}개")
+                
+                print("\n[센서별 통계]")
+                print("-" * 70)
+                
+                for sensor_name in sorted(summary['sensors'].keys()):
+                    stats = summary['sensors'][sensor_name]
+                    print(f"\n{sensor_name}")
+                    print(f"  샘플 수: {stats['sample_count']:5d}개")
+                    print(f"  최소값: {stats['min']:10.2f}")
+                    print(f"  최대값: {stats['max']:10.2f}")
+                    print(f"  평균값: {stats['avg']:10.2f}")
+                
+                print("\n" + "=" * 70)
+                
+                # 파일 저장
+                if args.output in ['json', 'both']:
+                    collector.export_to_json()
+                if args.output in ['csv', 'both']:
+                    collector.export_to_csv()
+            
+            collector.cleanup()
+            print("\n[+] 배치 모드 완료")
+        
+        # 대화형 CLI 모드
+        else:
+            cli = SensorMonitoringCLI()
+            cli.run()
+    
     except KeyboardInterrupt:
         print("\n\n[!] Ctrl+C로 중단됨")
     except Exception as e:
