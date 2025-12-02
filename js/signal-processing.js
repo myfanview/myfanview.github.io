@@ -5,7 +5,7 @@
 class SignalProcessor {
     /**
      * FFT (Fast Fourier Transform)
-     * ml-dsp 라이브러리 사용
+     * DSP.js 라이브러리 사용
      */
     static performFFT(signal) {
         if (!signal || signal.length === 0) {
@@ -14,9 +14,9 @@ class SignalProcessor {
         }
 
         try {
-            // ml-dsp 라이브러리 확인
-            if (typeof window.ml === 'undefined' || !window.ml.FFT) {
-                console.error('FFT 라이브러리(ml-dsp)가 로드되지 않았습니다');
+            // DSP.js 라이브러리 확인
+            if (typeof window.DSP === 'undefined' || !window.DSP.FFT) {
+                console.error('FFT 라이브러리(DSP.js)가 로드되지 않았습니다');
                 return null;
             }
 
@@ -27,19 +27,12 @@ class SignalProcessor {
                 paddedSignal[i] = signal[i];
             }
 
-            // ml-dsp FFT 인스턴스 생성
-            const FFT = window.ml.FFT;
-            const fft = new FFT(n);
+            // DSP.js FFT 인스턴스 생성
+            // new DSP.FFT(bufferSize, sampleRate)
+            const fft = new window.DSP.FFT(n, 10); // 샘플링 레이트: 10 Hz
             
-            // ComplexArray 생성 (실수부 초기화)
-            const complexArray = new window.ml.ComplexArray(n);
-            for (let i = 0; i < n; i++) {
-                complexArray.real[i] = paddedSignal[i];
-                complexArray.imag[i] = 0;
-            }
-
             // FFT 수행
-            fft.forward(complexArray);
+            fft.forward(paddedSignal);
 
             // 결과 추출
             const magnitude = [];
@@ -47,9 +40,11 @@ class SignalProcessor {
             const real = [];
             const imaginary = [];
 
-            for (let i = 0; i < complexArray.length; i++) {
-                const r = complexArray.real[i];
-                const im = complexArray.imag[i];
+            // DSP.js는 spectrum (magnitude) 배열을 제공
+            // real과 imaginary는 내부 배열로 접근
+            for (let i = 0; i < n / 2; i++) {
+                const r = fft.real[i];
+                const im = fft.imag[i];
                 magnitude.push(Math.sqrt(r * r + im * im));
                 phase.push(Math.atan2(im, r));
                 real.push(r);
