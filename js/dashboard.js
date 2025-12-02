@@ -538,6 +538,18 @@ class Dashboard {
 
         const typeCount = Object.keys(this.selectedSensorsByType).length;
         if (typeCount === 0) {
+            // 그래프 클리어
+            const mainGraph = document.getElementById('mainGraph');
+            if (mainGraph) {
+                Plotly.purge(mainGraph);
+            }
+            // 통계 초기화
+            document.getElementById('statMean').textContent = '-';
+            document.getElementById('statMin').textContent = '-';
+            document.getElementById('statMax').textContent = '-';
+            document.getElementById('statStdDev').textContent = '-';
+            document.getElementById('analysisText').textContent = '센서를 선택해주세요.';
+
             this._showMessage('센서를 1개 이상 선택해주세요', 'warning');
             return;
         }
@@ -1084,6 +1096,7 @@ class Dashboard {
                 title: `${sensorNames} - 시계열 (다중센서)`,
                 xaxis: {title: '시간 (초)'},
                 hovermode: 'x unified',
+                dragmode: 'select',  // 영역 선택 모드 활성화
                 plot_bgcolor: '#fafafa',
                 paper_bgcolor: 'white',
                 margin: {
@@ -1097,10 +1110,13 @@ class Dashboard {
 
             // 그래프 렌더링
             Plotly.newPlot('mainGraph', traces, layout, {responsive: true});
-            
+
             // 통계 업데이트 (첫 센서 기준)
             const firstValues = dataLoader.getSensorData(allSensors[0].name).map(r => r.value);
             this._updateStatistics(firstValues);
+
+            // 선택 이벤트 바인딩 (다중 센서 시계열에서도 영역 선택 가능)
+            this._bindSelectionEvent(firstValues);
             
         } catch (error) {
             console.error('[ERROR] 다중센서 그래프 렌더링 오류:', error);
@@ -1154,6 +1170,7 @@ class Dashboard {
             xaxis: {title: '시간 (초)'},
             yaxis: {title: ylabel},
             hovermode: 'x unified',
+            dragmode: 'select',  // 영역 선택 모드 활성화
             plot_bgcolor: '#fafafa',
             paper_bgcolor: 'white',
             margin: {t: 40, b: 40, l: 60, r: 40}
