@@ -11,6 +11,15 @@
     <!-- DSP.js (FFT) - 로컬 파일 -->
     <script src="dspjs/dsp.js"></script>
     
+    <!-- DSP.js 초기화 (window 객체에 FFT 노출) -->
+    <script>
+        if (typeof window !== 'undefined' && typeof FFT !== 'undefined') {
+            window.FFT = FFT;
+            window.RFFT = RFFT;
+            window.DFT = DFT;
+        }
+    </script>
+    
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
 </head>

@@ -15,7 +15,7 @@ class SignalProcessor {
 
         try {
             // DSP.js 라이브러리 확인
-            if (typeof window.DSP === 'undefined' || !window.DSP.FFT) {
+            if (typeof window.FFT === 'undefined') {
                 console.error('FFT 라이브러리(DSP.js)가 로드되지 않았습니다');
                 return null;
             }
@@ -28,8 +28,8 @@ class SignalProcessor {
             }
 
             // DSP.js FFT 인스턴스 생성
-            // new DSP.FFT(bufferSize, sampleRate)
-            const fft = new window.DSP.FFT(n, 10); // 샘플링 레이트: 10 Hz
+            // new FFT(bufferSize, sampleRate)
+            const fft = new window.FFT(n, 10); // 샘플링 레이트: 10 Hz
             
             // FFT 수행
             fft.forward(paddedSignal);
