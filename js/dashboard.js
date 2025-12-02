@@ -700,14 +700,12 @@ class Dashboard {
             console.error('[ERROR] Plotly relayout 실패:', err);
         });
 
-        // 이전 이벤트 리스너 제거 (중복 방지)
-        if (mainGraph._selectionListener) {
-            mainGraph.removeEventListener('plotly_selected', mainGraph._selectionListener);
-            console.log('[*] 이전 선택 이벤트 리스너 제거');
-        }
+        // 이전 Plotly 이벤트 리스너 제거 (중복 방지)
+        Plotly.removeAllListeners(mainGraph, 'plotly_selected');
+        console.log('[*] 이전 plotly_selected 이벤트 리스너 모두 제거');
 
-        // 새 이벤트 리스너 등록
-        const selectionListener = (data) => {
+        // 새 이벤트 리스너 등록 (Plotly 이벤트 시스템 사용)
+        Plotly.on(mainGraph, 'plotly_selected', (data) => {
             console.log('[*] plotly_selected 이벤트 발생!', data);
 
             if (!data || !data.points || data.points.length === 0) {
@@ -757,13 +755,9 @@ class Dashboard {
                 console.error('[ERROR] 선택 영역 처리 오류:', error);
                 this._showMessage('선택 영역 처리 실패: ' + error.message, 'error');
             }
-        };
+        });
 
-        // 이벤트 리스너 저장 (이후 제거용)
-        mainGraph._selectionListener = selectionListener;
-        mainGraph.addEventListener('plotly_selected', selectionListener);
-
-        console.log('[*] plotly_selected 이벤트 리스너 등록 완료');
+        console.log('[*] Plotly.on()으로 plotly_selected 이벤트 리스너 등록 완료');
 
         // 사용자 안내
         this._showMessage('💡 그래프 영역을 드래그하여 신호처리할 영역을 선택하세요', 'info');
@@ -1142,7 +1136,7 @@ class Dashboard {
                 title: `${sensorNames} - 시계열 (다중센서)`,
                 xaxis: {title: '시간 (초)'},
                 hovermode: 'x unified',
-                dragmode: 'select',  // 영역 선택 모드 활성화
+                dragmode: 'zoom',  // 다중센서에서는 zoom 모드 (신호처리 비활성화)
                 plot_bgcolor: '#fafafa',
                 paper_bgcolor: 'white',
                 margin: {
