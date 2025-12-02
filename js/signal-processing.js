@@ -5,7 +5,7 @@
 class SignalProcessor {
     /**
      * FFT (Fast Fourier Transform)
-     * ml.js 라이브러리 사용
+     * ml-dsp 라이브러리 사용
      */
     static performFFT(signal) {
         if (!signal || signal.length === 0) {
@@ -14,14 +14,53 @@ class SignalProcessor {
         }
 
         try {
-            // ml.js의 FFT
-            const fftResult = ml.FFT.transform(signal);
+            // ml-dsp 라이브러리 확인
+            if (typeof window.ml === 'undefined' || !window.ml.FFT) {
+                console.error('FFT 라이브러리(ml-dsp)가 로드되지 않았습니다');
+                return null;
+            }
+
+            // 신호 길이를 2의 거듭제곱으로 조정 (FFT 최적화)
+            const n = Math.pow(2, Math.ceil(Math.log2(signal.length)));
+            const paddedSignal = new Array(n).fill(0);
+            for (let i = 0; i < signal.length; i++) {
+                paddedSignal[i] = signal[i];
+            }
+
+            // ml-dsp FFT 인스턴스 생성
+            const FFT = window.ml.FFT;
+            const fft = new FFT(n);
             
+            // ComplexArray 생성 (실수부 초기화)
+            const complexArray = new window.ml.ComplexArray(n);
+            for (let i = 0; i < n; i++) {
+                complexArray.real[i] = paddedSignal[i];
+                complexArray.imag[i] = 0;
+            }
+
+            // FFT 수행
+            fft.forward(complexArray);
+
+            // 결과 추출
+            const magnitude = [];
+            const phase = [];
+            const real = [];
+            const imaginary = [];
+
+            for (let i = 0; i < complexArray.length; i++) {
+                const r = complexArray.real[i];
+                const im = complexArray.imag[i];
+                magnitude.push(Math.sqrt(r * r + im * im));
+                phase.push(Math.atan2(im, r));
+                real.push(r);
+                imaginary.push(im);
+            }
+
             return {
-                magnitude: fftResult.map(c => Math.sqrt(c[0] * c[0] + c[1] * c[1])),
-                phase: fftResult.map(c => Math.atan2(c[1], c[0])),
-                real: fftResult.map(c => c[0]),
-                imaginary: fftResult.map(c => c[1])
+                magnitude: magnitude,
+                phase: phase,
+                real: real,
+                imaginary: imaginary
             };
         } catch (error) {
             console.error('FFT 오류:', error);
@@ -43,6 +82,7 @@ class SignalProcessor {
     /**
      * STFT (Short-Time Fourier Transform)
      * 시간-주파수 분석
+     * ml-dsp의 FFT 사용
      */
     static performSTFT(signal, windowSize = 256, hopSize = 128) {
         if (!signal || signal.length === 0) {
@@ -94,6 +134,7 @@ class SignalProcessor {
     /**
      * Hilbert Transform (포락선 추출)
      * 해석적 신호(Analytic Signal) 생성
+     * ml-dsp의 FFT 사용
      */
     static performHilbert(signal) {
         if (!signal || signal.length === 0) {
@@ -159,7 +200,7 @@ class SignalProcessor {
      * 간단한 Continuous Wavelet Transform (CWT)
      * Morlet Wavelet 사용
      */
-    static performWavelet(signal, scales = null, wavelet = 'morlet') {
+    static performWavelet(signal, scales = null, wavelet = 'morlet', samplingRateHz = 10) {
         if (!signal || signal.length === 0) {
             console.error('Wavelet: 신호 데이터가 없습니다');
             return null;
@@ -174,6 +215,12 @@ class SignalProcessor {
                 }
                 scales = [...new Set(scales)].sort((a, b) => a - b);
             }
+
+            // Morlet wavelet 중심 주파수
+            const centerFrequency = 1.0;
+            
+            // Scale을 주파수(Hz)로 변환
+            const frequencies = scales.map(scale => centerFrequency / scale);
 
             const result = [];
 
@@ -200,6 +247,9 @@ class SignalProcessor {
             return {
                 coefficients: result,
                 scales: scales,
+                frequencies: frequencies,
+                centerFrequency: centerFrequency,
+                samplingRateHz: samplingRateHz,
                 time: Array.from({length: signal.length}, (_, i) => i),
                 waveletType: wavelet
             };

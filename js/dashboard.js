@@ -8,6 +8,7 @@ class Dashboard {
         this.currentGraphType = 'timeseries';
         this.updateInterval = 10000;
         this.autoUpdateTimer = null;
+        this.waveletFrequencyMode = false;  // Wavelet y축 모드: false=스케일, true=주파수
         this.githubConfig = {
             username: 'YOUR_USERNAME', // 사용자가 설정해야 함
             repo: 'YOUR_REPO',
@@ -64,39 +65,34 @@ class Dashboard {
         const sensorType = this._getCurrentSensorType();
         
         const allowedTypes = {
+            // Temperature: 온도 변화 시계열만 필요 (신호처리 분석 불필요)
             'Temperature': [
-                { value: 'timeseries', label: '시계열 (온도)' },
-                { value: 'pwm-rpm', label: 'PWM vs RPM' },
-                { value: 'fft', label: 'FFT 스펙트럼' },
-                { value: 'stft', label: 'STFT 스펙트로그램' },
-                { value: 'wavelet', label: 'Wavelet Transform' },
-                { value: 'hilbert', label: 'Hilbert 포락선' }
+                { value: 'timeseries', label: '시계열 (온도)' }
             ],
+            // Fan: 시계열 + 주파수 분석 (RPM 변화 특성 분석)
             'Fan': [
                 { value: 'timeseries', label: '시계열 (RPM)' },
-                { value: 'pwm-rpm', label: 'PWM vs RPM' },
-                { value: '3d', label: '3D 그래프' },
                 { value: 'fft', label: 'FFT 스펙트럼' },
                 { value: 'stft', label: 'STFT 스펙트로그램' },
                 { value: 'wavelet', label: 'Wavelet Transform' },
                 { value: 'hilbert', label: 'Hilbert 포락선' }
             ],
+            // Control: PWM 제어 신호 (GPU 팬 제어 신호 분석)
             'Control': [
                 { value: 'timeseries', label: '시계열 (PWM %)' },
-                { value: 'pwm-rpm', label: 'PWM vs RPM' },
                 { value: 'fft', label: 'FFT 스펙트럼' }
             ],
+            // Voltage: 전압 데이터 (수집되지 않음)
             'Voltage': [
-                { value: 'timeseries', label: '시계열 (전압)' },
-                { value: 'fft', label: 'FFT 스펙트럼' }
+                { value: 'timeseries', label: '시계열 (전압)' }
             ],
+            // Power: 전력 데이터 (수집되지 않음)
             'Power': [
-                { value: 'timeseries', label: '시계열 (전력)' },
-                { value: 'fft', label: 'FFT 스펙트럼' }
+                { value: 'timeseries', label: '시계열 (전력)' }
             ],
+            // Unknown: 기본 시계열만
             'Unknown': [
-                { value: 'timeseries', label: '시계열' },
-                { value: 'fft', label: 'FFT 스펙트럼' }
+                { value: 'timeseries', label: '시계열' }
             ]
         };
         
@@ -397,6 +393,12 @@ class Dashboard {
             const values = sensorData.map(r => r.value);
             const timestamps = sensorData.map(r => r.timestamp);
 
+            // Wavelet 컨트롤 패널 숨김 (wavelet이 아닐 때)
+            const waveletPanel = document.getElementById('waveletControlPanel');
+            if (waveletPanel && this.currentGraphType !== 'wavelet') {
+                waveletPanel.style.display = 'none';
+            }
+
             let trace, layout;
 
             switch (this.currentGraphType) {
@@ -428,6 +430,21 @@ class Dashboard {
                 case 'wavelet':
                     const wavelet = this._createWaveletPlot(values);
                     Plotly.newPlot('mainGraph', [wavelet.trace], wavelet.layout, {responsive: true});
+                    
+                    // Wavelet y축 전환 패널 표시
+                    const waveletPanel = document.getElementById('waveletControlPanel');
+                    if (waveletPanel) {
+                        waveletPanel.style.display = 'block';
+                        const toggle = document.getElementById('waveletFrequencyToggle');
+                        if (toggle) {
+                            toggle.checked = this.waveletFrequencyMode;
+                            toggle.onchange = (e) => {
+                                this.waveletFrequencyMode = e.target.checked;
+                                // 그래프 재렌더링
+                                this.renderGraph();
+                            };
+                        }
+                    }
                     break;
 
                 case 'hilbert':
@@ -570,23 +587,43 @@ class Dashboard {
             row.map(v => Math.log10(v + 1e-10))
         );
 
+        // y축 데이터 (스케일 또는 주파수)
+        let yAxisData = waveletResult.scales;
+        let yAxisTitle = '스케일';
+        let yAxisLabel = '스케일';
+        
+        // 웨이블릿 y축 전환 상태 확인
+        if (this.waveletFrequencyMode === true && waveletResult.frequencies) {
+            yAxisData = waveletResult.frequencies;
+            yAxisTitle = '주파수 (Hz)';
+            yAxisLabel = '주파수';
+        }
+
+        const hoverTemplate = this.waveletFrequencyMode && waveletResult.frequencies
+            ? '<b>시간:</b> %{x:.2f}s<br><b>주파수:</b> %{y:.4f} Hz<br><b>에너지:</b> %{z:.2f}<extra></extra>'
+            : '<b>시간:</b> %{x:.2f}s<br><b>스케일:</b> %{y}<br><b>에너지:</b> %{z:.2f}<extra></extra>';
+
         const trace = {
             z: normalized,
+            y: yAxisData,
             type: 'heatmap',
             colorscale: 'Viridis',
-            hovertemplate: '<b>시간:</b> %{x:.2f}s<br><b>스케일:</b> %{y}<br><b>에너지:</b> %{z:.2f}<extra></extra>'
+            hovertemplate: hoverTemplate
         };
 
         const layout = {
             title: `${this.currentSensor} - Wavelet Transform (Morlet)`,
             xaxis: {title: '시간'},
-            yaxis: {title: '스케일'},
+            yaxis: {
+                title: yAxisTitle,
+                type: this.waveletFrequencyMode ? 'log' : 'linear'
+            },
             plot_bgcolor: '#fafafa',
             paper_bgcolor: 'white',
             margin: {t: 40, b: 40, l: 60, r: 40}
         };
 
-        return {trace, layout};
+        return {trace, layout, yAxisLabel};
     }
 
     /**
