@@ -290,11 +290,15 @@ class Dashboard {
             console.log('[*] 샘플 데이터 로드 중...');
             
             // dataLoader 초기화 확인
-            if (!window.dataLoader) {
-                console.error('[FATAL] dataLoader가 전역 객체에 없습니다');
-                this._showMessage('데이터 로더 초기화 실패', 'error');
+            if (typeof dataLoader === 'undefined') {
+                console.error('[FATAL] dataLoader가 정의되지 않았습니다');
+                console.error('[DEBUG] typeof dataLoader:', typeof dataLoader);
+                console.error('[DEBUG] window.dataLoader:', window.dataLoader);
+                this._showMessage('데이터 로더 초기화 실패 - 페이지를 새로고침 해주세요', 'error');
                 return;
             }
+            
+            console.log('[+] dataLoader 준비 완료:', typeof dataLoader);
             
             // sampledata.json 파일에서 로드 (또는 실패 시 합성 데이터 사용)
             await dataLoader.loadSampleDataFromFile();
@@ -363,8 +367,9 @@ class Dashboard {
      */
     _updateUI() {
         // dataLoader 상태 확인
-        if (!dataLoader) {
-            console.error('[FATAL] dataLoader가 없습니다');
+        if (typeof dataLoader === 'undefined' || !dataLoader) {
+            console.error('[FATAL] dataLoader가 정의되지 않았습니다');
+            console.error('[INFO] dataLoader 타입:', typeof dataLoader);
             return;
         }
 
@@ -516,8 +521,9 @@ class Dashboard {
      */
     async renderGraph() {
         // 디버깅: dataLoader 상태 확인
-        if (!dataLoader) {
+        if (typeof dataLoader === 'undefined' || !dataLoader) {
             console.error('[FATAL] dataLoader가 초기화되지 않았습니다');
+            console.error('[INFO] dataLoader 타입:', typeof dataLoader);
             this._showMessage('데이터 로더 초기화 실패', 'error');
             return;
         }
