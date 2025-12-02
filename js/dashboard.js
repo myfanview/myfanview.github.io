@@ -288,14 +288,29 @@ class Dashboard {
     async _loadSampleData() {
         try {
             console.log('[*] 샘플 데이터 로드 중...');
+            
+            // dataLoader 초기화 확인
+            if (!window.dataLoader) {
+                console.error('[FATAL] dataLoader가 전역 객체에 없습니다');
+                this._showMessage('데이터 로더 초기화 실패', 'error');
+                return;
+            }
+            
             // sampledata.json 파일에서 로드 (또는 실패 시 합성 데이터 사용)
             await dataLoader.loadSampleDataFromFile();
+            
+            // 로드 후 dataLoader 상태 확인
+            const metadata = dataLoader.getMetadata();
+            if (!metadata) {
+                console.warn('[WARN] 메타데이터 없음');
+            }
             
             this._updateUI();
             
             console.log('[+] 샘플 데이터 로드 완료');
         } catch (error) {
             console.error('[ERROR] 샘플 데이터 로드 실패:', error);
+            this._showMessage('샘플 데이터 로드 실패: ' + error.message, 'error');
         }
     }
 
@@ -347,8 +362,27 @@ class Dashboard {
      * UI 업데이트
      */
     _updateUI() {
+        // dataLoader 상태 확인
+        if (!dataLoader) {
+            console.error('[FATAL] dataLoader가 없습니다');
+            return;
+        }
+
         // 센서 목록 업데이트 (타입별 그룹화)
         const sensors = dataLoader.getSensorList();
+        
+        if (!Array.isArray(sensors)) {
+            console.error('[ERROR] 센서 목록이 배열이 아닙니다:', sensors);
+            this._showMessage('센서 목록 로드 실패', 'error');
+            return;
+        }
+        
+        if (sensors.length === 0) {
+            console.warn('[WARN] 센서 데이터가 없습니다');
+            document.getElementById('sensorCheckboxes').innerHTML = '<p>로드된 센서가 없습니다</p>';
+            return;
+        }
+
         const sensorCheckboxes = document.getElementById('sensorCheckboxes');
         
         sensorCheckboxes.innerHTML = '';
@@ -481,7 +515,20 @@ class Dashboard {
      * 그래프 렌더링
      */
     async renderGraph() {
+        // 디버깅: dataLoader 상태 확인
+        if (!dataLoader) {
+            console.error('[FATAL] dataLoader가 초기화되지 않았습니다');
+            this._showMessage('데이터 로더 초기화 실패', 'error');
+            return;
+        }
+
         // 선택된 센서 확인
+        if (!this.selectedSensorsByType || typeof this.selectedSensorsByType !== 'object') {
+            console.error('[FATAL] selectedSensorsByType이 객체가 아닙니다:', this.selectedSensorsByType);
+            this._showMessage('센서 선택 상태 오류', 'error');
+            return;
+        }
+
         const typeCount = Object.keys(this.selectedSensorsByType).length;
         if (typeCount === 0) {
             this._showMessage('센서를 1개 이상 선택해주세요', 'warning');
@@ -503,6 +550,13 @@ class Dashboard {
             // 단일타입 처리
             const sensorType = Object.keys(this.selectedSensorsByType)[0];
             const sensors = this.selectedSensorsByType[sensorType];
+            
+            // 센서 배열 확인
+            if (!sensors || sensors.length === 0) {
+                this._showMessage('선택된 센서가 없습니다', 'error');
+                return;
+            }
+            
             const firstSensor = sensors[0];
             this.currentSensor = firstSensor;  // 그래프 제목용
             const sensorData = dataLoader.getSensorData(firstSensor);
@@ -586,7 +640,6 @@ class Dashboard {
             
             // 선택 이벤트 바인딩 (단일타입 + 신호처리 가능한 타입 + 토글 활성)
             const signalProcessingTypes = ['fft', 'stft', 'wavelet', 'hilbert'];
-            const typeCount = Object.keys(this.selectedSensorsByType).length;
             if (typeCount === 1 && signalProcessingTypes.includes(this.currentGraphType) && this.rangeProcessingEnabled) {
                 this._bindSelectionEvent(values);
             }
@@ -880,9 +933,22 @@ class Dashboard {
                 });
             }
             
+            // 센서 배열 확인
+            if (allSensors.length === 0) {
+                this._showMessage('선택된 센서가 없습니다', 'error');
+                this._showLoading(false);
+                return;
+            }
+            
             // 첫 센서 기준으로 시간축 설정
             const firstSensorData = dataLoader.getSensorData(allSensors[0].name);
-            const timeAxis = firstSensorData && dataLoader.data.sample_interval_ms 
+            if (!firstSensorData || firstSensorData.length === 0) {
+                this._showMessage('센서 데이터가 없습니다', 'error');
+                this._showLoading(false);
+                return;
+            }
+            
+            const timeAxis = dataLoader.data.sample_interval_ms 
                 ? Array.from({length: firstSensorData.length}, (_, i) => i * dataLoader.data.sample_interval_ms / 1000)
                 : Array.from({length: firstSensorData.length}, (_, i) => i);
 
