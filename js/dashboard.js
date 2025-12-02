@@ -10,6 +10,7 @@ class Dashboard {
         this.autoUpdateTimer = null;
         this.waveletFrequencyMode = false;
         this.selectedRangeData = null;  // 선택된 영역 데이터 저장
+        this.selectionEventBound = false;  // 선택 이벤트 바인딩 여부
         this.githubConfig = {
             username: 'YOUR_USERNAME',
             repo: 'YOUR_REPO',
@@ -166,6 +167,8 @@ class Dashboard {
         // 그래프 타입 선택
         document.getElementById('graphType').addEventListener('change', (e) => {
             this.currentGraphType = e.target.value;
+            // 그래프 타입 변경 시 이벤트 바인딩 플래그 리셋
+            this.selectionEventBound = false;
             this.renderGraph();
         });
 
@@ -550,6 +553,9 @@ class Dashboard {
             document.getElementById('statStdDev').textContent = '-';
             document.getElementById('analysisText').textContent = '센서를 선택해주세요.';
 
+            // 이벤트 바인딩 플래그 리셋
+            this.selectionEventBound = false;
+
             this._showMessage('센서를 1개 이상 선택해주세요', 'warning');
             return;
         }
@@ -559,6 +565,9 @@ class Dashboard {
         try {
             // 다중타입일 때 시계열만 지원
             if (typeCount > 1) {
+                // 다중 센서 모드로 전환 시 이벤트 바인딩 플래그 리셋
+                this.selectionEventBound = false;
+
                 if (this.currentGraphType !== 'timeseries') {
                     this.currentGraphType = 'timeseries';
                 }
@@ -578,6 +587,9 @@ class Dashboard {
 
             // 여러 센서가 선택되었고 시계열 그래프일 때는 다중 센서 표시
             if (sensors.length > 1 && this.currentGraphType === 'timeseries') {
+                // 다중 센서 모드로 전환 시 이벤트 바인딩 플래그 리셋
+                this.selectionEventBound = false;
+
                 await this._renderMultiSensorTimeseries();
                 return;
             }
@@ -700,9 +712,11 @@ class Dashboard {
             console.error('[ERROR] Plotly relayout 실패:', err);
         });
 
-        // 이전 Plotly 이벤트 리스너 제거 (중복 방지)
-        Plotly.removeAllListeners(mainGraph, 'plotly_selected');
-        console.log('[*] 이전 plotly_selected 이벤트 리스너 모두 제거');
+        // 이미 이벤트 리스너가 바인딩되어 있으면 중복 등록하지 않음
+        if (this.selectionEventBound) {
+            console.log('[*] 이미 plotly_selected 이벤트 리스너가 등록되어 있음 (중복 방지)');
+            return;
+        }
 
         // 새 이벤트 리스너 등록 (Plotly 이벤트 시스템 사용)
         Plotly.on(mainGraph, 'plotly_selected', (data) => {
@@ -757,6 +771,7 @@ class Dashboard {
             }
         });
 
+        this.selectionEventBound = true;
         console.log('[*] Plotly.on()으로 plotly_selected 이벤트 리스너 등록 완료');
 
         // 사용자 안내
