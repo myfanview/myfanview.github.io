@@ -31,12 +31,126 @@ class Dashboard {
     }
 
     /**
-     * 이벤트 리스너 설정
+     * 센서 타입 라벨 (드롭다운 표시용)
      */
+    _getTypeLabel(type) {
+        const labels = {
+            'Temperature': '🌡️ 온도 (°C)',
+            'Fan': '🌀 팬 (RPM)',
+            'Control': '⚙️ 제어 (PWM %)',
+            'Voltage': '⚡ 전압 (V)',
+            'Power': '💡 전력 (W)',
+            'Unknown': '❓ 기타'
+        };
+        return labels[type] || type;
+    }
+
+    /**
+     * 선택된 센서의 타입 조회
+     */
+    _getCurrentSensorType() {
+        if (!this.currentSensor) return 'Unknown';
+        const sensorData = dataLoader.getSensorData(this.currentSensor);
+        if (sensorData && sensorData.length > 0) {
+            return sensorData[0].type;
+        }
+        return 'Unknown';
+    }
+
+    /**
+     * 센서 타입별 허용 그래프 타입
+     */
+    _getAllowedGraphTypes() {
+        const sensorType = this._getCurrentSensorType();
+        
+        const allowedTypes = {
+            'Temperature': [
+                { value: 'timeseries', label: '시계열 (온도)' },
+                { value: 'pwm-rpm', label: 'PWM vs RPM' },
+                { value: 'fft', label: 'FFT 스펙트럼' },
+                { value: 'stft', label: 'STFT 스펙트로그램' },
+                { value: 'wavelet', label: 'Wavelet Transform' },
+                { value: 'hilbert', label: 'Hilbert 포락선' }
+            ],
+            'Fan': [
+                { value: 'timeseries', label: '시계열 (RPM)' },
+                { value: 'pwm-rpm', label: 'PWM vs RPM' },
+                { value: '3d', label: '3D 그래프' },
+                { value: 'fft', label: 'FFT 스펙트럼' },
+                { value: 'stft', label: 'STFT 스펙트로그램' },
+                { value: 'wavelet', label: 'Wavelet Transform' },
+                { value: 'hilbert', label: 'Hilbert 포락선' }
+            ],
+            'Control': [
+                { value: 'timeseries', label: '시계열 (PWM %)' },
+                { value: 'pwm-rpm', label: 'PWM vs RPM' },
+                { value: 'fft', label: 'FFT 스펙트럼' }
+            ],
+            'Voltage': [
+                { value: 'timeseries', label: '시계열 (전압)' },
+                { value: 'fft', label: 'FFT 스펙트럼' }
+            ],
+            'Power': [
+                { value: 'timeseries', label: '시계열 (전력)' },
+                { value: 'fft', label: 'FFT 스펙트럼' }
+            ],
+            'Unknown': [
+                { value: 'timeseries', label: '시계열' },
+                { value: 'fft', label: 'FFT 스펙트럼' }
+            ]
+        };
+        
+        return allowedTypes[sensorType] || allowedTypes['Unknown'];
+    }
+
+    /**
+     * 그래프 타입 옵션 업데이트 (센서 타입별 필터링)
+     */
+    _updateGraphTypeOptions() {
+        const graphTypeSelect = document.getElementById('graphType');
+        const allowedTypes = this._getAllowedGraphTypes();
+        const currentValue = graphTypeSelect.value;
+
+        graphTypeSelect.innerHTML = '';
+        
+        allowedTypes.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type.value;
+            option.textContent = type.label;
+            graphTypeSelect.appendChild(option);
+        });
+
+        // 현재 값이 허용 목록에 없으면 첫 번째로 변경
+        if (!allowedTypes.find(t => t.value === currentValue)) {
+            this.currentGraphType = allowedTypes[0].value;
+            graphTypeSelect.value = this.currentGraphType;
+        } else {
+            graphTypeSelect.value = currentValue;
+        }
+    }
+
+    /**
+     * Y축 레이블 자동 설정
+     */
+    _getYAxisLabel() {
+        const sensorType = this._getCurrentSensorType();
+        
+        const labels = {
+            'Temperature': '온도 (°C)',
+            'Fan': 'RPM (회전/분)',
+            'Control': 'PWM (%)',
+            'Voltage': '전압 (V)',
+            'Power': '전력 (W)',
+            'Unknown': '값'
+        };
+        
+        return labels[sensorType] || '값';
+    }
     _setupEventListeners() {
         // 센서 선택
         document.getElementById('sensorSelect').addEventListener('change', (e) => {
             this.currentSensor = e.target.value;
+            this._updateGraphTypeOptions();  // 그래프 타입 옵션 업데이트
             this.renderGraph();
         });
 
@@ -149,21 +263,47 @@ class Dashboard {
      * UI 업데이트
      */
     _updateUI() {
-        // 센서 목록 업데이트
+        // 센서 목록 업데이트 (타입별 그룹화)
         const sensors = dataLoader.getSensorList();
         const sensorSelect = document.getElementById('sensorSelect');
         
         sensorSelect.innerHTML = '';
+        
+        // 센서를 타입별로 그룹화
+        const sensorsByType = {};
         sensors.forEach(sensor => {
-            const option = document.createElement('option');
-            option.value = sensor;
-            option.textContent = sensor;
-            sensorSelect.appendChild(option);
+            const sensorData = dataLoader.getSensorData(sensor);
+            const type = sensorData && sensorData.length > 0 ? sensorData[0].type : 'Unknown';
+            
+            if (!sensorsByType[type]) {
+                sensorsByType[type] = [];
+            }
+            sensorsByType[type].push(sensor);
+        });
+
+        // 드롭다운 구성 (타입별 옵션 그룹)
+        const typeOrder = ['Temperature', 'Fan', 'Control', 'Voltage', 'Power', 'Unknown'];
+        
+        typeOrder.forEach(type => {
+            if (sensorsByType[type]) {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = this._getTypeLabel(type);
+                
+                sensorsByType[type].sort().forEach(sensor => {
+                    const option = document.createElement('option');
+                    option.value = sensor;
+                    option.textContent = sensor;
+                    optgroup.appendChild(option);
+                });
+                
+                sensorSelect.appendChild(optgroup);
+            }
         });
 
         if (sensors.length > 0) {
             this.currentSensor = sensors[0];
             sensorSelect.value = this.currentSensor;
+            this._updateGraphTypeOptions();  // 그래프 타입 필터링
         }
 
         // 메타데이터 업데이트
@@ -191,38 +331,50 @@ class Dashboard {
         // 자동 갱신 시작
         this._startAutoUpdate();
     }
+    }
 
     /**
-     * 현재 상태 업데이트
+     * 현재 상태 업데이트 (센서 타입별 표시)
      */
     _updateCurrentStatus() {
         const sensors = dataLoader.getSensorList();
 
         // CPU 팬 RPM
-        const cpuFanSensor = sensors.find(s => s.includes('CPU') && s.includes('FAN') && !s.includes('PWM'));
+        const cpuFanSensor = sensors.find(s => 
+            (s.includes('CPU') || s.includes('cpu')) && 
+            s.includes('Fan') && 
+            !s.includes('PWM')
+        );
         if (cpuFanSensor) {
             const data = dataLoader.getSensorData(cpuFanSensor);
-            if (data && data.length > 0) {
+            if (data && data.length > 0 && data[0].type === 'Fan') {
                 const rpm = data[data.length - 1].value;
                 document.getElementById('cpuFanRpm').textContent = rpm.toFixed(0);
             }
         }
 
         // CPU 온도
-        const cpuTempSensor = sensors.find(s => s.includes('CPU') && s.includes('Temperature'));
+        const cpuTempSensor = sensors.find(s => 
+            (s.includes('CPU') || s.includes('Core')) && 
+            s.includes('Temperature')
+        );
         if (cpuTempSensor) {
             const data = dataLoader.getSensorData(cpuTempSensor);
-            if (data && data.length > 0) {
+            if (data && data.length > 0 && data[0].type === 'Temperature') {
                 const temp = data[data.length - 1].value;
                 document.getElementById('cpuTemp').textContent = temp.toFixed(1);
             }
         }
 
         // PWM 비율
-        const pwmSensor = sensors.find(s => s.includes('PWM'));
+        const pwmSensor = sensors.find(s => 
+            (s.includes('Fan') || s.includes('Control')) && 
+            (s.includes('PWM') || s.includes('Control'))
+        );
         if (pwmSensor) {
             const data = dataLoader.getSensorData(pwmSensor);
-            if (data && data.length > 0) {
+            if (data && data.length > 0 && 
+                (data[0].type === 'Control' || data[0].type === 'Fan')) {
                 const pwm = data[data.length - 1].value;
                 document.getElementById('pwmRatio').textContent = pwm.toFixed(1);
             }
@@ -251,11 +403,10 @@ class Dashboard {
 
             switch (this.currentGraphType) {
                 case 'timeseries':
-                    ({ trace, layout } = this._createTimeseriesPlot(values, timestamps));
-                    break;
-
                 case 'timeseries-temp':
-                    ({ trace, layout } = this._createTimeseriesPlot(values, timestamps, '온도 (°C)'));
+                    // 센서 타입에 맞게 Y축 자동 설정
+                    const ts = this._createTimeseriesPlot(values, timestamps);
+                    Plotly.newPlot('mainGraph', [ts.trace], ts.layout, {responsive: true});
                     break;
 
                 case 'pwm-rpm':
@@ -267,28 +418,30 @@ class Dashboard {
                     break;
 
                 case 'fft':
-                    ({ trace, layout } = this._createFFTPlot(values));
+                    const fft = this._createFFTPlot(values);
+                    Plotly.newPlot('mainGraph', [fft.trace], fft.layout, {responsive: true});
                     break;
 
                 case 'stft':
-                    ({ trace, layout } = this._createSTFTPlot(values));
+                    const stft = this._createSTFTPlot(values);
+                    Plotly.newPlot('mainGraph', [stft.trace], stft.layout, {responsive: true});
                     break;
 
                 case 'wavelet':
-                    ({ trace, layout } = this._createWaveletPlot(values));
+                    const wavelet = this._createWaveletPlot(values);
+                    Plotly.newPlot('mainGraph', [wavelet.trace], wavelet.layout, {responsive: true});
                     break;
 
                 case 'hilbert':
-                    ({ trace, layout } = this._createHilbertPlot(values));
+                    const hilbert = this._createHilbertPlot(values);
+                    Plotly.newPlot('mainGraph', hilbert.traces, hilbert.layout, {responsive: true});
                     break;
 
                 default:
                     return;
             }
 
-            Plotly.newPlot('mainGraph', [trace], layout, {responsive: true});
-
-            // 통계 업데이트
+            // 통계 업데이트 (정적 메서드 호출)
             this._updateStatistics(values);
 
             // 분석 텍스트 업데이트
@@ -304,7 +457,12 @@ class Dashboard {
     /**
      * 시계열 플롯 생성
      */
-    _createTimeseriesPlot(values, timestamps, ylabel = '값') {
+    _createTimeseriesPlot(values, timestamps, ylabel = null) {
+        // Y축 레이블이 지정되지 않으면 센서 타입에 따라 자동 설정
+        if (!ylabel) {
+            ylabel = this._getYAxisLabel();
+        }
+
         const timeAxis = timestamps.map((_, i) => i * (dataLoader.data.sample_interval_ms || 100) / 1000);
 
         const trace = {
@@ -484,17 +642,23 @@ class Dashboard {
     async _renderPwmVsRpm() {
         const sensors = dataLoader.getSensorList();
         
-        const pwmSensor = sensors.find(s => s.includes('PWM'));
-        const rpmSensor = sensors.find(s => s.includes('FAN') && !s.includes('PWM'));
+        const pwmSensor = sensors.find(s => s.includes('PWM') || (s.includes('Control') && s.includes('Fan')));
+        const rpmSensor = sensors.find(s => s.includes('Fan') && !s.includes('PWM'));
 
         if (!pwmSensor || !rpmSensor) {
             this._showMessage('PWM 또는 RPM 데이터를 찾을 수 없습니다', 'error');
-            this._showLoading(false);  // ← 추가
+            this._showLoading(false);
             return;
         }
 
-        const pwmData = dataLoader.getSensorData(pwmSensor).map(r => r.value);
-        const rpmData = dataLoader.getSensorData(rpmSensor).map(r => r.value);
+        const pwmData = dataLoader.getSensorData(pwmSensor)?.map(r => r.value) || [];
+        const rpmData = dataLoader.getSensorData(rpmSensor)?.map(r => r.value) || [];
+
+        if (pwmData.length === 0 || rpmData.length === 0) {
+            this._showMessage('센서 데이터가 부족합니다', 'error');
+            this._showLoading(false);
+            return;
+        }
 
         const trace = {
             x: pwmData,
@@ -508,21 +672,20 @@ class Dashboard {
                 showscale: true,
                 colorbar: {title: '시간'}
             },
-            text: Array.from({length: pwmData.length}, (_, i) => `시간: ${i}`),
+            text: Array.from({length: pwmData.length}, (_, i) => `샘플 ${i}`),
             hovertemplate: '<b>PWM:</b> %{x:.1f}%<br><b>RPM:</b> %{y:.0f}<extra></extra>'
         };
 
         const layout = {
             title: 'PWM vs RPM (팬 성능 곡선)',
             xaxis: {title: 'PWM (%)'},
-            yaxis: {title: 'RPM'},
+            yaxis: {title: 'RPM (회전/분)'},
             plot_bgcolor: '#fafafa',
             paper_bgcolor: 'white',
             margin: {t: 40, b: 40, l: 60, r: 40}
         };
 
         Plotly.newPlot('mainGraph', [trace], layout, {responsive: true});
-        this._showLoading(false);
     }
 
     /**
@@ -531,28 +694,33 @@ class Dashboard {
     async _render3DPlot() {
         const sensors = dataLoader.getSensorList();
         
-        const pwmSensor = sensors.find(s => s.includes('PWM'));
-        const rpmSensor = sensors.find(s => s.includes('FAN') && !s.includes('PWM'));
+        const pwmSensor = sensors.find(s => s.includes('PWM') || (s.includes('Control') && s.includes('Fan')));
+        const rpmSensor = sensors.find(s => s.includes('Fan') && !s.includes('PWM'));
 
         if (!pwmSensor || !rpmSensor) {
             this._showMessage('필요한 데이터를 찾을 수 없습니다', 'error');
-            this._showLoading(false);
             return;
         }
 
-        const pwmData = dataLoader.getSensorData(pwmSensor).map(r => r.value);
-        const rpmData = dataLoader.getSensorData(rpmSensor).map(r => r.value);
-        const timeData = Array.from({length: pwmData.length}, (_, i) => i);
+        const pwmData = dataLoader.getSensorData(pwmSensor)?.map(r => r.value) || [];
+        const rpmData = dataLoader.getSensorData(rpmSensor)?.map(r => r.value) || [];
+
+        if (pwmData.length === 0 || rpmData.length === 0) {
+            this._showMessage('센서 데이터가 부족합니다', 'error');
+            return;
+        }
+
+        const timeData = Array.from({length: Math.max(pwmData.length, rpmData.length)}, (_, i) => i);
 
         const trace = {
             x: pwmData,
             y: rpmData,
-            z: timeData,
+            z: timeData.slice(0, pwmData.length),
             mode: 'markers',
             type: 'scatter3d',
             marker: {
                 size: 4,
-                color: timeData,
+                color: timeData.slice(0, pwmData.length),
                 colorscale: 'Viridis',
                 showscale: true,
                 colorbar: {title: '시간'}
@@ -564,7 +732,7 @@ class Dashboard {
             title: '3D: PWM-RPM-시간',
             scene: {
                 xaxis: {title: 'PWM (%)'},
-                yaxis: {title: 'RPM'},
+                yaxis: {title: 'RPM (회전/분)'},
                 zaxis: {title: '시간'}
             },
             paper_bgcolor: 'white',
@@ -572,7 +740,6 @@ class Dashboard {
         };
 
         Plotly.newPlot('mainGraph', [trace], layout, {responsive: true});
-        this._showLoading(false);
     }
 
     /**
@@ -592,9 +759,23 @@ class Dashboard {
      */
     _updateAnalysisText(graphType, values) {
         const stats = SignalProcessor.getStatistics(values);
+        const sensorType = this._getCurrentSensorType();
         let analysisText = '';
 
         switch (graphType) {
+            case 'timeseries':
+            case 'timeseries-temp':
+                if (sensorType === 'Temperature') {
+                    analysisText = `평균: ${stats.mean.toFixed(2)}°C | 범위: ${stats.min.toFixed(1)}~${stats.max.toFixed(1)}°C | 변동폭: ${(stats.max - stats.min).toFixed(1)}°C`;
+                } else if (sensorType === 'Fan') {
+                    analysisText = `평균: ${stats.mean.toFixed(0)} RPM | 범위: ${stats.min.toFixed(0)}~${stats.max.toFixed(0)} RPM | 안정성: ${((1 - stats.stdDev/stats.mean) * 100).toFixed(1)}%`;
+                } else if (sensorType === 'Control') {
+                    analysisText = `평균: ${stats.mean.toFixed(1)}% | 범위: ${stats.min.toFixed(1)}~${stats.max.toFixed(1)}% | 변동폭: ${(stats.max - stats.min).toFixed(1)}%`;
+                } else {
+                    analysisText = `평균: ${stats.mean.toFixed(2)} | 범위: ${stats.min.toFixed(2)}~${stats.max.toFixed(2)} | 표준편차: ${stats.stdDev.toFixed(2)}`;
+                }
+                break;
+
             case 'fft':
                 const fftResult = SignalProcessor.performFFT(values);
                 if (fftResult) {
@@ -602,23 +783,43 @@ class Dashboard {
                     const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
                     const peakFreq = (maxMagIdx * sampleRate) / values.length;
                     analysisText = `피크 주파수: ${peakFreq.toFixed(2)} Hz (크기: ${fftResult.magnitude[maxMagIdx].toFixed(2)})`;
+                    
+                    if (sensorType === 'Fan') {
+                        analysisText += ` | 해석: 회전 기본 주파수`;
+                    }
                 }
                 break;
 
             case 'stft':
-                analysisText = '시간-주파수 에너지 분포를 관찰하세요. 밝은 영역이 높은 에너지를 나타냅니다.';
+                analysisText = '시간-주파수 에너지 분포입니다. 밝은 색 영역이 높은 에너지를 나타냅니다.';
+                if (sensorType === 'Fan') {
+                    analysisText += ' 베어링 손상이 있으면 광대역 에너지가 증가합니다.';
+                }
                 break;
 
             case 'wavelet':
-                analysisText = '다중 스케일에서의 신호 특성을 분석합니다. 밝은 색은 높은 에너지입니다.';
+                analysisText = '다중 스케일 신호 분석입니다. 밝은 색은 높은 에너지를 의미합니다.';
+                if (sensorType === 'Fan') {
+                    analysisText += ' 팬의 기계적 결함은 낮은 스케일에서 에너지 집중.';
+                }
                 break;
 
             case 'hilbert':
-                analysisText = `신호의 포락선을 추출했습니다. 포락선은 진폭 변조 신호의 회복에 유용합니다.`;
+                analysisText = `신호의 포락선을 추출했습니다. 포락선 범위: ${stats.min.toFixed(2)}~${stats.max.toFixed(2)}`;
+                if (sensorType === 'Fan') {
+                    analysisText += ' 포락선의 변동성이 크면 베어링 문제 가능성.';
+                }
                 break;
 
             case 'pwm-rpm':
-                analysisText = `PWM과 RPM의 관계를 나타냅니다. 정상적인 팬은 선형 관계를 보입니다.`;
+                analysisText = 'PWM(입력) 대비 RPM(출력)의 성능 곡선입니다.';
+                if (this.currentSensor && this.currentSensor.includes('Fan')) {
+                    analysisText += ' 정상 팬은 선형 관계를 보입니다. 베어링 마모시 곡선이 우측 이동.';
+                }
+                break;
+
+            case '3d':
+                analysisText = 'PWM-RPM-시간의 3D 산점도입니다. 시간에 따른 팬 특성 변화를 관찰할 수 있습니다.';
                 break;
 
             default:
@@ -629,10 +830,78 @@ class Dashboard {
     }
 
     /**
-     * 고장 진단 업데이트
+     * 고장 진단 업데이트 (센서 타입별)
      */
     _updateDiagnosis() {
-        const warnings = dataLoader.performDiagnosis();
+        const warnings = [];
+        const sensorType = this._getCurrentSensorType();
+
+        if (!this.currentSensor) return;
+
+        const sensorData = dataLoader.getSensorData(this.currentSensor);
+        if (!sensorData || sensorData.length === 0) return;
+
+        const values = sensorData.map(r => r.value);
+        const stats = SignalProcessor.getStatistics(values);
+
+        // 센서 타입별 진단 규칙
+        if (sensorType === 'Temperature') {
+            // 온도 진단
+            if (stats.max > 90) {
+                warnings.push({
+                    level: 'danger',
+                    message: `위험한 고온: ${stats.max.toFixed(1)}°C (즉시 조치 필요)`
+                });
+            } else if (stats.max > 80) {
+                warnings.push({
+                    level: 'warning',
+                    message: `높은 온도: ${stats.max.toFixed(1)}°C (냉각 개선 필요)`
+                });
+            }
+            
+            if (stats.mean < 0) {
+                warnings.push({
+                    level: 'danger',
+                    message: '센서 오류: 음수 온도 감지'
+                });
+            }
+
+        } else if (sensorType === 'Fan') {
+            // 팬 진단
+            if (stats.mean < 500) {
+                warnings.push({
+                    level: 'danger',
+                    message: `낮은 회전 속도: 평균 ${stats.mean.toFixed(0)} RPM (베어링 마모 의심)`
+                });
+            }
+
+            if (values[values.length - 1] === 0) {
+                warnings.push({
+                    level: 'danger',
+                    message: '팬이 멈춤: 즉시 점검 필요'
+                });
+            }
+
+            // RPM 변동성 분석
+            const volatility = stats.stdDev / stats.mean;
+            if (volatility > 0.3) {
+                warnings.push({
+                    level: 'warning',
+                    message: `회전 불안정: 변동율 ${(volatility * 100).toFixed(1)}% (축 흔들림 가능)`
+                });
+            }
+
+        } else if (sensorType === 'Control') {
+            // PWM 제어 진단
+            if (stats.max === stats.min) {
+                warnings.push({
+                    level: 'warning',
+                    message: `제어 변화 없음: 고정값 ${stats.mean.toFixed(1)}% (자동 제어 확인 필요)`
+                });
+            }
+        }
+
+        // UI 업데이트
         const warningBox = document.getElementById('warningBox');
         const warningText = document.getElementById('warningText');
 
@@ -640,11 +909,12 @@ class Dashboard {
 
         if (warnings.length === 0) {
             warningBox.classList.add('success');
-            warningText.textContent = '정상';
+            warningText.textContent = '✓ 정상';
         } else {
             const maxLevel = warnings.some(w => w.level === 'danger') ? 'danger' : 'warning';
             warningBox.classList.add(maxLevel);
-            warningText.innerHTML = warnings.map(w => `• ${w.message}`).join('<br>');
+            const emoji = maxLevel === 'danger' ? '⚠️' : '⚡';
+            warningText.innerHTML = emoji + ' ' + warnings.map(w => w.message).join('<br>');
         }
     }
 
