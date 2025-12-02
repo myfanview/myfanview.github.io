@@ -922,6 +922,10 @@ class Dashboard {
         return labels[sensorType] || '값';
     }
 
+    /**
+     * 시계열 플롯 생성
+     */
+    _createTimeseriesPlot(values, timestamps, ylabel = null) {
         // Y축 레이블이 지정되지 않으면 센서 타입에 따라 자동 설정
         if (!ylabel) {
             ylabel = this._getYAxisLabel();
