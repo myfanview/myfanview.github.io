@@ -330,7 +330,6 @@ class Dashboard {
         // 자동 갱신 시작
         this._startAutoUpdate();
     }
-    }
 
     /**
      * 현재 상태 업데이트 (센서 타입별 표시)
