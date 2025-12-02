@@ -693,6 +693,13 @@ class Dashboard {
 
         console.log('[*] _bindSelectionEvent 호출됨, 신호 길이:', fullSignal.length);
 
+        // dragmode를 명시적으로 select로 설정 (Plotly가 다른 모드로 시작할 수 있음)
+        Plotly.relayout(mainGraph, {'dragmode': 'select'}).then(() => {
+            console.log('[*] Plotly dragmode를 select로 강제 설정 완료');
+        }).catch(err => {
+            console.error('[ERROR] Plotly relayout 실패:', err);
+        });
+
         // 이전 이벤트 리스너 제거 (중복 방지)
         if (mainGraph._selectionListener) {
             mainGraph.removeEventListener('plotly_selected', mainGraph._selectionListener);
