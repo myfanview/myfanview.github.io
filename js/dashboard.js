@@ -726,10 +726,32 @@ class Dashboard {
         }
 
         mainGraph.on('plotly_selected', (data) => {
-            console.log('[*] plotly_selected 이벤트 발생!', data);
+            console.log('[*] plotly_selected 이벤트 발생!');
+            console.log('[DEBUG] data 객체 전체:', data);
+            console.log('[DEBUG] data 타입:', typeof data);
+            console.log('[DEBUG] data JSON:', JSON.stringify(data, null, 2));
+
+            // data 객체의 모든 속성 출력
+            if (data) {
+                console.log('[DEBUG] data 객체의 속성들:');
+                for (let key in data) {
+                    console.log(`  - ${key}:`, data[key]);
+                }
+            }
+
+            // points 확인
+            console.log('[DEBUG] data.points 존재:', data && data.points !== undefined);
+            console.log('[DEBUG] data.points 타입:', data && typeof data.points);
+            console.log('[DEBUG] data.points 길이:', data && data.points && data.points.length);
+            console.log('[DEBUG] data.points 내용:', data && data.points);
+
+            // range 확인
+            console.log('[DEBUG] data.range 존재:', data && data.range !== undefined);
+            console.log('[DEBUG] data.range 내용:', data && data.range);
 
             if (!data || !data.points || data.points.length === 0) {
                 console.warn('[WARN] 선택된 포인트가 없습니다');
+                console.warn('[WARN] 하지만 data.range가 있는지 확인:', data && data.range);
                 return;
             }
 
