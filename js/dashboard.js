@@ -915,8 +915,12 @@ class Dashboard {
      */
     _showSelectedFFT(fftResult, signal, info, startIdx) {
         const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+        const nyquistFreq = sampleRate / 2;
         const freqs = SignalProcessor.getFrequencies(signal.length, sampleRate).slice(0, fftResult.magnitude.length);
         const magnitudeDb = fftResult.magnitude.map(m => 20 * Math.log10(Math.max(m, 1e-10)));
+
+        // 디버그 정보 콘솔 출력
+        console.log(`[선택 영역 FFT Debug] 샘플링 레이트: ${sampleRate.toFixed(2)} Hz | 나이퀴스트 주파수: ${nyquistFreq.toFixed(2)} Hz | 신호 길이: ${signal.length} 샘플`);
 
         const trace = {
             x: freqs,
@@ -930,12 +934,12 @@ class Dashboard {
         };
 
         const layout = {
-            title: `선택 영역 FFT 스펙트럼 - ${info}`,
+            title: `선택 영역 FFT 스펙트럼 - ${info}<br><sub>샘플링: ${sampleRate.toFixed(2)} Hz | 나이퀴스트: ${nyquistFreq.toFixed(2)} Hz</sub>`,
             xaxis: {title: '주파수 (Hz)'},
             yaxis: {title: '크기 (dB)'},
             plot_bgcolor: '#fafafa',
             paper_bgcolor: 'white',
-            margin: {t: 40, b: 40, l: 60, r: 40}
+            margin: {t: 60, b: 40, l: 60, r: 40}
         };
 
         Plotly.newPlot('mainGraph', [trace], layout, {responsive: true});
@@ -946,7 +950,7 @@ class Dashboard {
      */
     _showSelectedSTFT(stftResult, signal, info, startIdx) {
         const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
-        
+
         // 정규화
         const minVal = Math.min(...stftResult.spectrogram.flat());
         const maxVal = Math.max(...stftResult.spectrogram.flat());
@@ -956,15 +960,15 @@ class Dashboard {
 
         const trace = {
             z: normalized,
-            x: Array.from({length: signal.length}, (_, i) => i),
+            x: stftResult.times,  // 실제 시간축 데이터 사용
             type: 'heatmap',
             colorscale: 'Viridis',
-            hovertemplate: '<b>시간</b> %{x}<br><b>주파수</b> %{y}<br><b>에너지</b> %{z:.3f}<extra></extra>'
+            hovertemplate: '<b>시간:</b> %{x:.2f}s<br><b>주파수</b> %{y}<br><b>에너지</b> %{z:.3f}<extra></extra>'
         };
 
         const layout = {
             title: `선택 영역 STFT 스펙트로그램 - ${info}`,
-            xaxis: {title: '시간 (샘플)'},
+            xaxis: {title: '시간 (초)'},
             yaxis: {title: '주파수'},
             plot_bgcolor: '#fafafa',
             paper_bgcolor: 'white',
@@ -1251,6 +1255,7 @@ class Dashboard {
     _createFFTPlot(values) {
         // 샘플링 레이트 계산
         const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+        const nyquistFreq = sampleRate / 2;
 
         const fftResult = SignalProcessor.performFFT(values, sampleRate);
         if (!fftResult) {
@@ -1262,6 +1267,9 @@ class Dashboard {
 
         // dB 스케일
         const magnitudeDb = magnitude.map(m => 20 * Math.log10(Math.max(m, 1e-10)));
+
+        // 디버그 정보 콘솔 출력
+        console.log(`[FFT Debug] 샘플링 레이트: ${sampleRate.toFixed(2)} Hz | 나이퀴스트 주파수: ${nyquistFreq.toFixed(2)} Hz | 주파수 해상도: ${(freqs[1] - freqs[0]).toFixed(4)} Hz`);
 
         const trace = {
             x: freqs,
@@ -1275,12 +1283,12 @@ class Dashboard {
         };
 
         const layout = {
-            title: `${this.currentSensor} - FFT 스펙트럼`,
+            title: `${this.currentSensor} - FFT 스펙트럼<br><sub>샘플링: ${sampleRate.toFixed(2)} Hz | 나이퀴스트: ${nyquistFreq.toFixed(2)} Hz</sub>`,
             xaxis: {title: '주파수 (Hz)'},
             yaxis: {title: '크기 (dB)'},
             plot_bgcolor: '#fafafa',
             paper_bgcolor: 'white',
-            margin: {t: 40, b: 40, l: 60, r: 40}
+            margin: {t: 60, b: 40, l: 60, r: 40}
         };
 
         return {trace, layout};
@@ -1300,6 +1308,7 @@ class Dashboard {
 
         const trace = {
             z: stftResult.spectrogram,
+            x: stftResult.times,  // 실제 시간축 데이터 사용
             type: 'heatmap',
             colorscale: 'Jet',
             hovertemplate: '<b>시간:</b> %{x:.2f}s<br><b>주파수:</b> %{y:.0f} Hz<br><b>크기:</b> %{z:.2f} dB<extra></extra>'
@@ -1323,6 +1332,7 @@ class Dashboard {
     _createWaveletPlot(values) {
         // 샘플링 레이트 계산
         const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+        const nyquistFreq = sampleRate / 2;
 
         const waveletResult = SignalProcessor.performWavelet(values, null, 'morlet', sampleRate);
         if (!waveletResult) {
@@ -1338,7 +1348,7 @@ class Dashboard {
         let yAxisData = waveletResult.scales;
         let yAxisTitle = '스케일';
         let yAxisLabel = '스케일';
-        
+
         // 웨이블릿 y축 전환 상태 확인
         if (this.waveletFrequencyMode === true && waveletResult.frequencies) {
             yAxisData = waveletResult.frequencies;
@@ -1358,8 +1368,12 @@ class Dashboard {
             hovertemplate: hoverTemplate
         };
 
+        // 주파수 범위 계산 (디버그 정보용)
+        const minFreq = Math.min(...waveletResult.frequencies);
+        const maxFreq = Math.max(...waveletResult.frequencies);
+
         const layout = {
-            title: `${this.currentSensor} - Wavelet Transform (Morlet)`,
+            title: `${this.currentSensor} - Wavelet Transform (Morlet)<br><sub>샘플링: ${sampleRate.toFixed(2)} Hz | 나이퀴스트: ${nyquistFreq.toFixed(2)} Hz | 주파수 범위: ${minFreq.toFixed(4)}~${maxFreq.toFixed(4)} Hz</sub>`,
             xaxis: {title: '시간'},
             yaxis: {
                 title: yAxisTitle,
@@ -1367,7 +1381,7 @@ class Dashboard {
             },
             plot_bgcolor: '#fafafa',
             paper_bgcolor: 'white',
-            margin: {t: 40, b: 40, l: 60, r: 40}
+            margin: {t: 80, b: 40, l: 60, r: 40}
         };
 
         return {trace, layout, yAxisLabel};

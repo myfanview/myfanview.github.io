@@ -238,6 +238,27 @@ class SignalProcessor {
             // 공식: f = (centerFrequency * sampleRate) / (2 * π * scale)
             const frequencies = scales.map(scale => (centerFrequency * sampleRate) / (2 * Math.PI * scale));
 
+            // 주파수 검증: 나이퀴스트 주파수 이하인지 확인
+            const nyquistFreq = sampleRate / 2;
+            const maxFreq = Math.max(...frequencies);
+            const minFreq = Math.min(...frequencies);
+
+            console.log(`[Wavelet Debug] 샘플링 레이트: ${sampleRate.toFixed(2)} Hz`);
+            console.log(`[Wavelet Debug] 나이퀴스트 주파수: ${nyquistFreq.toFixed(2)} Hz`);
+            console.log(`[Wavelet Debug] 주파수 범위: ${minFreq.toFixed(4)} ~ ${maxFreq.toFixed(4)} Hz`);
+            console.log(`[Wavelet Debug] 스케일 범위: ${scales[0]} ~ ${scales[scales.length - 1]}`);
+
+            if (maxFreq > nyquistFreq) {
+                console.warn(`[Wavelet Warning] 최대 주파수(${maxFreq.toFixed(2)} Hz)가 나이퀴스트 주파수(${nyquistFreq.toFixed(2)} Hz)를 초과합니다.`);
+                console.warn(`[Wavelet Warning] 앨리어싱(aliasing)이 발생할 수 있습니다.`);
+            }
+
+            // 주파수 예시 출력 (처음 5개)
+            console.log('[Wavelet Debug] 스케일-주파수 대응 (처음 5개):');
+            for (let i = 0; i < Math.min(5, scales.length); i++) {
+                console.log(`  스케일 ${scales[i]} → ${frequencies[i].toFixed(4)} Hz`);
+            }
+
             const result = [];
 
             for (const scale of scales) {
