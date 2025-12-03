@@ -169,6 +169,10 @@ class Dashboard {
             this.currentGraphType = e.target.value;
             // 그래프 타입 변경 시 이벤트 바인딩 플래그 리셋
             this.selectionEventBound = false;
+
+            // 전처리 패널 표시/숨김
+            this._updateFullSignalPreprocessVisibility();
+
             this.renderGraph();
         });
 
@@ -216,6 +220,68 @@ class Dashboard {
         document.getElementById('cancelSignalProcessingBtn').addEventListener('click', () => {
             this._hideSignalProcessingUI();
         });
+
+        // 전체 신호 전처리 체크박스 변경 시 그래프 재렌더링
+        document.getElementById('fullPreprocessRemoveDC')?.addEventListener('change', () => {
+            if (this._isSignalProcessingGraphType()) {
+                this.renderGraph();
+            }
+        });
+
+        document.getElementById('fullPreprocessDetrend')?.addEventListener('change', () => {
+            if (this._isSignalProcessingGraphType()) {
+                this.renderGraph();
+            }
+        });
+    }
+
+    /**
+     * 전체 신호 전처리 패널 표시/숨김
+     */
+    _updateFullSignalPreprocessVisibility() {
+        const panel = document.getElementById('fullSignalPreprocessGroup');
+        if (panel) {
+            if (this._isSignalProcessingGraphType()) {
+                panel.style.display = 'block';
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+    }
+
+    /**
+     * 현재 그래프 타입이 신호처리 타입인지 확인
+     */
+    _isSignalProcessingGraphType() {
+        return ['fft', 'stft', 'wavelet', 'hilbert'].includes(this.currentGraphType);
+    }
+
+    /**
+     * 전체 신호 전처리 적용
+     */
+    _applyFullSignalPreprocessing(signal) {
+        const removeDC = document.getElementById('fullPreprocessRemoveDC')?.checked || false;
+        const detrend = document.getElementById('fullPreprocessDetrend')?.checked || false;
+
+        let processedSignal = signal;
+        let preprocessInfo = '';
+
+        if (removeDC) {
+            processedSignal = SignalProcessor.removeDC(processedSignal);
+            preprocessInfo += 'DC 제거 ';
+            console.log('[전처리] DC 성분 제거 적용 (전체 신호)');
+        }
+
+        if (detrend) {
+            processedSignal = SignalProcessor.detrend(processedSignal);
+            preprocessInfo += '트렌드 제거 ';
+            console.log('[전처리] 선형 트렌드 제거 적용 (전체 신호)');
+        }
+
+        return {
+            processedSignal: processedSignal,
+            preprocessInfo: preprocessInfo.trim()
+        };
     }
 
     /**
@@ -1292,16 +1358,19 @@ class Dashboard {
      * FFT 플롯 생성
      */
     _createFFTPlot(values) {
+        // 전처리 적용
+        const {processedSignal, preprocessInfo} = this._applyFullSignalPreprocessing(values);
+
         // 샘플링 레이트 계산
         const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
         const nyquistFreq = sampleRate / 2;
 
-        const fftResult = SignalProcessor.performFFT(values, sampleRate);
+        const fftResult = SignalProcessor.performFFT(processedSignal, sampleRate);
         if (!fftResult) {
             throw new Error('FFT 계산 실패');
         }
 
-        const freqs = SignalProcessor.getFrequencies(values.length, sampleRate).slice(0, fftResult.magnitude.length / 2);
+        const freqs = SignalProcessor.getFrequencies(processedSignal.length, sampleRate).slice(0, fftResult.magnitude.length / 2);
         const magnitude = fftResult.magnitude.slice(0, fftResult.magnitude.length / 2);
 
         // dB 스케일
@@ -1309,6 +1378,9 @@ class Dashboard {
 
         // 디버그 정보 콘솔 출력
         console.log(`[FFT Debug] 샘플링 레이트: ${sampleRate.toFixed(2)} Hz | 나이퀴스트 주파수: ${nyquistFreq.toFixed(2)} Hz | 주파수 해상도: ${(freqs[1] - freqs[0]).toFixed(4)} Hz`);
+        if (preprocessInfo) {
+            console.log(`[FFT Debug] 전처리: ${preprocessInfo}`);
+        }
 
         const trace = {
             x: freqs,
@@ -1321,13 +1393,16 @@ class Dashboard {
             hovertemplate: '<b>주파수:</b> %{x:.2f} Hz<br><b>크기:</b> %{y:.2f} dB<extra></extra>'
         };
 
+        const titleSuffix = preprocessInfo ? `<br><sub>샘플링: ${sampleRate.toFixed(2)} Hz | 나이퀴스트: ${nyquistFreq.toFixed(2)} Hz | 전처리: ${preprocessInfo}</sub>`
+                                           : `<br><sub>샘플링: ${sampleRate.toFixed(2)} Hz | 나이퀴스트: ${nyquistFreq.toFixed(2)} Hz</sub>`;
+
         const layout = {
-            title: `${this.currentSensor} - FFT 스펙트럼<br><sub>샘플링: ${sampleRate.toFixed(2)} Hz | 나이퀴스트: ${nyquistFreq.toFixed(2)} Hz</sub>`,
+            title: `${this.currentSensor} - FFT 스펙트럼${titleSuffix}`,
             xaxis: {title: '주파수 (Hz)'},
             yaxis: {title: '크기 (dB)'},
             plot_bgcolor: '#fafafa',
             paper_bgcolor: 'white',
-            margin: {t: 60, b: 40, l: 60, r: 40}
+            margin: {t: 80, b: 40, l: 60, r: 40}
         };
 
         return {trace, layout};
@@ -1337,10 +1412,13 @@ class Dashboard {
      * STFT 플롯 생성
      */
     _createSTFTPlot(values) {
+        // 전처리 적용
+        const {processedSignal, preprocessInfo} = this._applyFullSignalPreprocessing(values);
+
         // 샘플링 레이트 계산
         const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
 
-        const stftResult = SignalProcessor.performSTFT(values, 128, 64, sampleRate);
+        const stftResult = SignalProcessor.performSTFT(processedSignal, 128, 64, sampleRate);
         if (!stftResult) {
             throw new Error('STFT 계산 실패');
         }
@@ -1366,8 +1444,10 @@ class Dashboard {
             hovertemplate: '<b>시간:</b> %{x:.2f}s<br><b>주파수:</b> %{y:.2f} Hz<br><b>크기:</b> %{z:.2f} dB<extra></extra>'
         };
 
+        const titleSuffix = preprocessInfo ? ` (전처리: ${preprocessInfo})` : '';
+
         const layout = {
-            title: `${this.currentSensor} - STFT 스펙트로그램`,
+            title: `${this.currentSensor} - STFT 스펙트로그램${titleSuffix}`,
             xaxis: {title: '시간 (초)'},
             yaxis: {title: '주파수 (Hz)'},
             plot_bgcolor: '#fafafa',
@@ -1382,11 +1462,14 @@ class Dashboard {
      * Wavelet 플롯 생성
      */
     _createWaveletPlot(values) {
+        // 전처리 적용
+        const {processedSignal, preprocessInfo} = this._applyFullSignalPreprocessing(values);
+
         // 샘플링 레이트 계산
         const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
         const nyquistFreq = sampleRate / 2;
 
-        const waveletResult = SignalProcessor.performWavelet(values, null, 'morlet', sampleRate);
+        const waveletResult = SignalProcessor.performWavelet(processedSignal, null, 'morlet', sampleRate);
         if (!waveletResult) {
             throw new Error('Wavelet 계산 실패');
         }
@@ -1397,7 +1480,7 @@ class Dashboard {
         );
 
         // x축: 실제 시간(초) 배열 생성
-        const timeAxis = Array.from({length: values.length}, (_, i) =>
+        const timeAxis = Array.from({length: processedSignal.length}, (_, i) =>
             i * (dataLoader.data.sample_interval_ms || 100) / 1000
         );
 
@@ -1430,8 +1513,10 @@ class Dashboard {
         const minFreq = Math.min(...waveletResult.frequencies);
         const maxFreq = Math.max(...waveletResult.frequencies);
 
+        const preprocessSuffix = preprocessInfo ? ` | 전처리: ${preprocessInfo}` : '';
+
         const layout = {
-            title: `${this.currentSensor} - Wavelet Transform (Morlet)<br><sub>샘플링: ${sampleRate.toFixed(2)} Hz | 나이퀴스트: ${nyquistFreq.toFixed(2)} Hz | 주파수 범위: ${minFreq.toFixed(4)}~${maxFreq.toFixed(4)} Hz</sub>`,
+            title: `${this.currentSensor} - Wavelet Transform (Morlet)<br><sub>샘플링: ${sampleRate.toFixed(2)} Hz | 나이퀴스트: ${nyquistFreq.toFixed(2)} Hz | 주파수 범위: ${minFreq.toFixed(4)}~${maxFreq.toFixed(4)} Hz${preprocessSuffix}</sub>`,
             xaxis: {title: '시간 (초)'},
             yaxis: {
                 title: yAxisTitle,
@@ -1449,21 +1534,24 @@ class Dashboard {
      * Hilbert 포락선 플롯 생성
      */
     _createHilbertPlot(values) {
+        // 전처리 적용
+        const {processedSignal, preprocessInfo} = this._applyFullSignalPreprocessing(values);
+
         // 샘플링 레이트 계산
         const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
 
-        const hilbertResult = SignalProcessor.performHilbert(values, sampleRate);
+        const hilbertResult = SignalProcessor.performHilbert(processedSignal, sampleRate);
         if (!hilbertResult) {
             throw new Error('Hilbert 계산 실패');
         }
 
-        const timeAxis = Array.from({length: values.length}, (_, i) => i * (dataLoader.data.sample_interval_ms || 100) / 1000);
+        const timeAxis = Array.from({length: processedSignal.length}, (_, i) => i * (dataLoader.data.sample_interval_ms || 100) / 1000);
 
         const traces = [
             {
                 x: timeAxis,
-                y: values,
-                name: '원본 신호',
+                y: processedSignal,
+                name: preprocessInfo ? '전처리된 신호' : '원본 신호',
                 type: 'scatter',
                 mode: 'lines',
                 line: {color: '#2196F3', width: 1},
@@ -1480,8 +1568,10 @@ class Dashboard {
             }
         ];
 
+        const titleSuffix = preprocessInfo ? ` (전처리: ${preprocessInfo})` : '';
+
         const layout = {
-            title: `${this.currentSensor} - Hilbert 포락선`,
+            title: `${this.currentSensor} - Hilbert 포락선${titleSuffix}`,
             xaxis: {title: '시간 (초)'},
             yaxis: {title: '진폭'},
             hovermode: 'x unified',
