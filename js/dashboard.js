@@ -718,8 +718,14 @@ class Dashboard {
             return;
         }
 
-        // 새 이벤트 리스너 등록 (Plotly 이벤트 시스템 사용)
-        Plotly.on(mainGraph, 'plotly_selected', (data) => {
+        // Plotly가 DOM 요소에 추가한 .on() 메서드 사용
+        // (jQuery 스타일이지만 Plotly가 자체적으로 제공)
+        if (typeof mainGraph.on !== 'function') {
+            console.error('[ERROR] mainGraph.on()이 함수가 아닙니다. Plotly 그래프가 생성되지 않았을 수 있습니다.');
+            return;
+        }
+
+        mainGraph.on('plotly_selected', (data) => {
             console.log('[*] plotly_selected 이벤트 발생!', data);
 
             if (!data || !data.points || data.points.length === 0) {
@@ -772,7 +778,7 @@ class Dashboard {
         });
 
         this.selectionEventBound = true;
-        console.log('[*] Plotly.on()으로 plotly_selected 이벤트 리스너 등록 완료');
+        console.log('[*] mainGraph.on()으로 plotly_selected 이벤트 리스너 등록 완료');
 
         // 사용자 안내
         this._showMessage('💡 그래프 영역을 드래그하여 신호처리할 영역을 선택하세요', 'info');
