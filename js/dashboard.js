@@ -865,42 +865,45 @@ class Dashboard {
      */
     _processSelectedSignal(signal, graphType, info, startIdx) {
         try {
+            // 샘플링 레이트 계산 (공통)
+            const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+
             let result = null;
-            
+
             switch(graphType) {
                 case 'fft':
-                    result = SignalProcessor.performFFT(signal);
+                    result = SignalProcessor.performFFT(signal, sampleRate);
                     if (result) {
                         this._showSelectedFFT(result, signal, info, startIdx);
                     }
                     break;
-                    
+
                 case 'stft':
-                    result = SignalProcessor.performSTFT(signal);
+                    result = SignalProcessor.performSTFT(signal, 128, 64, sampleRate);
                     if (result) {
                         this._showSelectedSTFT(result, signal, info, startIdx);
                     }
                     break;
-                    
+
                 case 'wavelet':
-                    result = SignalProcessor.performWavelet(signal);
+                    result = SignalProcessor.performWavelet(signal, null, 'morlet', sampleRate);
                     if (result) {
                         this._showSelectedWavelet(result, signal, info, startIdx);
                     }
                     break;
-                    
+
                 case 'hilbert':
-                    result = SignalProcessor.performHilbert(signal);
+                    result = SignalProcessor.performHilbert(signal, sampleRate);
                     if (result) {
                         this._showSelectedHilbert(result, signal, info, startIdx);
                     }
                     break;
             }
-            
+
             if (result) {
                 this._showMessage(`✅ 선택 영역 신호처리 완료: ${info}`, 'success');
             }
-            
+
         } catch (error) {
             console.error('[ERROR] 신호처리 오류:', error);
             this._showMessage('신호처리 실패: ' + error.message, 'error');
@@ -1246,12 +1249,14 @@ class Dashboard {
      * FFT 플롯 생성
      */
     _createFFTPlot(values) {
-        const fftResult = SignalProcessor.performFFT(values);
+        // 샘플링 레이트 계산
+        const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+
+        const fftResult = SignalProcessor.performFFT(values, sampleRate);
         if (!fftResult) {
             throw new Error('FFT 계산 실패');
         }
 
-        const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
         const freqs = SignalProcessor.getFrequencies(values.length, sampleRate).slice(0, fftResult.magnitude.length / 2);
         const magnitude = fftResult.magnitude.slice(0, fftResult.magnitude.length / 2);
 
@@ -1285,7 +1290,10 @@ class Dashboard {
      * STFT 플롯 생성
      */
     _createSTFTPlot(values) {
-        const stftResult = SignalProcessor.performSTFT(values, 128, 64);
+        // 샘플링 레이트 계산
+        const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+
+        const stftResult = SignalProcessor.performSTFT(values, 128, 64, sampleRate);
         if (!stftResult) {
             throw new Error('STFT 계산 실패');
         }
@@ -1313,7 +1321,10 @@ class Dashboard {
      * Wavelet 플롯 생성
      */
     _createWaveletPlot(values) {
-        const waveletResult = SignalProcessor.performWavelet(values);
+        // 샘플링 레이트 계산
+        const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+
+        const waveletResult = SignalProcessor.performWavelet(values, null, 'morlet', sampleRate);
         if (!waveletResult) {
             throw new Error('Wavelet 계산 실패');
         }
@@ -1366,7 +1377,10 @@ class Dashboard {
      * Hilbert 포락선 플롯 생성
      */
     _createHilbertPlot(values) {
-        const hilbertResult = SignalProcessor.performHilbert(values);
+        // 샘플링 레이트 계산
+        const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+
+        const hilbertResult = SignalProcessor.performHilbert(values, sampleRate);
         if (!hilbertResult) {
             throw new Error('Hilbert 계산 실패');
         }
@@ -1548,13 +1562,13 @@ class Dashboard {
                 break;
 
             case 'fft':
-                const fftResult = SignalProcessor.performFFT(values);
+                const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+                const fftResult = SignalProcessor.performFFT(values, sampleRate);
                 if (fftResult) {
                     const maxMagIdx = fftResult.magnitude.indexOf(Math.max(...fftResult.magnitude));
-                    const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
                     const peakFreq = (maxMagIdx * sampleRate) / values.length;
                     analysisText = `피크 주파수: ${peakFreq.toFixed(2)} Hz (크기: ${fftResult.magnitude[maxMagIdx].toFixed(2)})`;
-                    
+
                     if (sensorType === 'Fan') {
                         analysisText += ` | 해석: 회전 기본 주파수`;
                     }

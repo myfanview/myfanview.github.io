@@ -7,9 +7,14 @@ class SignalProcessor {
      * FFT (Fast Fourier Transform)
      * DSP.js 라이브러리 사용
      */
-    static performFFT(signal) {
+    static performFFT(signal, sampleRate = null) {
         if (!signal || signal.length === 0) {
             console.error('FFT: 신호 데이터가 없습니다');
+            return null;
+        }
+
+        if (sampleRate === null) {
+            console.error('FFT: 샘플링 레이트가 지정되지 않았습니다');
             return null;
         }
 
@@ -29,7 +34,7 @@ class SignalProcessor {
 
             // DSP.js FFT 인스턴스 생성
             // new FFT(bufferSize, sampleRate)
-            const fft = new window.FFT(n, 10); // 샘플링 레이트: 10 Hz
+            const fft = new window.FFT(n, sampleRate);
             
             // FFT 수행
             fft.forward(paddedSignal);
@@ -79,42 +84,47 @@ class SignalProcessor {
      * 시간-주파수 분석
      * ml-dsp의 FFT 사용
      */
-    static performSTFT(signal, windowSize = 256, hopSize = 128) {
+    static performSTFT(signal, windowSize = 256, hopSize = 128, sampleRate = null) {
         if (!signal || signal.length === 0) {
             console.error('STFT: 신호 데이터가 없습니다');
             return null;
         }
 
+        if (sampleRate === null) {
+            console.error('STFT: 샘플링 레이트가 지정되지 않았습니다');
+            return null;
+        }
+
         const result = [];
         const times = [];
-        
+
         // Hann 윈도우 생성
         const window = this._hannWindow(windowSize);
 
         for (let start = 0; start + windowSize <= signal.length; start += hopSize) {
             // 신호 절편 추출
             const segment = signal.slice(start, start + windowSize);
-            
+
             // 윈도우 적용
             const windowed = segment.map((x, i) => x * window[i]);
-            
+
             // 필요시 zero-padding
             while (windowed.length < 512) {
                 windowed.push(0);
             }
-            
-            // FFT 수행
-            const fft = this.performFFT(windowed);
-            
+
+            // FFT 수행 (sampleRate 전달)
+            const fft = this.performFFT(windowed, sampleRate);
+
             if (fft) {
                 // 양수 주파수만 추출
                 const magnitude = fft.magnitude.slice(0, fft.magnitude.length / 2);
-                
+
                 // dB 스케일
                 const magnitudeDb = magnitude.map(m => 20 * Math.log10(Math.max(m, 1e-10)));
-                
+
                 result.push(magnitudeDb);
-                times.push(start / 44100); // 타임 스탬프 (가정된 샘플레이트)
+                times.push(start / sampleRate); // 타임 스탬프 (실제 샘플링 레이트 사용)
             }
         }
 
@@ -131,9 +141,14 @@ class SignalProcessor {
      * 해석적 신호(Analytic Signal) 생성
      * ml-dsp의 FFT 사용
      */
-    static performHilbert(signal) {
+    static performHilbert(signal, sampleRate = null) {
         if (!signal || signal.length === 0) {
             console.error('Hilbert: 신호 데이터가 없습니다');
+            return null;
+        }
+
+        if (sampleRate === null) {
+            console.error('Hilbert: 샘플링 레이트가 지정되지 않았습니다');
             return null;
         }
 
@@ -141,15 +156,15 @@ class SignalProcessor {
             // 신호 길이를 2의 거듭제곱으로 확장 (FFT 효율성)
             const n = signal.length;
             const n_fft = Math.pow(2, Math.ceil(Math.log2(2 * n)));
-            
+
             // Zero-padding
             const paddedSignal = [...signal];
             while (paddedSignal.length < n_fft) {
                 paddedSignal.push(0);
             }
 
-            // FFT
-            const fft = this.performFFT(paddedSignal);
+            // FFT (sampleRate 전달)
+            const fft = this.performFFT(paddedSignal, sampleRate);
             
             if (!fft) return null;
 
@@ -195,9 +210,14 @@ class SignalProcessor {
      * 간단한 Continuous Wavelet Transform (CWT)
      * Morlet Wavelet 사용
      */
-    static performWavelet(signal, scales = null, wavelet = 'morlet', samplingRateHz = 10) {
+    static performWavelet(signal, scales = null, wavelet = 'morlet', sampleRate = null) {
         if (!signal || signal.length === 0) {
             console.error('Wavelet: 신호 데이터가 없습니다');
+            return null;
+        }
+
+        if (sampleRate === null) {
+            console.error('Wavelet: 샘플링 레이트가 지정되지 않았습니다');
             return null;
         }
 
@@ -211,11 +231,12 @@ class SignalProcessor {
                 scales = [...new Set(scales)].sort((a, b) => a - b);
             }
 
-            // Morlet wavelet 중심 주파수
+            // Morlet wavelet 중심 주파수 (정규화된 주파수)
             const centerFrequency = 1.0;
-            
+
             // Scale을 주파수(Hz)로 변환
-            const frequencies = scales.map(scale => centerFrequency / scale);
+            // 공식: f = (centerFrequency * sampleRate) / (2 * π * scale)
+            const frequencies = scales.map(scale => (centerFrequency * sampleRate) / (2 * Math.PI * scale));
 
             const result = [];
 
@@ -244,7 +265,7 @@ class SignalProcessor {
                 scales: scales,
                 frequencies: frequencies,
                 centerFrequency: centerFrequency,
-                samplingRateHz: samplingRateHz,
+                sampleRate: sampleRate,
                 time: Array.from({length: signal.length}, (_, i) => i),
                 waveletType: wavelet
             };
@@ -303,9 +324,14 @@ class SignalProcessor {
     /**
      * Welch's Method (전력 스펙트럼 밀도)
      */
-    static performWelch(signal, nperseg = 256) {
+    static performWelch(signal, nperseg = 256, sampleRate = null) {
         if (!signal || signal.length < nperseg) {
             console.error('Welch: 신호가 너무 짧음');
+            return null;
+        }
+
+        if (sampleRate === null) {
+            console.error('Welch: 샘플링 레이트가 지정되지 않았습니다');
             return null;
         }
 
@@ -322,7 +348,7 @@ class SignalProcessor {
         let averagePsd = null;
 
         for (const segment of segments) {
-            const fft = this.performFFT(segment);
+            const fft = this.performFFT(segment, sampleRate);
             
             if (fft) {
                 const magnitude = fft.magnitude.slice(0, fft.magnitude.length / 2);
@@ -342,7 +368,7 @@ class SignalProcessor {
 
         return {
             psd: averagePsd,
-            frequency: this.getFrequencies(nperseg, 1),
+            frequency: this.getFrequencies(nperseg, sampleRate),
             segments: segments.length
         };
     }
@@ -372,6 +398,53 @@ class SignalProcessor {
             peak: parseFloat(peak.toFixed(4)),
             peakToPeak: parseFloat((max - min).toFixed(4))
         };
+    }
+
+    /**
+     * DC 성분 제거 (평균값 빼기)
+     * @param {Array<number>} signal - 입력 신호
+     * @returns {Array<number>} DC 성분이 제거된 신호
+     */
+    static removeDC(signal) {
+        if (!signal || signal.length === 0) {
+            console.error('removeDC: 신호 데이터가 없습니다');
+            return null;
+        }
+
+        const mean = signal.reduce((a, b) => a + b, 0) / signal.length;
+        return signal.map(x => x - mean);
+    }
+
+    /**
+     * 선형 트렌드 제거
+     * 최소제곱법을 사용하여 선형 트렌드를 제거
+     * @param {Array<number>} signal - 입력 신호
+     * @returns {Array<number>} 트렌드가 제거된 신호
+     */
+    static detrend(signal) {
+        if (!signal || signal.length === 0) {
+            console.error('detrend: 신호 데이터가 없습니다');
+            return null;
+        }
+
+        const n = signal.length;
+        const x = Array.from({length: n}, (_, i) => i);
+
+        // 최소제곱법으로 기울기 계산
+        const meanX = x.reduce((a, b) => a + b) / n;
+        const meanY = signal.reduce((a, b) => a + b) / n;
+
+        let numerator = 0, denominator = 0;
+        for (let i = 0; i < n; i++) {
+            numerator += (x[i] - meanX) * (signal[i] - meanY);
+            denominator += (x[i] - meanX) ** 2;
+        }
+
+        const slope = numerator / denominator;
+        const intercept = meanY - slope * meanX;
+
+        // 트렌드 제거
+        return signal.map((y, i) => y - (slope * i + intercept));
     }
 }
 
