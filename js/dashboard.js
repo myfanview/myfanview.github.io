@@ -958,18 +958,29 @@ class Dashboard {
             row.map(v => (v - minVal) / (maxVal - minVal + 1e-10))
         );
 
+        // Transpose: [시간][주파수] → [주파수][시간]
+        const transposed = normalized[0].map((_, colIndex) =>
+            normalized.map(row => row[colIndex])
+        );
+
+        // 주파수 축 생성
+        const freqBins = transposed.length;
+        const nyquistFreq = sampleRate / 2;
+        const frequencies = Array.from({length: freqBins}, (_, i) => (i * nyquistFreq) / freqBins);
+
         const trace = {
-            z: normalized,
-            x: stftResult.times,  // 실제 시간축 데이터 사용
+            z: transposed,  // [주파수][시간]
+            x: stftResult.times,  // 시간축
+            y: frequencies,  // 주파수축
             type: 'heatmap',
             colorscale: 'Viridis',
-            hovertemplate: '<b>시간:</b> %{x:.2f}s<br><b>주파수</b> %{y}<br><b>에너지</b> %{z:.3f}<extra></extra>'
+            hovertemplate: '<b>시간:</b> %{x:.2f}s<br><b>주파수:</b> %{y:.2f} Hz<br><b>에너지:</b> %{z:.3f}<extra></extra>'
         };
 
         const layout = {
             title: `선택 영역 STFT 스펙트로그램 - ${info}`,
             xaxis: {title: '시간 (초)'},
-            yaxis: {title: '주파수'},
+            yaxis: {title: '주파수 (Hz)'},
             plot_bgcolor: '#fafafa',
             paper_bgcolor: 'white',
             margin: {t: 40, b: 40, l: 60, r: 40}
@@ -987,27 +998,32 @@ class Dashboard {
             row.map(v => Math.log10(v + 1e-10))
         );
 
+        // x축: 실제 시간(초) 배열 생성
+        const timeAxis = Array.from({length: signal.length}, (_, i) =>
+            i * (dataLoader.data.sample_interval_ms || 100) / 1000
+        );
+
         // y축 데이터 (스케일 또는 주파수)
         let yAxisData = waveletResult.scales;
         let yAxisTitle = '스케일';
-        
+
         if (this.waveletFrequencyMode && waveletResult.frequencies) {
             yAxisData = waveletResult.frequencies;
             yAxisTitle = '주파수 (Hz)';
         }
 
         const trace = {
-            z: normalized,
-            y: yAxisData,
-            x: Array.from({length: signal.length}, (_, i) => i),
+            z: normalized,  // [스케일][시간]
+            x: timeAxis,    // 실제 시간 (초)
+            y: yAxisData,   // 스케일 또는 주파수
             type: 'heatmap',
             colorscale: 'Viridis',
-            hovertemplate: '<b>시간</b> %{x}<br><b>' + yAxisTitle + '</b> %{y}<br><b>에너지</b> %{z:.2f}<extra></extra>'
+            hovertemplate: '<b>시간:</b> %{x:.2f}s<br><b>' + yAxisTitle + ':</b> %{y}<br><b>에너지:</b> %{z:.2f}<extra></extra>'
         };
 
         const layout = {
             title: `선택 영역 Wavelet Transform - ${info}`,
-            xaxis: {title: '시간 (샘플)'},
+            xaxis: {title: '시간 (초)'},
             yaxis: {
                 title: yAxisTitle,
                 type: this.waveletFrequencyMode ? 'log' : 'linear'
@@ -1306,12 +1322,25 @@ class Dashboard {
             throw new Error('STFT 계산 실패');
         }
 
+        // Transpose: [시간][주파수] → [주파수][시간]
+        // Plotly heatmap은 z[i][j]가 y[i], x[j]에 해당하므로
+        // z = [주파수][시간], x = 시간, y = 주파수
+        const transposed = stftResult.spectrogram[0].map((_, colIndex) =>
+            stftResult.spectrogram.map(row => row[colIndex])
+        );
+
+        // 주파수 축 생성
+        const freqBins = transposed.length;
+        const nyquistFreq = sampleRate / 2;
+        const frequencies = Array.from({length: freqBins}, (_, i) => (i * nyquistFreq) / freqBins);
+
         const trace = {
-            z: stftResult.spectrogram,
-            x: stftResult.times,  // 실제 시간축 데이터 사용
+            z: transposed,  // [주파수][시간]
+            x: stftResult.times,  // 시간축
+            y: frequencies,  // 주파수축
             type: 'heatmap',
             colorscale: 'Jet',
-            hovertemplate: '<b>시간:</b> %{x:.2f}s<br><b>주파수:</b> %{y:.0f} Hz<br><b>크기:</b> %{z:.2f} dB<extra></extra>'
+            hovertemplate: '<b>시간:</b> %{x:.2f}s<br><b>주파수:</b> %{y:.2f} Hz<br><b>크기:</b> %{z:.2f} dB<extra></extra>'
         };
 
         const layout = {
@@ -1344,6 +1373,11 @@ class Dashboard {
             row.map(v => Math.log10(v + 1e-10))
         );
 
+        // x축: 실제 시간(초) 배열 생성
+        const timeAxis = Array.from({length: values.length}, (_, i) =>
+            i * (dataLoader.data.sample_interval_ms || 100) / 1000
+        );
+
         // y축 데이터 (스케일 또는 주파수)
         let yAxisData = waveletResult.scales;
         let yAxisTitle = '스케일';
@@ -1361,8 +1395,9 @@ class Dashboard {
             : '<b>시간:</b> %{x:.2f}s<br><b>스케일:</b> %{y}<br><b>에너지:</b> %{z:.2f}<extra></extra>';
 
         const trace = {
-            z: normalized,
-            y: yAxisData,
+            z: normalized,  // [스케일][시간]
+            x: timeAxis,    // 실제 시간 (초)
+            y: yAxisData,   // 스케일 또는 주파수
             type: 'heatmap',
             colorscale: 'Viridis',
             hovertemplate: hoverTemplate
@@ -1374,7 +1409,7 @@ class Dashboard {
 
         const layout = {
             title: `${this.currentSensor} - Wavelet Transform (Morlet)<br><sub>샘플링: ${sampleRate.toFixed(2)} Hz | 나이퀴스트: ${nyquistFreq.toFixed(2)} Hz | 주파수 범위: ${minFreq.toFixed(4)}~${maxFreq.toFixed(4)} Hz</sub>`,
-            xaxis: {title: '시간'},
+            xaxis: {title: '시간 (초)'},
             yaxis: {
                 title: yAxisTitle,
                 type: this.waveletFrequencyMode ? 'log' : 'linear'
