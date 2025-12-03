@@ -868,40 +868,63 @@ class Dashboard {
             // 샘플링 레이트 계산 (공통)
             const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
 
+            // 전처리 옵션 확인
+            const removeDC = document.getElementById('preprocessRemoveDC')?.checked || false;
+            const detrend = document.getElementById('preprocessDetrend')?.checked || false;
+
+            // 전처리 적용
+            let processedSignal = signal;
+            let preprocessInfo = '';
+
+            if (removeDC) {
+                processedSignal = SignalProcessor.removeDC(processedSignal);
+                preprocessInfo += 'DC 제거 ';
+                console.log('[전처리] DC 성분 제거 적용');
+            }
+
+            if (detrend) {
+                processedSignal = SignalProcessor.detrend(processedSignal);
+                preprocessInfo += '트렌드 제거 ';
+                console.log('[전처리] 선형 트렌드 제거 적용');
+            }
+
+            // 전처리 정보 추가
+            const fullInfo = preprocessInfo ? `${info} (${preprocessInfo.trim()})` : info;
+
             let result = null;
 
             switch(graphType) {
                 case 'fft':
-                    result = SignalProcessor.performFFT(signal, sampleRate);
+                    result = SignalProcessor.performFFT(processedSignal, sampleRate);
                     if (result) {
-                        this._showSelectedFFT(result, signal, info, startIdx);
+                        this._showSelectedFFT(result, processedSignal, fullInfo, startIdx);
                     }
                     break;
 
                 case 'stft':
-                    result = SignalProcessor.performSTFT(signal, 128, 64, sampleRate);
+                    result = SignalProcessor.performSTFT(processedSignal, 128, 64, sampleRate);
                     if (result) {
-                        this._showSelectedSTFT(result, signal, info, startIdx);
+                        this._showSelectedSTFT(result, processedSignal, fullInfo, startIdx);
                     }
                     break;
 
                 case 'wavelet':
-                    result = SignalProcessor.performWavelet(signal, null, 'morlet', sampleRate);
+                    result = SignalProcessor.performWavelet(processedSignal, null, 'morlet', sampleRate);
                     if (result) {
-                        this._showSelectedWavelet(result, signal, info, startIdx);
+                        this._showSelectedWavelet(result, processedSignal, fullInfo, startIdx);
                     }
                     break;
 
                 case 'hilbert':
-                    result = SignalProcessor.performHilbert(signal, sampleRate);
+                    result = SignalProcessor.performHilbert(processedSignal, sampleRate);
                     if (result) {
-                        this._showSelectedHilbert(result, signal, info, startIdx);
+                        this._showSelectedHilbert(result, processedSignal, fullInfo, startIdx);
                     }
                     break;
             }
 
             if (result) {
-                this._showMessage(`✅ 선택 영역 신호처리 완료: ${info}`, 'success');
+                this._showMessage(`✅ 선택 영역 신호처리 완료: ${fullInfo}`, 'success');
             }
 
         } catch (error) {
