@@ -76,10 +76,10 @@
                     <option value="timeseries">시계열</option>
                     <option value="pwm-rpm">PWM vs RPM</option>
                     <option value="3d">3D 그래프</option>
-                    <option value="fft">FFT 스펙트럼</option>
-                    <option value="stft">STFT 스펙트로그램</option>
+                    <option value="fft">FFT</option>
+                    <option value="stft">STFT</option>
                     <option value="wavelet">Wavelet Transform</option>
-                    <option value="hilbert">Hilbert 포락선</option>
+                    <option value="hilbert">envelope extraction</option>
                 </select>
             </div>
 
@@ -119,6 +119,14 @@
         <!-- 메인 그래프 -->
         <section class="graph-section">
             <h2>신호 분석</h2>
+            <!-- 신호처리 그래프 Export 버튼 -->
+            <div id="graphExportPanel" style="display: none; margin-bottom: 10px; padding: 10px; background: #e3f2fd; border-radius: 4px; border-left: 3px solid #2196F3;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 13px; font-weight: 600; color: #555;">📥 신호처리 결과 내보내기:</span>
+                    <button id="exportGraphJSON" style="padding: 6px 16px; font-size: 13px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background 0.2s;">JSON</button>
+                    <button id="exportGraphCSV" style="padding: 6px 16px; font-size: 13px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background 0.2s;">CSV</button>
+                </div>
+            </div>
             <div id="mainGraph" class="graph-container"></div>
             <!-- Wavelet 그래프 y축 전환 버튼 -->
             <div id="waveletControlPanel" style="display: none; margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;">
@@ -136,14 +144,21 @@
                     <span style="font-size: 14px; font-weight: 600; color: #333;">📊 선택 영역 신호처리:</span>
                     <select id="signalProcessingType" style="padding: 8px 12px; font-size: 14px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer; min-width: 200px;">
                         <option value="">-- 신호처리 방식 선택 --</option>
-                        <option value="fft">FFT 스펙트럼</option>
-                        <option value="stft">STFT 스펙트로그램</option>
+                        <option value="fft">FFT</option>
+                        <option value="stft">STFT</option>
                         <option value="wavelet">Wavelet Transform</option>
-                        <option value="hilbert">Hilbert 포락선</option>
+                        <option value="hilbert">envelope extraction</option>
                     </select>
                     <button id="applySignalProcessingBtn" style="padding: 8px 20px; font-size: 14px; background: #FF9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; transition: background 0.2s;">확인</button>
                     <button id="cancelSignalProcessingBtn" style="padding: 8px 20px; font-size: 14px; background: #999; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background 0.2s;">취소</button>
                     <span id="selectedRangeInfo" style="font-size: 12px; color: #666; margin-left: auto;"></span>
+                </div>
+                <!-- Export 버튼 -->
+                <div id="selectionExportPanel" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid #FFB74D; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 13px; font-weight: 600; color: #555;">📥 내보내기:</span>
+                    <button id="exportSelectionJSON" style="padding: 6px 16px; font-size: 13px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background 0.2s;">JSON</button>
+                    <button id="exportSelectionCSV" style="padding: 6px 16px; font-size: 13px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background 0.2s;">CSV</button>
+                    <span style="font-size: 11px; color: #666;">신호처리 결과를 파일로 저장합니다</span>
                 </div>
                 <!-- 데이터 전처리 옵션 -->
                 <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #FFB74D; display: flex; align-items: center; gap: 20px;">
