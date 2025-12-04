@@ -169,6 +169,10 @@ class Dashboard {
             this.currentGraphType = e.target.value;
             // 그래프 타입 변경 시 이벤트 바인딩 플래그 리셋
             this.selectionEventBound = false;
+
+            // 전처리 패널 표시/숨김
+            this._updateFullSignalPreprocessVisibility();
+
             this.renderGraph();
         });
 
@@ -216,6 +220,68 @@ class Dashboard {
         document.getElementById('cancelSignalProcessingBtn').addEventListener('click', () => {
             this._hideSignalProcessingUI();
         });
+
+        // 전체 신호 전처리 체크박스 변경 시 그래프 재렌더링
+        document.getElementById('fullPreprocessRemoveDC')?.addEventListener('change', () => {
+            if (this._isSignalProcessingGraphType()) {
+                this.renderGraph();
+            }
+        });
+
+        document.getElementById('fullPreprocessDetrend')?.addEventListener('change', () => {
+            if (this._isSignalProcessingGraphType()) {
+                this.renderGraph();
+            }
+        });
+    }
+
+    /**
+     * 전체 신호 전처리 패널 표시/숨김
+     */
+    _updateFullSignalPreprocessVisibility() {
+        const panel = document.getElementById('fullSignalPreprocessGroup');
+        if (panel) {
+            if (this._isSignalProcessingGraphType()) {
+                panel.style.display = 'block';
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+    }
+
+    /**
+     * 현재 그래프 타입이 신호처리 타입인지 확인
+     */
+    _isSignalProcessingGraphType() {
+        return ['fft', 'stft', 'wavelet', 'hilbert'].includes(this.currentGraphType);
+    }
+
+    /**
+     * 전체 신호 전처리 적용
+     */
+    _applyFullSignalPreprocessing(signal) {
+        const removeDC = document.getElementById('fullPreprocessRemoveDC')?.checked || false;
+        const detrend = document.getElementById('fullPreprocessDetrend')?.checked || false;
+
+        let processedSignal = signal;
+        let preprocessInfo = '';
+
+        if (removeDC) {
+            processedSignal = SignalProcessor.removeDC(processedSignal);
+            preprocessInfo += 'DC 제거 ';
+            console.log('[전처리] DC 성분 제거 적용 (전체 신호)');
+        }
+
+        if (detrend) {
+            processedSignal = SignalProcessor.detrend(processedSignal);
+            preprocessInfo += '트렌드 제거 ';
+            console.log('[전처리] 선형 트렌드 제거 적용 (전체 신호)');
+        }
+
+        return {
+            processedSignal: processedSignal,
+            preprocessInfo: preprocessInfo.trim()
+        };
     }
 
     /**
@@ -865,42 +931,68 @@ class Dashboard {
      */
     _processSelectedSignal(signal, graphType, info, startIdx) {
         try {
+            // 샘플링 레이트 계산 (공통)
+            const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+
+            // 전처리 옵션 확인
+            const removeDC = document.getElementById('preprocessRemoveDC')?.checked || false;
+            const detrend = document.getElementById('preprocessDetrend')?.checked || false;
+
+            // 전처리 적용
+            let processedSignal = signal;
+            let preprocessInfo = '';
+
+            if (removeDC) {
+                processedSignal = SignalProcessor.removeDC(processedSignal);
+                preprocessInfo += 'DC 제거 ';
+                console.log('[전처리] DC 성분 제거 적용');
+            }
+
+            if (detrend) {
+                processedSignal = SignalProcessor.detrend(processedSignal);
+                preprocessInfo += '트렌드 제거 ';
+                console.log('[전처리] 선형 트렌드 제거 적용');
+            }
+
+            // 전처리 정보 추가
+            const fullInfo = preprocessInfo ? `${info} (${preprocessInfo.trim()})` : info;
+
             let result = null;
-            
+
             switch(graphType) {
                 case 'fft':
-                    result = SignalProcessor.performFFT(signal);
+                    result = SignalProcessor.performFFT(processedSignal, sampleRate);
                     if (result) {
-                        this._showSelectedFFT(result, signal, info, startIdx);
+                        this._showSelectedFFT(result, processedSignal, fullInfo, startIdx);
                     }
                     break;
-                    
+
                 case 'stft':
-                    result = SignalProcessor.performSTFT(signal);
+                    result = SignalProcessor.performSTFT(processedSignal, 128, 64, sampleRate);
                     if (result) {
-                        this._showSelectedSTFT(result, signal, info, startIdx);
+                        this._showSelectedSTFT(result, processedSignal, fullInfo, startIdx);
                     }
                     break;
-                    
+
                 case 'wavelet':
-                    result = SignalProcessor.performWavelet(signal);
+                    result = SignalProcessor.performWavelet(processedSignal, null, 'morlet', sampleRate);
                     if (result) {
-                        this._showSelectedWavelet(result, signal, info, startIdx);
+                        this._showSelectedWavelet(result, processedSignal, fullInfo, startIdx);
                     }
                     break;
-                    
+
                 case 'hilbert':
-                    result = SignalProcessor.performHilbert(signal);
+                    result = SignalProcessor.performHilbert(processedSignal, sampleRate);
                     if (result) {
-                        this._showSelectedHilbert(result, signal, info, startIdx);
+                        this._showSelectedHilbert(result, processedSignal, fullInfo, startIdx);
                     }
                     break;
             }
-            
+
             if (result) {
-                this._showMessage(`✅ 선택 영역 신호처리 완료: ${info}`, 'success');
+                this._showMessage(`✅ 선택 영역 신호처리 완료: ${fullInfo}`, 'success');
             }
-            
+
         } catch (error) {
             console.error('[ERROR] 신호처리 오류:', error);
             this._showMessage('신호처리 실패: ' + error.message, 'error');
@@ -912,8 +1004,12 @@ class Dashboard {
      */
     _showSelectedFFT(fftResult, signal, info, startIdx) {
         const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+        const nyquistFreq = sampleRate / 2;
         const freqs = SignalProcessor.getFrequencies(signal.length, sampleRate).slice(0, fftResult.magnitude.length);
         const magnitudeDb = fftResult.magnitude.map(m => 20 * Math.log10(Math.max(m, 1e-10)));
+
+        // 디버그 정보 콘솔 출력
+        console.log(`[선택 영역 FFT Debug] 샘플링 레이트: ${sampleRate.toFixed(2)} Hz | 나이퀴스트 주파수: ${nyquistFreq.toFixed(2)} Hz | 신호 길이: ${signal.length} 샘플`);
 
         const trace = {
             x: freqs,
@@ -927,12 +1023,12 @@ class Dashboard {
         };
 
         const layout = {
-            title: `선택 영역 FFT 스펙트럼 - ${info}`,
+            title: `선택 영역 FFT 스펙트럼 - ${info}<br><sub>샘플링: ${sampleRate.toFixed(2)} Hz | 나이퀴스트: ${nyquistFreq.toFixed(2)} Hz</sub>`,
             xaxis: {title: '주파수 (Hz)'},
             yaxis: {title: '크기 (dB)'},
             plot_bgcolor: '#fafafa',
             paper_bgcolor: 'white',
-            margin: {t: 40, b: 40, l: 60, r: 40}
+            margin: {t: 60, b: 40, l: 60, r: 40}
         };
 
         Plotly.newPlot('mainGraph', [trace], layout, {responsive: true});
@@ -943,7 +1039,7 @@ class Dashboard {
      */
     _showSelectedSTFT(stftResult, signal, info, startIdx) {
         const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
-        
+
         // 정규화
         const minVal = Math.min(...stftResult.spectrogram.flat());
         const maxVal = Math.max(...stftResult.spectrogram.flat());
@@ -951,18 +1047,29 @@ class Dashboard {
             row.map(v => (v - minVal) / (maxVal - minVal + 1e-10))
         );
 
+        // Transpose: [시간][주파수] → [주파수][시간]
+        const transposed = normalized[0].map((_, colIndex) =>
+            normalized.map(row => row[colIndex])
+        );
+
+        // 주파수 축 생성
+        const freqBins = transposed.length;
+        const nyquistFreq = sampleRate / 2;
+        const frequencies = Array.from({length: freqBins}, (_, i) => (i * nyquistFreq) / freqBins);
+
         const trace = {
-            z: normalized,
-            x: Array.from({length: signal.length}, (_, i) => i),
+            z: transposed,  // [주파수][시간]
+            x: stftResult.times,  // 시간축
+            y: frequencies,  // 주파수축
             type: 'heatmap',
             colorscale: 'Viridis',
-            hovertemplate: '<b>시간</b> %{x}<br><b>주파수</b> %{y}<br><b>에너지</b> %{z:.3f}<extra></extra>'
+            hovertemplate: '<b>시간:</b> %{x:.2f}s<br><b>주파수:</b> %{y:.2f} Hz<br><b>에너지:</b> %{z:.3f}<extra></extra>'
         };
 
         const layout = {
             title: `선택 영역 STFT 스펙트로그램 - ${info}`,
-            xaxis: {title: '시간 (샘플)'},
-            yaxis: {title: '주파수'},
+            xaxis: {title: '시간 (초)'},
+            yaxis: {title: '주파수 (Hz)'},
             plot_bgcolor: '#fafafa',
             paper_bgcolor: 'white',
             margin: {t: 40, b: 40, l: 60, r: 40}
@@ -980,27 +1087,32 @@ class Dashboard {
             row.map(v => Math.log10(v + 1e-10))
         );
 
+        // x축: 실제 시간(초) 배열 생성
+        const timeAxis = Array.from({length: signal.length}, (_, i) =>
+            i * (dataLoader.data.sample_interval_ms || 100) / 1000
+        );
+
         // y축 데이터 (스케일 또는 주파수)
         let yAxisData = waveletResult.scales;
         let yAxisTitle = '스케일';
-        
+
         if (this.waveletFrequencyMode && waveletResult.frequencies) {
             yAxisData = waveletResult.frequencies;
             yAxisTitle = '주파수 (Hz)';
         }
 
         const trace = {
-            z: normalized,
-            y: yAxisData,
-            x: Array.from({length: signal.length}, (_, i) => i),
+            z: normalized,  // [스케일][시간]
+            x: timeAxis,    // 실제 시간 (초)
+            y: yAxisData,   // 스케일 또는 주파수
             type: 'heatmap',
             colorscale: 'Viridis',
-            hovertemplate: '<b>시간</b> %{x}<br><b>' + yAxisTitle + '</b> %{y}<br><b>에너지</b> %{z:.2f}<extra></extra>'
+            hovertemplate: '<b>시간:</b> %{x:.2f}s<br><b>' + yAxisTitle + ':</b> %{y}<br><b>에너지:</b> %{z:.2f}<extra></extra>'
         };
 
         const layout = {
             title: `선택 영역 Wavelet Transform - ${info}`,
-            xaxis: {title: '시간 (샘플)'},
+            xaxis: {title: '시간 (초)'},
             yaxis: {
                 title: yAxisTitle,
                 type: this.waveletFrequencyMode ? 'log' : 'linear'
@@ -1246,17 +1358,29 @@ class Dashboard {
      * FFT 플롯 생성
      */
     _createFFTPlot(values) {
-        const fftResult = SignalProcessor.performFFT(values);
+        // 전처리 적용
+        const {processedSignal, preprocessInfo} = this._applyFullSignalPreprocessing(values);
+
+        // 샘플링 레이트 계산
+        const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+        const nyquistFreq = sampleRate / 2;
+
+        const fftResult = SignalProcessor.performFFT(processedSignal, sampleRate);
         if (!fftResult) {
             throw new Error('FFT 계산 실패');
         }
 
-        const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
-        const freqs = SignalProcessor.getFrequencies(values.length, sampleRate).slice(0, fftResult.magnitude.length / 2);
+        const freqs = SignalProcessor.getFrequencies(processedSignal.length, sampleRate).slice(0, fftResult.magnitude.length / 2);
         const magnitude = fftResult.magnitude.slice(0, fftResult.magnitude.length / 2);
 
         // dB 스케일
         const magnitudeDb = magnitude.map(m => 20 * Math.log10(Math.max(m, 1e-10)));
+
+        // 디버그 정보 콘솔 출력
+        console.log(`[FFT Debug] 샘플링 레이트: ${sampleRate.toFixed(2)} Hz | 나이퀴스트 주파수: ${nyquistFreq.toFixed(2)} Hz | 주파수 해상도: ${(freqs[1] - freqs[0]).toFixed(4)} Hz`);
+        if (preprocessInfo) {
+            console.log(`[FFT Debug] 전처리: ${preprocessInfo}`);
+        }
 
         const trace = {
             x: freqs,
@@ -1269,13 +1393,16 @@ class Dashboard {
             hovertemplate: '<b>주파수:</b> %{x:.2f} Hz<br><b>크기:</b> %{y:.2f} dB<extra></extra>'
         };
 
+        const titleSuffix = preprocessInfo ? `<br><sub>샘플링: ${sampleRate.toFixed(2)} Hz | 나이퀴스트: ${nyquistFreq.toFixed(2)} Hz | 전처리: ${preprocessInfo}</sub>`
+                                           : `<br><sub>샘플링: ${sampleRate.toFixed(2)} Hz | 나이퀴스트: ${nyquistFreq.toFixed(2)} Hz</sub>`;
+
         const layout = {
-            title: `${this.currentSensor} - FFT 스펙트럼`,
+            title: `${this.currentSensor} - FFT 스펙트럼${titleSuffix}`,
             xaxis: {title: '주파수 (Hz)'},
             yaxis: {title: '크기 (dB)'},
             plot_bgcolor: '#fafafa',
             paper_bgcolor: 'white',
-            margin: {t: 40, b: 40, l: 60, r: 40}
+            margin: {t: 80, b: 40, l: 60, r: 40}
         };
 
         return {trace, layout};
@@ -1285,20 +1412,42 @@ class Dashboard {
      * STFT 플롯 생성
      */
     _createSTFTPlot(values) {
-        const stftResult = SignalProcessor.performSTFT(values, 128, 64);
+        // 전처리 적용
+        const {processedSignal, preprocessInfo} = this._applyFullSignalPreprocessing(values);
+
+        // 샘플링 레이트 계산
+        const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+
+        const stftResult = SignalProcessor.performSTFT(processedSignal, 128, 64, sampleRate);
         if (!stftResult) {
             throw new Error('STFT 계산 실패');
         }
 
+        // Transpose: [시간][주파수] → [주파수][시간]
+        // Plotly heatmap은 z[i][j]가 y[i], x[j]에 해당하므로
+        // z = [주파수][시간], x = 시간, y = 주파수
+        const transposed = stftResult.spectrogram[0].map((_, colIndex) =>
+            stftResult.spectrogram.map(row => row[colIndex])
+        );
+
+        // 주파수 축 생성
+        const freqBins = transposed.length;
+        const nyquistFreq = sampleRate / 2;
+        const frequencies = Array.from({length: freqBins}, (_, i) => (i * nyquistFreq) / freqBins);
+
         const trace = {
-            z: stftResult.spectrogram,
+            z: transposed,  // [주파수][시간]
+            x: stftResult.times,  // 시간축
+            y: frequencies,  // 주파수축
             type: 'heatmap',
             colorscale: 'Jet',
-            hovertemplate: '<b>시간:</b> %{x:.2f}s<br><b>주파수:</b> %{y:.0f} Hz<br><b>크기:</b> %{z:.2f} dB<extra></extra>'
+            hovertemplate: '<b>시간:</b> %{x:.2f}s<br><b>주파수:</b> %{y:.2f} Hz<br><b>크기:</b> %{z:.2f} dB<extra></extra>'
         };
 
+        const titleSuffix = preprocessInfo ? ` (전처리: ${preprocessInfo})` : '';
+
         const layout = {
-            title: `${this.currentSensor} - STFT 스펙트로그램`,
+            title: `${this.currentSensor} - STFT 스펙트로그램${titleSuffix}`,
             xaxis: {title: '시간 (초)'},
             yaxis: {title: '주파수 (Hz)'},
             plot_bgcolor: '#fafafa',
@@ -1313,7 +1462,14 @@ class Dashboard {
      * Wavelet 플롯 생성
      */
     _createWaveletPlot(values) {
-        const waveletResult = SignalProcessor.performWavelet(values);
+        // 전처리 적용
+        const {processedSignal, preprocessInfo} = this._applyFullSignalPreprocessing(values);
+
+        // 샘플링 레이트 계산
+        const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+        const nyquistFreq = sampleRate / 2;
+
+        const waveletResult = SignalProcessor.performWavelet(processedSignal, null, 'morlet', sampleRate);
         if (!waveletResult) {
             throw new Error('Wavelet 계산 실패');
         }
@@ -1323,11 +1479,16 @@ class Dashboard {
             row.map(v => Math.log10(v + 1e-10))
         );
 
+        // x축: 실제 시간(초) 배열 생성
+        const timeAxis = Array.from({length: processedSignal.length}, (_, i) =>
+            i * (dataLoader.data.sample_interval_ms || 100) / 1000
+        );
+
         // y축 데이터 (스케일 또는 주파수)
         let yAxisData = waveletResult.scales;
         let yAxisTitle = '스케일';
         let yAxisLabel = '스케일';
-        
+
         // 웨이블릿 y축 전환 상태 확인
         if (this.waveletFrequencyMode === true && waveletResult.frequencies) {
             yAxisData = waveletResult.frequencies;
@@ -1340,23 +1501,30 @@ class Dashboard {
             : '<b>시간:</b> %{x:.2f}s<br><b>스케일:</b> %{y}<br><b>에너지:</b> %{z:.2f}<extra></extra>';
 
         const trace = {
-            z: normalized,
-            y: yAxisData,
+            z: normalized,  // [스케일][시간]
+            x: timeAxis,    // 실제 시간 (초)
+            y: yAxisData,   // 스케일 또는 주파수
             type: 'heatmap',
             colorscale: 'Viridis',
             hovertemplate: hoverTemplate
         };
 
+        // 주파수 범위 계산 (디버그 정보용)
+        const minFreq = Math.min(...waveletResult.frequencies);
+        const maxFreq = Math.max(...waveletResult.frequencies);
+
+        const preprocessSuffix = preprocessInfo ? ` | 전처리: ${preprocessInfo}` : '';
+
         const layout = {
-            title: `${this.currentSensor} - Wavelet Transform (Morlet)`,
-            xaxis: {title: '시간'},
+            title: `${this.currentSensor} - Wavelet Transform (Morlet)<br><sub>샘플링: ${sampleRate.toFixed(2)} Hz | 나이퀴스트: ${nyquistFreq.toFixed(2)} Hz | 주파수 범위: ${minFreq.toFixed(4)}~${maxFreq.toFixed(4)} Hz${preprocessSuffix}</sub>`,
+            xaxis: {title: '시간 (초)'},
             yaxis: {
                 title: yAxisTitle,
                 type: this.waveletFrequencyMode ? 'log' : 'linear'
             },
             plot_bgcolor: '#fafafa',
             paper_bgcolor: 'white',
-            margin: {t: 40, b: 40, l: 60, r: 40}
+            margin: {t: 80, b: 40, l: 60, r: 40}
         };
 
         return {trace, layout, yAxisLabel};
@@ -1366,18 +1534,24 @@ class Dashboard {
      * Hilbert 포락선 플롯 생성
      */
     _createHilbertPlot(values) {
-        const hilbertResult = SignalProcessor.performHilbert(values);
+        // 전처리 적용
+        const {processedSignal, preprocessInfo} = this._applyFullSignalPreprocessing(values);
+
+        // 샘플링 레이트 계산
+        const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+
+        const hilbertResult = SignalProcessor.performHilbert(processedSignal, sampleRate);
         if (!hilbertResult) {
             throw new Error('Hilbert 계산 실패');
         }
 
-        const timeAxis = Array.from({length: values.length}, (_, i) => i * (dataLoader.data.sample_interval_ms || 100) / 1000);
+        const timeAxis = Array.from({length: processedSignal.length}, (_, i) => i * (dataLoader.data.sample_interval_ms || 100) / 1000);
 
         const traces = [
             {
                 x: timeAxis,
-                y: values,
-                name: '원본 신호',
+                y: processedSignal,
+                name: preprocessInfo ? '전처리된 신호' : '원본 신호',
                 type: 'scatter',
                 mode: 'lines',
                 line: {color: '#2196F3', width: 1},
@@ -1394,8 +1568,10 @@ class Dashboard {
             }
         ];
 
+        const titleSuffix = preprocessInfo ? ` (전처리: ${preprocessInfo})` : '';
+
         const layout = {
-            title: `${this.currentSensor} - Hilbert 포락선`,
+            title: `${this.currentSensor} - Hilbert 포락선${titleSuffix}`,
             xaxis: {title: '시간 (초)'},
             yaxis: {title: '진폭'},
             hovermode: 'x unified',
@@ -1548,13 +1724,13 @@ class Dashboard {
                 break;
 
             case 'fft':
-                const fftResult = SignalProcessor.performFFT(values);
+                const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+                const fftResult = SignalProcessor.performFFT(values, sampleRate);
                 if (fftResult) {
                     const maxMagIdx = fftResult.magnitude.indexOf(Math.max(...fftResult.magnitude));
-                    const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
                     const peakFreq = (maxMagIdx * sampleRate) / values.length;
                     analysisText = `피크 주파수: ${peakFreq.toFixed(2)} Hz (크기: ${fftResult.magnitude[maxMagIdx].toFixed(2)})`;
-                    
+
                     if (sensorType === 'Fan') {
                         analysisText += ` | 해석: 회전 기본 주파수`;
                     }
