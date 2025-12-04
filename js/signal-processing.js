@@ -166,14 +166,8 @@ class SignalProcessor {
             // DSP.js FFT 객체 생성
             const fftInstance = new window.FFT(n_fft, sampleRate);
 
-            // 입력 신호 설정
-            for (let i = 0; i < n_fft; i++) {
-                fftInstance.real[i] = paddedSignal[i];
-                fftInstance.imag[i] = 0;
-            }
-
-            // FFT 수행
-            fftInstance.forward();
+            // FFT 수행 (paddedSignal을 인자로 전달)
+            fftInstance.forward(paddedSignal);
 
             // Hilbert 필터 적용
             // DC 성분 (index 0) 유지
@@ -181,8 +175,7 @@ class SignalProcessor {
             // 나이퀴스트 주파수 (index n_fft/2) 유지 (짝수 길이인 경우)
             // 음수 주파수 (index n_fft/2+1 ~ n_fft-1) 제거
 
-            // DC 성분 유지
-            // index 0은 그대로
+            // DC 성분 유지 (index 0은 그대로)
 
             // 양수 주파수 2배 증폭
             for (let i = 1; i < n_fft / 2; i++) {
@@ -190,8 +183,7 @@ class SignalProcessor {
                 fftInstance.imag[i] *= 2;
             }
 
-            // 나이퀴스트 주파수 유지 (짝수 길이인 경우)
-            // index n_fft/2는 그대로
+            // 나이퀴스트 주파수 유지 (index n_fft/2는 그대로)
 
             // 음수 주파수 제거
             for (let i = Math.floor(n_fft / 2) + 1; i < n_fft; i++) {
@@ -199,8 +191,8 @@ class SignalProcessor {
                 fftInstance.imag[i] = 0;
             }
 
-            // IFFT 수행
-            fftInstance.inverse();
+            // IFFT 수행 (real과 imag를 인자로 전달)
+            fftInstance.inverse(fftInstance.real, fftInstance.imag);
 
             // 해석적 신호 추출
             const analyticSignal = [];

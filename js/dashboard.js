@@ -102,14 +102,14 @@ class Dashboard {
             ],
             'Fan': [
                 { value: 'timeseries', label: '시계열 (RPM)' },
-                { value: 'fft', label: 'FFT 스펙트럼' },
-                { value: 'stft', label: 'STFT 스펙트로그램' },
+                { value: 'fft', label: 'FFT' },
+                { value: 'stft', label: 'STFT' },
                 { value: 'wavelet', label: 'Wavelet Transform' },
-                { value: 'hilbert', label: 'Hilbert 포락선' }
+                { value: 'hilbert', label: 'envelope extraction' }
             ],
             'Control': [
                 { value: 'timeseries', label: '시계열 (PWM %)' },
-                { value: 'fft', label: 'FFT 스펙트럼' }
+                { value: 'fft', label: 'FFT' }
             ],
             'Voltage': [
                 { value: 'timeseries', label: '시계열 (전압)' }
@@ -1858,10 +1858,14 @@ class Dashboard {
 
         if (!this.currentSensor) return;
 
-        // 여러 센서 타입 선택 시 경고 시스템 비활성화 (방어코드)
+        // 여러 센서 선택 시 경고 시스템 비활성화 (방어코드)
         const typeCount = Object.keys(this.selectedSensorsByType).length;
-        if (typeCount > 1) {
-            // 다중 타입 선택 시 경고 비활성화
+        // 여러 타입 선택이거나, 같은 타입의 여러 센서 선택 시 경고 비활성화
+        const hasMultipleSensors = typeCount > 1 ||
+            (typeCount === 1 && Object.values(this.selectedSensorsByType)[0].length > 1);
+
+        if (hasMultipleSensors) {
+            // 다중 센서 선택 시 경고 비활성화
             const warningBox = document.getElementById('warningBox');
             const warningText = document.getElementById('warningText');
             if (warningBox && warningText) {
