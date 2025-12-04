@@ -1866,6 +1866,11 @@ class Dashboard {
 
         if (hasMultipleSensors) {
             // 다중 센서 선택 시 경고 비활성화
+            console.log('[방어코드] 다중 센서 선택 감지 - 경고 시스템 비활성화:', {
+                typeCount,
+                selectedTypes: Object.keys(this.selectedSensorsByType),
+                sensorCounts: Object.values(this.selectedSensorsByType).map(arr => arr.length)
+            });
             const warningBox = document.getElementById('warningBox');
             const warningText = document.getElementById('warningText');
             if (warningBox && warningText) {

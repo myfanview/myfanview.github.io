@@ -169,36 +169,37 @@ class SignalProcessor {
             // FFT 수행 (paddedSignal을 인자로 전달)
             fftInstance.forward(paddedSignal);
 
+            // 복소수 배열로 변환 (Hilbert 필터 적용용)
+            const complexArray = [];
+            for (let i = 0; i < n_fft; i++) {
+                complexArray.push([fftInstance.real[i], fftInstance.imag[i]]);
+            }
+
             // Hilbert 필터 적용
             // DC 성분 (index 0) 유지
+            complexArray[0][0] = complexArray[0][0];
+            complexArray[0][1] = complexArray[0][1];
+
             // 양수 주파수 (index 1 ~ n_fft/2-1) 2배 증폭
-            // 나이퀴스트 주파수 (index n_fft/2) 유지 (짝수 길이인 경우)
-            // 음수 주파수 (index n_fft/2+1 ~ n_fft-1) 제거
-
-            // DC 성분 유지 (index 0은 그대로)
-
-            // 양수 주파수 2배 증폭
             for (let i = 1; i < n_fft / 2; i++) {
-                fftInstance.real[i] *= 2;
-                fftInstance.imag[i] *= 2;
+                complexArray[i][0] *= 2;
+                complexArray[i][1] *= 2;
             }
 
-            // 나이퀴스트 주파수 유지 (index n_fft/2는 그대로)
+            // 나이퀴스트 주파수 (index n_fft/2) 유지
+            // complexArray[n_fft/2]는 그대로
 
-            // 음수 주파수 제거
+            // 음수 주파수 (index n_fft/2+1 ~ n_fft-1) 제거
             for (let i = Math.floor(n_fft / 2) + 1; i < n_fft; i++) {
-                fftInstance.real[i] = 0;
-                fftInstance.imag[i] = 0;
+                complexArray[i][0] = 0;
+                complexArray[i][1] = 0;
             }
 
-            // IFFT 수행 (real과 imag를 인자로 전달)
-            fftInstance.inverse(fftInstance.real, fftInstance.imag);
+            // 간단한 IFFT 수행 (직접 구현)
+            const analyticSignalFull = this._simpleIFFT(complexArray);
 
-            // 해석적 신호 추출
-            const analyticSignal = [];
-            for (let i = 0; i < n; i++) {
-                analyticSignal.push([fftInstance.real[i], fftInstance.imag[i]]);
-            }
+            // 원래 길이로 자르기
+            const analyticSignal = analyticSignalFull.slice(0, n);
 
             // 포락선 계산 (복소수 크기)
             const envelope = analyticSignal.map(c =>
@@ -344,25 +345,30 @@ class SignalProcessor {
 
     /**
      * 간단한 IFFT (역 푸리에 변환)
-     * 복소수 배열 입력 필요
+     * 복소수 배열 입력 필요 [[real, imag], ...]
+     * DFT를 사용하여 IFFT 계산 (O(n²) 복잡도)
      */
-    static _ifft(fftData) {
-        // 간단한 구현 (정확도보다는 작동 중심)
-        const n = fftData.length;
+    static _simpleIFFT(complexArray) {
+        const n = complexArray.length;
         const result = [];
 
         for (let t = 0; t < n; t++) {
             let real = 0, imag = 0;
 
             for (let k = 0; k < n; k++) {
-                const angle = 2 * Math.PI * k * t / n;
+                // IFFT는 각도 부호가 음수 (FFT와 반대)
+                const angle = -2 * Math.PI * k * t / n;
                 const cos = Math.cos(angle);
                 const sin = Math.sin(angle);
 
-                real += (fftData[k][0] * cos + fftData[k][1] * sin);
-                imag += (fftData[k][1] * cos - fftData[k][0] * sin);
+                // 복소수 곱셈: (a + bi) * (cos + i*sin)
+                // real = a*cos - b*sin
+                // imag = a*sin + b*cos
+                real += (complexArray[k][0] * cos - complexArray[k][1] * sin);
+                imag += (complexArray[k][0] * sin + complexArray[k][1] * cos);
             }
 
+            // IFFT는 1/n으로 정규화
             result.push([real / n, imag / n]);
         }
 
