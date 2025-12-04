@@ -139,7 +139,7 @@ class SignalProcessor {
     /**
      * Hilbert Transform (포락선 추출)
      * 해석적 신호(Analytic Signal) 생성
-     * ml-dsp의 FFT 사용
+     * DSP.js의 FFT와 inverse 사용
      */
     static performHilbert(signal, sampleRate = null) {
         if (!signal || signal.length === 0) {
@@ -153,52 +153,87 @@ class SignalProcessor {
         }
 
         try {
-            // 신호 길이를 2의 거듭제곱으로 확장 (FFT 효율성)
             const n = signal.length;
-            const n_fft = Math.pow(2, Math.ceil(Math.log2(2 * n)));
 
-            // Zero-padding
+            // Zero-padding: 신호 길이를 2의 거듭제곱으로 (2배 아님)
+            const n_fft = Math.pow(2, Math.ceil(Math.log2(n)));
+
             const paddedSignal = [...signal];
             while (paddedSignal.length < n_fft) {
                 paddedSignal.push(0);
             }
 
-            // FFT (sampleRate 전달)
-            const fft = this.performFFT(paddedSignal, sampleRate);
-            
-            if (!fft) return null;
+            // DSP.js FFT 객체 생성
+            const fftInstance = new window.FFT(n_fft, sampleRate);
 
-            // Hilbert 필터 적용
-            const magnitudeResponse = new Array(fft.magnitude.length);
-            magnitudeResponse[0] = 1;
-            
-            for (let i = 1; i < magnitudeResponse.length; i++) {
-                if (i < fft.magnitude.length / 2) {
-                    magnitudeResponse[i] = 2;
-                } else if (i === fft.magnitude.length / 2) {
-                    magnitudeResponse[i] = 1;
-                } else {
-                    magnitudeResponse[i] = 0;
-                }
+            // 입력 신호 설정
+            for (let i = 0; i < n_fft; i++) {
+                fftInstance.real[i] = paddedSignal[i];
+                fftInstance.imag[i] = 0;
             }
 
-            // 필터링된 스펙트럼
-            const hilbertFft = fft.real.map((r, i) => [
-                r * magnitudeResponse[i],
-                fft.imaginary[i] * magnitudeResponse[i]
-            ]);
+            // FFT 수행
+            fftInstance.forward();
 
-            // IFFT로 해석적 신호 복원
-            const analyticSignal = this._ifft(hilbertFft);
+            // Hilbert 필터 적용
+            // DC 성분 (index 0) 유지
+            // 양수 주파수 (index 1 ~ n_fft/2-1) 2배 증폭
+            // 나이퀴스트 주파수 (index n_fft/2) 유지 (짝수 길이인 경우)
+            // 음수 주파수 (index n_fft/2+1 ~ n_fft-1) 제거
 
-            // 포락선 계산 (크기)
-            const envelope = analyticSignal.slice(0, n).map(c => 
+            // DC 성분 유지
+            // index 0은 그대로
+
+            // 양수 주파수 2배 증폭
+            for (let i = 1; i < n_fft / 2; i++) {
+                fftInstance.real[i] *= 2;
+                fftInstance.imag[i] *= 2;
+            }
+
+            // 나이퀴스트 주파수 유지 (짝수 길이인 경우)
+            // index n_fft/2는 그대로
+
+            // 음수 주파수 제거
+            for (let i = Math.floor(n_fft / 2) + 1; i < n_fft; i++) {
+                fftInstance.real[i] = 0;
+                fftInstance.imag[i] = 0;
+            }
+
+            // IFFT 수행
+            fftInstance.inverse();
+
+            // 해석적 신호 추출
+            const analyticSignal = [];
+            for (let i = 0; i < n; i++) {
+                analyticSignal.push([fftInstance.real[i], fftInstance.imag[i]]);
+            }
+
+            // 포락선 계산 (복소수 크기)
+            const envelope = analyticSignal.map(c =>
                 Math.sqrt(c[0] * c[0] + c[1] * c[1])
             );
 
+            // 결과 검증: 포락선이 원본의 절댓값보다 작으면 경고
+            const maxOriginal = Math.max(...signal.map(Math.abs));
+            const maxEnvelope = Math.max(...envelope);
+
+            if (maxEnvelope > maxOriginal * 1.5) {
+                console.warn('[Hilbert] 포락선이 비정상적으로 큼:', {
+                    maxOriginal: maxOriginal.toFixed(2),
+                    maxEnvelope: maxEnvelope.toFixed(2),
+                    ratio: (maxEnvelope / maxOriginal).toFixed(2)
+                });
+            } else {
+                console.log('[Hilbert] 포락선 검증 통과:', {
+                    maxOriginal: maxOriginal.toFixed(2),
+                    maxEnvelope: maxEnvelope.toFixed(2),
+                    ratio: (maxEnvelope / maxOriginal).toFixed(2)
+                });
+            }
+
             return {
                 envelope: envelope,
-                analyticSignal: analyticSignal.slice(0, n)
+                analyticSignal: analyticSignal
             };
         } catch (error) {
             console.error('Hilbert 오류:', error);

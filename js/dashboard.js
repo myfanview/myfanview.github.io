@@ -17,6 +17,11 @@ class Dashboard {
             filepath: 'data/sensor_data.json'
         };
 
+        // 신호처리 결과 저장 (Export용)
+        this.lastSignalProcessingResult = null;
+        this.lastProcessingType = null;
+        this.lastProcessingSensor = null;
+
         this.init();
     }
 
@@ -232,6 +237,24 @@ class Dashboard {
             if (this._isSignalProcessingGraphType()) {
                 this.renderGraph();
             }
+        });
+
+        // Export 버튼 이벤트 리스너 (선택 영역)
+        document.getElementById('exportSelectionJSON')?.addEventListener('click', () => {
+            this.exportSignalProcessingJSON();
+        });
+
+        document.getElementById('exportSelectionCSV')?.addEventListener('click', () => {
+            this.exportSignalProcessingCSV();
+        });
+
+        // Export 버튼 이벤트 리스너 (메인 그래프)
+        document.getElementById('exportGraphJSON')?.addEventListener('click', () => {
+            this.exportSignalProcessingJSON();
+        });
+
+        document.getElementById('exportGraphCSV')?.addEventListener('click', () => {
+            this.exportSignalProcessingCSV();
         });
     }
 
@@ -735,6 +758,16 @@ class Dashboard {
                     return;
             }
 
+            // Export 패널 표시/숨김
+            const exportPanel = document.getElementById('graphExportPanel');
+            if (exportPanel) {
+                if (['fft', 'stft', 'wavelet', 'hilbert'].includes(this.currentGraphType)) {
+                    exportPanel.style.display = 'block';
+                } else {
+                    exportPanel.style.display = 'none';
+                }
+            }
+
             // 통계 업데이트 (정적 메서드 호출)
             this._updateStatistics(values);
 
@@ -921,6 +954,12 @@ class Dashboard {
             this.selectedRangeData.info,
             this.selectedRangeData.startIdx
         );
+
+        // Export 패널 표시
+        const exportPanel = document.getElementById('selectionExportPanel');
+        if (exportPanel) {
+            exportPanel.style.display = 'flex';
+        }
 
         // UI 숨김
         this._hideSignalProcessingUI();
@@ -1376,6 +1415,15 @@ class Dashboard {
         // dB 스케일
         const magnitudeDb = magnitude.map(m => 20 * Math.log10(Math.max(m, 1e-10)));
 
+        // 신호처리 결과 저장 (Export용)
+        this.lastSignalProcessingResult = {
+            frequencies: freqs,
+            magnitude: magnitudeDb,
+            phase: fftResult.phase.slice(0, fftResult.phase.length / 2)
+        };
+        this.lastProcessingType = 'fft';
+        this.lastProcessingSensor = this.currentSensor;
+
         // 디버그 정보 콘솔 출력
         console.log(`[FFT Debug] 샘플링 레이트: ${sampleRate.toFixed(2)} Hz | 나이퀴스트 주파수: ${nyquistFreq.toFixed(2)} Hz | 주파수 해상도: ${(freqs[1] - freqs[0]).toFixed(4)} Hz`);
         if (preprocessInfo) {
@@ -1434,6 +1482,15 @@ class Dashboard {
         const freqBins = transposed.length;
         const nyquistFreq = sampleRate / 2;
         const frequencies = Array.from({length: freqBins}, (_, i) => (i * nyquistFreq) / freqBins);
+
+        // 신호처리 결과 저장 (Export용)
+        this.lastSignalProcessingResult = {
+            times: stftResult.times,
+            frequencies: frequencies,
+            spectrogram: transposed
+        };
+        this.lastProcessingType = 'stft';
+        this.lastProcessingSensor = this.currentSensor;
 
         const trace = {
             z: transposed,  // [주파수][시간]
@@ -1500,6 +1557,15 @@ class Dashboard {
             ? '<b>시간:</b> %{x:.2f}s<br><b>주파수:</b> %{y:.4f} Hz<br><b>에너지:</b> %{z:.2f}<extra></extra>'
             : '<b>시간:</b> %{x:.2f}s<br><b>스케일:</b> %{y}<br><b>에너지:</b> %{z:.2f}<extra></extra>';
 
+        // 신호처리 결과 저장 (Export용)
+        this.lastSignalProcessingResult = {
+            time: timeAxis,
+            frequencies: waveletResult.frequencies,
+            spectrogram: normalized
+        };
+        this.lastProcessingType = 'wavelet';
+        this.lastProcessingSensor = this.currentSensor;
+
         const trace = {
             z: normalized,  // [스케일][시간]
             x: timeAxis,    // 실제 시간 (초)
@@ -1546,6 +1612,13 @@ class Dashboard {
         }
 
         const timeAxis = Array.from({length: processedSignal.length}, (_, i) => i * (dataLoader.data.sample_interval_ms || 100) / 1000);
+
+        // 신호처리 결과 저장 (Export용)
+        this.lastSignalProcessingResult = {
+            envelope: hilbertResult.envelope
+        };
+        this.lastProcessingType = 'hilbert';
+        this.lastProcessingSensor = this.currentSensor;
 
         const traces = [
             {
@@ -1785,35 +1858,27 @@ class Dashboard {
 
         if (!this.currentSensor) return;
 
+        // 여러 센서 타입 선택 시 경고 시스템 비활성화 (방어코드)
+        const typeCount = Object.keys(this.selectedSensorsByType).length;
+        if (typeCount > 1) {
+            // 다중 타입 선택 시 경고 비활성화
+            const warningBox = document.getElementById('warningBox');
+            const warningText = document.getElementById('warningText');
+            if (warningBox && warningText) {
+                warningBox.classList.remove('warning', 'danger', 'success');
+                warningText.textContent = '다중 센서 선택 시 경고 비활성화';
+            }
+            return;
+        }
+
         const sensorData = dataLoader.getSensorData(this.currentSensor);
         if (!sensorData || sensorData.length === 0) return;
 
         const values = sensorData.map(r => r.value);
         const stats = SignalProcessor.getStatistics(values);
 
-        // 센서 타입별 진단 규칙
-        if (sensorType === 'Temperature') {
-            // 온도 진단
-            if (stats.max > 90) {
-                warnings.push({
-                    level: 'danger',
-                    message: `위험한 고온: ${stats.max.toFixed(1)}°C (즉시 조치 필요)`
-                });
-            } else if (stats.max > 80) {
-                warnings.push({
-                    level: 'warning',
-                    message: `높은 온도: ${stats.max.toFixed(1)}°C (냉각 개선 필요)`
-                });
-            }
-            
-            if (stats.mean < 0) {
-                warnings.push({
-                    level: 'danger',
-                    message: '센서 오류: 음수 온도 감지'
-                });
-            }
-
-        } else if (sensorType === 'Fan') {
+        // 센서 타입별 진단 규칙 (Temperature 경고 제거, Fan 경고만 유지)
+        if (sensorType === 'Fan') {
             // 팬 진단
             if (stats.mean < 500) {
                 warnings.push({
@@ -1903,6 +1968,99 @@ class Dashboard {
         URL.revokeObjectURL(url);
 
         this._showMessage('데이터 내보내기 완료', 'success');
+    }
+
+    /**
+     * 신호처리 결과 JSON으로 내보내기
+     */
+    exportSignalProcessingJSON() {
+        if (!this.lastSignalProcessingResult || !this.lastProcessingType) {
+            this._showMessage('내보낼 신호처리 결과가 없습니다', 'error');
+            return;
+        }
+
+        const exportData = {
+            sensor: this.lastProcessingSensor,
+            processingType: this.lastProcessingType,
+            timestamp: new Date().toISOString(),
+            sampleRate: 1000 / (dataLoader.data.sample_interval_ms || 100),
+            result: this.lastSignalProcessingResult
+        };
+
+        const json = JSON.stringify(exportData, null, 2);
+        const blob = new Blob([json], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${this.lastProcessingType}_${this.lastProcessingSensor}_${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        this._showMessage('JSON 내보내기 완료', 'success');
+    }
+
+    /**
+     * 신호처리 결과 CSV로 내보내기
+     */
+    exportSignalProcessingCSV() {
+        if (!this.lastSignalProcessingResult || !this.lastProcessingType) {
+            this._showMessage('내보낼 신호처리 결과가 없습니다', 'error');
+            return;
+        }
+
+        let csv = '';
+        const result = this.lastSignalProcessingResult;
+
+        switch(this.lastProcessingType) {
+            case 'fft':
+                csv = 'Frequency (Hz),Magnitude (dB),Phase (rad)\n';
+                result.frequencies.forEach((f, i) => {
+                    csv += `${f},${result.magnitude[i]},${result.phase[i]}\n`;
+                });
+                break;
+
+            case 'stft':
+                // STFT는 2D 데이터이므로 long format으로 출력
+                csv = 'Time (s),Frequency (Hz),Magnitude (dB)\n';
+                result.times.forEach((t, i) => {
+                    result.frequencies.forEach((f, j) => {
+                        csv += `${t},${f},${result.spectrogram[j][i]}\n`;
+                    });
+                });
+                break;
+
+            case 'wavelet':
+                // Wavelet도 2D 데이터
+                csv = 'Time (s),Frequency (Hz),Magnitude\n';
+                result.time.forEach((t, i) => {
+                    result.frequencies.forEach((f, j) => {
+                        csv += `${t},${f},${result.spectrogram[j][i]}\n`;
+                    });
+                });
+                break;
+
+            case 'hilbert':
+                csv = 'Time (s),Envelope\n';
+                result.envelope.forEach((env, i) => {
+                    const time = i * (dataLoader.data.sample_interval_ms || 100) / 1000;
+                    csv += `${time},${env}\n`;
+                });
+                break;
+
+            default:
+                this._showMessage('지원하지 않는 신호처리 타입입니다', 'error');
+                return;
+        }
+
+        const blob = new Blob([csv], {type: 'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${this.lastProcessingType}_${this.lastProcessingSensor}_${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        this._showMessage('CSV 내보내기 완료', 'success');
     }
 
     /**
