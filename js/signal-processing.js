@@ -138,8 +138,7 @@ class SignalProcessor {
 
     /**
      * Hilbert Transform (포락선 추출)
-     * 해석적 신호(Analytic Signal) 생성
-     * DSP.js의 FFT와 inverse 사용
+     * 해석적 신호(Analytic Signal) 생성 후 포락선 계산
      */
     static performHilbert(signal, sampleRate = null) {
         if (!signal || signal.length === 0) {
@@ -155,7 +154,7 @@ class SignalProcessor {
         try {
             const n = signal.length;
 
-            // Zero-padding: 신호 길이를 2의 거듭제곱으로 (2배 아님)
+            // Zero-padding: 신호 길이를 2의 거듭제곱으로
             const n_fft = Math.pow(2, Math.ceil(Math.log2(n)));
 
             const paddedSignal = [...signal];
@@ -163,66 +162,70 @@ class SignalProcessor {
                 paddedSignal.push(0);
             }
 
-            // DSP.js FFT 객체 생성
+            // DSP.js FFT 수행
             const fftInstance = new window.FFT(n_fft, sampleRate);
-
-            // FFT 수행 (paddedSignal을 인자로 전달)
             fftInstance.forward(paddedSignal);
 
-            // 복소수 배열로 변환 (Hilbert 필터 적용용)
-            const complexArray = [];
+            // 복소수 배열로 변환
+            const spectrum = [];
             for (let i = 0; i < n_fft; i++) {
-                complexArray.push([fftInstance.real[i], fftInstance.imag[i]]);
+                spectrum.push([fftInstance.real[i], fftInstance.imag[i]]);
             }
 
-            // Hilbert 필터 적용
-            // DC 성분 (index 0) 유지
-            complexArray[0][0] = complexArray[0][0];
-            complexArray[0][1] = complexArray[0][1];
+            // Hilbert 필터 적용하여 해석적 신호 생성
+            // H(f) = 1 (f=0), 2 (0<f<Nyquist), 1 (f=Nyquist), 0 (f>Nyquist)
+            const analyticSpectrum = [];
 
-            // 양수 주파수 (index 1 ~ n_fft/2-1) 2배 증폭
+            // DC 성분 (f=0): 유지
+            analyticSpectrum[0] = [spectrum[0][0], spectrum[0][1]];
+
+            // 양수 주파수 (0 < f < Nyquist): 2배
             for (let i = 1; i < n_fft / 2; i++) {
-                complexArray[i][0] *= 2;
-                complexArray[i][1] *= 2;
+                analyticSpectrum[i] = [spectrum[i][0] * 2, spectrum[i][1] * 2];
             }
 
-            // 나이퀴스트 주파수 (index n_fft/2) 유지
-            // complexArray[n_fft/2]는 그대로
+            // 나이퀴스트 주파수 (f = Nyquist): 유지
+            analyticSpectrum[n_fft / 2] = [spectrum[n_fft / 2][0], spectrum[n_fft / 2][1]];
 
-            // 음수 주파수 (index n_fft/2+1 ~ n_fft-1) 제거
+            // 음수 주파수 (f > Nyquist): 제거
             for (let i = Math.floor(n_fft / 2) + 1; i < n_fft; i++) {
-                complexArray[i][0] = 0;
-                complexArray[i][1] = 0;
+                analyticSpectrum[i] = [0, 0];
             }
 
-            // 간단한 IFFT 수행 (직접 구현)
-            const analyticSignalFull = this._simpleIFFT(complexArray);
+            // IFFT 수행
+            const analyticSignalFull = this._simpleIFFT(analyticSpectrum);
 
             // 원래 길이로 자르기
             const analyticSignal = analyticSignalFull.slice(0, n);
 
             // 포락선 계산 (복소수 크기)
+            // envelope = |z| = sqrt(real^2 + imag^2)
             const envelope = analyticSignal.map(c =>
                 Math.sqrt(c[0] * c[0] + c[1] * c[1])
             );
 
-            // 결과 검증: 포락선이 원본의 절댓값보다 작으면 경고
+            // 추가 검증: 포락선이 원본 신호를 항상 감싸는지 확인
+            let crossCount = 0;
+            for (let i = 0; i < n; i++) {
+                if (envelope[i] < Math.abs(signal[i]) - 1e-6) {  // 부동소수점 오차 고려
+                    crossCount++;
+                }
+            }
+
+            if (crossCount > 0) {
+                console.warn(`[Hilbert] 포락선이 원본 신호 아래로 내려가는 지점: ${crossCount}개`);
+            }
+
+            // 결과 검증
             const maxOriginal = Math.max(...signal.map(Math.abs));
             const maxEnvelope = Math.max(...envelope);
 
-            if (maxEnvelope > maxOriginal * 1.5) {
-                console.warn('[Hilbert] 포락선이 비정상적으로 큼:', {
-                    maxOriginal: maxOriginal.toFixed(2),
-                    maxEnvelope: maxEnvelope.toFixed(2),
-                    ratio: (maxEnvelope / maxOriginal).toFixed(2)
-                });
-            } else {
-                console.log('[Hilbert] 포락선 검증 통과:', {
-                    maxOriginal: maxOriginal.toFixed(2),
-                    maxEnvelope: maxEnvelope.toFixed(2),
-                    ratio: (maxEnvelope / maxOriginal).toFixed(2)
-                });
-            }
+            console.log('[Hilbert] 포락선 검증:', {
+                maxOriginal: maxOriginal.toFixed(2),
+                maxEnvelope: maxEnvelope.toFixed(2),
+                ratio: (maxEnvelope / maxOriginal).toFixed(2),
+                crossCount: crossCount
+            });
 
             return {
                 envelope: envelope,
@@ -356,8 +359,8 @@ class SignalProcessor {
             let real = 0, imag = 0;
 
             for (let k = 0; k < n; k++) {
-                // IFFT는 각도 부호가 음수 (FFT와 반대)
-                const angle = -2 * Math.PI * k * t / n;
+                // IFFT는 각도 부호가 양수 (FFT의 반대 부호)
+                const angle = +2 * Math.PI * k * t / n;
                 const cos = Math.cos(angle);
                 const sin = Math.sin(angle);
 
