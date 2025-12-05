@@ -162,7 +162,7 @@
                         </div>
 
                         <!-- 에지 처리 방식 -->
-                        <div>
+                        <div style="margin-bottom: 15px;">
                             <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">
                                 에지 처리 방식:
                             </label>
@@ -174,6 +174,17 @@
                             </select>
                             <div style="font-size: 11px; color: #666; margin-top: 6px; padding: 6px; background: #fffbf0; border-left: 2px solid #FFC107; border-radius: 2px;">
                                 💡 Symmetric은 경계 불연속성을 줄여 대부분의 경우 권장됩니다
+                            </div>
+                        </div>
+
+                        <!-- 나이퀴스트 필터 -->
+                        <div>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #555;">
+                                <input type="checkbox" id="waveletFilterNyquist" checked style="cursor: pointer; width: 16px; height: 16px;">
+                                <span style="font-weight: 600;">나이퀴스트 주파수 초과 Scale 자동 제거</span>
+                            </label>
+                            <div style="font-size: 11px; color: #666; margin-top: 6px; padding: 6px; background: #e8f5e9; border-left: 2px solid #4CAF50; border-radius: 2px;">
+                                ✓ 권장: 앨리어싱 방지를 위해 나이퀴스트 주파수를 초과하는 Scale을 자동으로 필터링합니다
                             </div>
                         </div>
                     </div>
@@ -200,6 +211,37 @@
                     <button id="exportSelectionJSON" style="padding: 6px 16px; font-size: 13px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background 0.2s;">JSON</button>
                     <button id="exportSelectionCSV" style="padding: 6px 16px; font-size: 13px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background 0.2s;">CSV</button>
                     <span style="font-size: 11px; color: #666;">신호처리 결과를 파일로 저장합니다</span>
+                </div>
+                <!-- Wavelet 전용 옵션 -->
+                <div id="selectionWaveletOptions" style="display: none; margin-top: 12px; padding: 12px; background: #f3e5f5; border-radius: 4px; border-left: 3px solid #9C27B0;">
+                    <div style="font-size: 13px; font-weight: 600; color: #555; margin-bottom: 10px;">⚙️ Wavelet 설정</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <!-- 중심 각주파수 -->
+                        <div>
+                            <label style="display: block; font-size: 12px; color: #555; margin-bottom: 4px;">
+                                중심 각주파수 (ω₀): <span id="selectionOmega0Value" style="color: #9C27B0; font-weight: 700;">5.0</span>
+                            </label>
+                            <input type="range" id="selectionOmega0Slider" min="3" max="10" step="0.5" value="5" style="width: 100%; cursor: pointer;">
+                            <div style="font-size: 10px; color: #999; margin-top: 2px;">3 (시간) ← 5 (균형) → 10 (주파수)</div>
+                        </div>
+                        <!-- 에지 처리 -->
+                        <div>
+                            <label style="display: block; font-size: 12px; color: #555; margin-bottom: 4px;">에지 처리:</label>
+                            <select id="selectionEdgeMode" style="width: 100%; padding: 6px; font-size: 12px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer;">
+                                <option value="none">없음</option>
+                                <option value="zero">Zero-padding</option>
+                                <option value="symmetric" selected>Symmetric ⭐</option>
+                                <option value="reflect">Reflect</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- 나이퀴스트 필터 -->
+                    <div style="margin-top: 10px;">
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; color: #555;">
+                            <input type="checkbox" id="selectionFilterNyquist" checked style="cursor: pointer; width: 14px; height: 14px;">
+                            <span>나이퀴스트 주파수 초과 Scale 자동 제거</span>
+                        </label>
+                    </div>
                 </div>
                 <!-- 데이터 전처리 옵션 -->
                 <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #FFB74D; display: flex; align-items: center; gap: 20px;">

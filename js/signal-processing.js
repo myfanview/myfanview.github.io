@@ -262,6 +262,7 @@ class SignalProcessor {
             const omega0 = options.omega0 || 5;  // 중심 각주파수
             const sigma = options.sigma || 1;    // Gaussian 표준편차
             const edgeMode = options.edgeMode || 'none';  // 에지 처리 방식
+            const filterNyquist = options.filterNyquist !== undefined ? options.filterNyquist : true;  // 나이퀴스트 필터
 
             // 기본 스케일 범위
             if (!scales) {
@@ -270,6 +271,29 @@ class SignalProcessor {
                     scales.push(Math.floor(s));
                 }
                 scales = [...new Set(scales)].sort((a, b) => a - b);
+            }
+
+            // 나이퀴스트 주파수 필터링
+            const nyquistFreq = sampleRate / 2;
+            const centerFrequency = omega0 / (2 * Math.PI);
+
+            if (filterNyquist) {
+                const originalLength = scales.length;
+                // 각 scale에 대해 최대 주파수 계산
+                scales = scales.filter(scale => {
+                    const maxFreq = centerFrequency * sampleRate / scale;
+                    return maxFreq <= nyquistFreq;
+                });
+
+                if (scales.length < originalLength) {
+                    console.log(`[Wavelet] 나이퀴스트 필터: ${originalLength}개 중 ${originalLength - scales.length}개 Scale 제거됨`);
+                    console.log(`[Wavelet] 필터링 후 Scale 범위: ${scales[0]} ~ ${scales[scales.length - 1]}`);
+                }
+
+                if (scales.length === 0) {
+                    console.error('[Wavelet] 오류: 모든 Scale이 나이퀴스트 주파수를 초과합니다. omega0 값을 낮추거나 샘플링 레이트를 높여주세요.');
+                    return null;
+                }
             }
 
             // 에지 처리: 신호 패딩
@@ -308,15 +332,11 @@ class SignalProcessor {
                 console.log(`[Wavelet] 에지 처리: ${edgeMode}, 패딩 크기: ${padSize}`);
             }
 
-            // 중심 주파수 계산 (정규화된 주파수)
-            const centerFrequency = omega0 / (2 * Math.PI);
-
             // Scale을 주파수(Hz)로 변환
             // 공식: f = (ω₀ / 2π) * (sampleRate / scale)
             const frequencies = scales.map(scale => centerFrequency * sampleRate / scale);
 
             // 주파수 검증
-            const nyquistFreq = sampleRate / 2;
             const maxFreq = Math.max(...frequencies);
             const minFreq = Math.min(...frequencies);
 
@@ -326,8 +346,8 @@ class SignalProcessor {
             console.log(`[Wavelet Debug] 주파수 범위: ${minFreq.toFixed(4)} ~ ${maxFreq.toFixed(4)} Hz`);
             console.log(`[Wavelet Debug] 스케일 범위: ${scales[0]} ~ ${scales[scales.length - 1]}`);
 
-            if (maxFreq > nyquistFreq) {
-                console.warn(`[Wavelet Warning] 최대 주파수(${maxFreq.toFixed(2)} Hz)가 나이퀴스트 주파수(${nyquistFreq.toFixed(2)} Hz)를 초과합니다.`);
+            if (!filterNyquist && maxFreq > nyquistFreq) {
+                console.warn(`[Wavelet Warning] 최대 주파수(${maxFreq.toFixed(2)} Hz)가 나이퀴스트 주파수(${nyquistFreq.toFixed(2)} Hz)를 초과합니다. 나이퀴스트 필터를 활성화하는 것을 권장합니다.`);
             }
 
             // 주파수 예시 출력 (처음 5개)

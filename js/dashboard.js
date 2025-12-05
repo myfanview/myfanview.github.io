@@ -282,6 +282,50 @@ class Dashboard {
                 }
             });
         }
+
+        // Wavelet 나이퀴스트 필터 체크박스 이벤트
+        const waveletFilterNyquist = document.getElementById('waveletFilterNyquist');
+        if (waveletFilterNyquist) {
+            waveletFilterNyquist.addEventListener('change', () => {
+                if (this.currentGraphType === 'wavelet') {
+                    this.renderGraph();
+                }
+            });
+        }
+
+        // 선택영역 신호처리 타입 변경 시 Wavelet 옵션 표시/숨김
+        const signalProcessingType = document.getElementById('signalProcessingType');
+        if (signalProcessingType) {
+            signalProcessingType.addEventListener('change', (e) => {
+                const selectionWaveletOptions = document.getElementById('selectionWaveletOptions');
+                if (selectionWaveletOptions) {
+                    if (e.target.value === 'wavelet') {
+                        // Wavelet 선택 시 메인 설정 값으로 동기화
+                        const mainOmega0 = document.getElementById('omega0Slider')?.value || 5;
+                        const mainEdgeMode = document.getElementById('waveletEdgeMode')?.value || 'symmetric';
+                        const mainFilterNyquist = document.getElementById('waveletFilterNyquist')?.checked !== false;
+
+                        document.getElementById('selectionOmega0Slider').value = mainOmega0;
+                        document.getElementById('selectionOmega0Value').textContent = parseFloat(mainOmega0).toFixed(1);
+                        document.getElementById('selectionEdgeMode').value = mainEdgeMode;
+                        document.getElementById('selectionFilterNyquist').checked = mainFilterNyquist;
+
+                        selectionWaveletOptions.style.display = 'block';
+                    } else {
+                        selectionWaveletOptions.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // 선택영역 Wavelet omega0 슬라이더 값 업데이트
+        const selectionOmega0Slider = document.getElementById('selectionOmega0Slider');
+        const selectionOmega0Value = document.getElementById('selectionOmega0Value');
+        if (selectionOmega0Slider && selectionOmega0Value) {
+            selectionOmega0Slider.addEventListener('input', (e) => {
+                selectionOmega0Value.textContent = parseFloat(e.target.value).toFixed(1);
+            });
+        }
     }
 
     /**
@@ -1040,12 +1084,14 @@ class Dashboard {
                     break;
 
                 case 'wavelet':
-                    // Wavelet 옵션 읽기
-                    const omega0Selected = parseFloat(document.getElementById('omega0Slider')?.value || 5);
-                    const edgeModeSelected = document.getElementById('waveletEdgeMode')?.value || 'symmetric';
+                    // Wavelet 옵션 읽기 (선택영역 전용 설정 사용)
+                    const omega0Selected = parseFloat(document.getElementById('selectionOmega0Slider')?.value || 5);
+                    const edgeModeSelected = document.getElementById('selectionEdgeMode')?.value || 'symmetric';
+                    const filterNyquistSelected = document.getElementById('selectionFilterNyquist')?.checked !== false;
                     result = SignalProcessor.performWavelet(processedSignal, null, 'morlet', sampleRate, {
                         omega0: omega0Selected,
-                        edgeMode: edgeModeSelected
+                        edgeMode: edgeModeSelected,
+                        filterNyquist: filterNyquistSelected
                     });
                     if (result) {
                         this._showSelectedWavelet(result, processedSignal, fullInfo, startIdx);
@@ -1561,10 +1607,12 @@ class Dashboard {
         // Wavelet 옵션 읽기
         const omega0 = parseFloat(document.getElementById('omega0Slider')?.value || 5);
         const edgeMode = document.getElementById('waveletEdgeMode')?.value || 'symmetric';
+        const filterNyquist = document.getElementById('waveletFilterNyquist')?.checked !== false;
 
         const waveletResult = SignalProcessor.performWavelet(processedSignal, null, 'morlet', sampleRate, {
             omega0: omega0,
-            edgeMode: edgeMode
+            edgeMode: edgeMode,
+            filterNyquist: filterNyquist
         });
         if (!waveletResult) {
             throw new Error('Wavelet 계산 실패');
