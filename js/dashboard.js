@@ -1613,9 +1613,12 @@ class Dashboard {
 
         const timeAxis = Array.from({length: processedSignal.length}, (_, i) => i * (dataLoader.data.sample_interval_ms || 100) / 1000);
 
-        // 신호처리 결과 저장 (Export용)
+        // 신호처리 결과 저장 (Export용 - 원본 신호와 포락선 모두 저장)
         this.lastSignalProcessingResult = {
-            envelope: hilbertResult.envelope
+            time: timeAxis,
+            originalSignal: processedSignal,  // 전처리가 적용된 원본 신호
+            envelope: hilbertResult.envelope,
+            preprocessInfo: preprocessInfo || 'none'
         };
         this.lastProcessingType = 'hilbert';
         this.lastProcessingSensor = this.currentSensor;
@@ -2049,11 +2052,20 @@ class Dashboard {
                 break;
 
             case 'hilbert':
-                csv = 'Time (s),Envelope\n';
-                result.envelope.forEach((env, i) => {
-                    const time = i * (dataLoader.data.sample_interval_ms || 100) / 1000;
-                    csv += `${time},${env}\n`;
-                });
+                // 원본 신호와 포락선 모두 출력
+                csv = 'Time (s),Original Signal,Envelope\n';
+                if (result.time && result.originalSignal && result.envelope) {
+                    // 시간, 원본, 포락선 모두 있는 경우
+                    result.envelope.forEach((env, i) => {
+                        csv += `${result.time[i]},${result.originalSignal[i]},${env}\n`;
+                    });
+                } else {
+                    // 하위 호환성: 포락선만 있는 경우
+                    result.envelope.forEach((env, i) => {
+                        const time = i * (dataLoader.data.sample_interval_ms || 100) / 1000;
+                        csv += `${time},,${env}\n`;
+                    });
+                }
                 break;
 
             default:
