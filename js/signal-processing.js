@@ -359,8 +359,8 @@ class SignalProcessor {
             let real = 0, imag = 0;
 
             for (let k = 0; k < n; k++) {
-                // IFFT는 각도 부호가 음수 (FFT와 반대)
-                const angle = -2 * Math.PI * k * t / n;
+                // IFFT는 각도 부호가 양수 (FFT의 반대 부호)
+                const angle = +2 * Math.PI * k * t / n;
                 const cos = Math.cos(angle);
                 const sin = Math.sin(angle);
 
