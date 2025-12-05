@@ -238,10 +238,15 @@ class SignalProcessor {
     }
 
     /**
-     * 간단한 Continuous Wavelet Transform (CWT)
-     * Morlet Wavelet 사용
+     * Continuous Wavelet Transform (CWT)
+     * Complex Morlet Wavelet 사용
+     * @param {Array} signal - 입력 신호
+     * @param {Array} scales - 스케일 배열 (null이면 자동 생성)
+     * @param {string} wavelet - Wavelet 타입 (현재는 'morlet'만 지원)
+     * @param {number} sampleRate - 샘플링 레이트 (Hz)
+     * @param {object} options - 옵션 {omega0, sigma, edgeMode}
      */
-    static performWavelet(signal, scales = null, wavelet = 'morlet', sampleRate = null) {
+    static performWavelet(signal, scales = null, wavelet = 'morlet', sampleRate = null, options = {}) {
         if (!signal || signal.length === 0) {
             console.error('Wavelet: 신호 데이터가 없습니다');
             return null;
@@ -253,6 +258,11 @@ class SignalProcessor {
         }
 
         try {
+            // 옵션 파라미터
+            const omega0 = options.omega0 || 5;  // 중심 각주파수
+            const sigma = options.sigma || 1;    // Gaussian 표준편차
+            const edgeMode = options.edgeMode || 'none';  // 에지 처리 방식
+
             // 기본 스케일 범위
             if (!scales) {
                 scales = [];
@@ -262,26 +272,62 @@ class SignalProcessor {
                 scales = [...new Set(scales)].sort((a, b) => a - b);
             }
 
-            // Morlet wavelet 중심 주파수 (정규화된 주파수)
-            const centerFrequency = 1.0;
+            // 에지 처리: 신호 패딩
+            let paddedSignal = [...signal];
+            let padLeft = 0;
+
+            if (edgeMode !== 'none') {
+                const maxScale = Math.max(...scales);
+                const padSize = Math.floor(maxScale * 5);  // 양쪽에 충분한 패딩
+
+                switch (edgeMode) {
+                    case 'zero':
+                        // Zero-padding
+                        const zeros = new Array(padSize).fill(0);
+                        paddedSignal = [...zeros, ...signal, ...zeros];
+                        padLeft = padSize;
+                        break;
+
+                    case 'symmetric':
+                        // 대칭 확장
+                        const leftPad = signal.slice(0, padSize).reverse();
+                        const rightPad = signal.slice(-padSize).reverse();
+                        paddedSignal = [...leftPad, ...signal, ...rightPad];
+                        padLeft = padSize;
+                        break;
+
+                    case 'reflect':
+                        // 반사 (경계값 제외하고 반전)
+                        const leftReflect = signal.slice(1, padSize + 1).reverse();
+                        const rightReflect = signal.slice(-padSize - 1, -1).reverse();
+                        paddedSignal = [...leftReflect, ...signal, ...rightReflect];
+                        padLeft = padSize;
+                        break;
+                }
+
+                console.log(`[Wavelet] 에지 처리: ${edgeMode}, 패딩 크기: ${padSize}`);
+            }
+
+            // 중심 주파수 계산 (정규화된 주파수)
+            const centerFrequency = omega0 / (2 * Math.PI);
 
             // Scale을 주파수(Hz)로 변환
-            // 공식: f = (centerFrequency * sampleRate) / (2 * π * scale)
-            const frequencies = scales.map(scale => (centerFrequency * sampleRate) / (2 * Math.PI * scale));
+            // 공식: f = (ω₀ / 2π) * (sampleRate / scale)
+            const frequencies = scales.map(scale => centerFrequency * sampleRate / scale);
 
-            // 주파수 검증: 나이퀴스트 주파수 이하인지 확인
+            // 주파수 검증
             const nyquistFreq = sampleRate / 2;
             const maxFreq = Math.max(...frequencies);
             const minFreq = Math.min(...frequencies);
 
             console.log(`[Wavelet Debug] 샘플링 레이트: ${sampleRate.toFixed(2)} Hz`);
+            console.log(`[Wavelet Debug] 중심 각주파수 ω₀: ${omega0.toFixed(2)}`);
             console.log(`[Wavelet Debug] 나이퀴스트 주파수: ${nyquistFreq.toFixed(2)} Hz`);
             console.log(`[Wavelet Debug] 주파수 범위: ${minFreq.toFixed(4)} ~ ${maxFreq.toFixed(4)} Hz`);
             console.log(`[Wavelet Debug] 스케일 범위: ${scales[0]} ~ ${scales[scales.length - 1]}`);
 
             if (maxFreq > nyquistFreq) {
                 console.warn(`[Wavelet Warning] 최대 주파수(${maxFreq.toFixed(2)} Hz)가 나이퀴스트 주파수(${nyquistFreq.toFixed(2)} Hz)를 초과합니다.`);
-                console.warn(`[Wavelet Warning] 앨리어싱(aliasing)이 발생할 수 있습니다.`);
             }
 
             // 주파수 예시 출력 (처음 5개)
@@ -290,23 +336,37 @@ class SignalProcessor {
                 console.log(`  스케일 ${scales[i]} → ${frequencies[i].toFixed(4)} Hz`);
             }
 
+            // 샘플링 간격 (정규화용)
+            const dt = 1.0 / sampleRate;
+
             const result = [];
 
             for (const scale of scales) {
                 const coefficients = [];
 
                 for (let t = 0; t < signal.length; t++) {
-                    let coeff = 0;
+                    let coeffReal = 0;
+                    let coeffImag = 0;
 
-                    // Wavelet 적분
-                    const window = Math.floor(scale * 5);
-                    for (let n = Math.max(0, t - window); n < Math.min(signal.length, t + window); n++) {
-                        const u = (n - t) / scale;
-                        const psi = this._morletWavelet(u);
-                        coeff += signal[n] * psi / Math.sqrt(scale);
+                    // Wavelet 적분 (컨볼루션)
+                    const window = Math.floor(scale * 5 * sigma);  // sigma 고려
+                    const tPadded = t + padLeft;  // 패딩된 인덱스
+
+                    for (let n = Math.max(0, tPadded - window); n < Math.min(paddedSignal.length, tPadded + window); n++) {
+                        const u = (n - tPadded) / scale;
+                        const psi = this._morletWavelet(u, sigma, omega0);
+
+                        // 샘플링 간격 정규화 포함
+                        const normalization = dt / Math.sqrt(scale);
+
+                        // 복소수 컨볼루션 (신호는 실수)
+                        coeffReal += paddedSignal[n] * psi.real * normalization;
+                        coeffImag += paddedSignal[n] * psi.imag * normalization;
                     }
 
-                    coefficients.push(Math.abs(coeff));
+                    // Magnitude 계산
+                    const magnitude = Math.sqrt(coeffReal * coeffReal + coeffImag * coeffImag);
+                    coefficients.push(magnitude);
                 }
 
                 result.push(coefficients);
@@ -317,9 +377,11 @@ class SignalProcessor {
                 scales: scales,
                 frequencies: frequencies,
                 centerFrequency: centerFrequency,
+                omega0: omega0,
                 sampleRate: sampleRate,
-                time: Array.from({length: signal.length}, (_, i) => i),
-                waveletType: wavelet
+                time: Array.from({length: signal.length}, (_, i) => i / sampleRate),
+                waveletType: wavelet,
+                edgeMode: edgeMode
             };
         } catch (error) {
             console.error('Wavelet 오류:', error);
@@ -339,11 +401,24 @@ class SignalProcessor {
     }
 
     /**
-     * Morlet Wavelet
+     * Complex Morlet Wavelet
+     * @param {number} u - 정규화된 시간 (n-t)/scale
+     * @param {number} sigma - Gaussian 표준편차 (기본값: 1)
+     * @param {number} omega0 - 중심 각주파수 (기본값: 5)
+     * @returns {object} {real, imag} - 복소수 wavelet 값
      */
-    static _morletWavelet(u, sigma = 1) {
-        const realPart = Math.exp(-u * u / (2 * sigma * sigma)) * Math.cos(5 * u);
-        return realPart;
+    static _morletWavelet(u, sigma = 1, omega0 = 5) {
+        // Gaussian envelope
+        const gaussian = Math.exp(-u * u / (2 * sigma * sigma));
+
+        // 정규화 계수 (에너지 보존)
+        const normalization = 1 / Math.sqrt(Math.sqrt(Math.PI) * sigma);
+
+        // Complex exponential: e^(iω₀u) = cos(ω₀u) + i·sin(ω₀u)
+        const real = normalization * gaussian * Math.cos(omega0 * u);
+        const imag = normalization * gaussian * Math.sin(omega0 * u);
+
+        return {real, imag};
     }
 
     /**

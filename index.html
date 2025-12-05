@@ -128,15 +128,56 @@
                 </div>
             </div>
             <div id="mainGraph" class="graph-container"></div>
-            <!-- Wavelet 그래프 y축 전환 버튼 -->
-            <div id="waveletControlPanel" style="display: none; margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;">
-                <label style="margin-right: 15px; font-size: 14px;">
-                    <input type="checkbox" id="waveletFrequencyToggle" style="cursor: pointer;">
-                    <span style="cursor: pointer;">주파수(Hz) 모드</span>
-                </label>
-                <span style="font-size: 12px; color: #666;">
-                    (체크: Hz 단위, 미체크: 스케일 단위)
-                </span>
+            <!-- Wavelet 그래프 y축 전환 버튼 및 고급 옵션 -->
+            <div id="waveletControlPanel" style="display: none; margin-top: 15px; padding: 15px; background: #f5f5f5; border-radius: 4px; border-left: 3px solid #9C27B0;">
+                <div style="margin-bottom: 12px;">
+                    <label style="margin-right: 15px; font-size: 14px;">
+                        <input type="checkbox" id="waveletFrequencyToggle" style="cursor: pointer;">
+                        <span style="cursor: pointer;">주파수(Hz) 모드</span>
+                    </label>
+                    <span style="font-size: 12px; color: #666;">
+                        (체크: Hz 단위, 미체크: 스케일 단위)
+                    </span>
+                </div>
+
+                <!-- Wavelet 고급 옵션 -->
+                <details style="margin-top: 10px;">
+                    <summary style="cursor: pointer; font-weight: 600; color: #555; font-size: 13px; user-select: none;">⚙️ Wavelet 고급 설정</summary>
+                    <div style="margin-top: 12px; padding: 12px; background: white; border-radius: 4px;">
+                        <!-- 중심 각주파수 슬라이더 -->
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">
+                                중심 각주파수 (ω₀): <span id="omega0Value" style="color: #9C27B0; font-weight: 700;">5.0</span>
+                            </label>
+                            <input type="range" id="omega0Slider" min="3" max="10" step="0.5" value="5"
+                                   style="width: 100%; cursor: pointer;">
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #999; margin-top: 2px;">
+                                <span>시간 해상도 우선 (3)</span>
+                                <span>균형 (5)</span>
+                                <span>주파수 해상도 우선 (10)</span>
+                            </div>
+                            <div style="font-size: 11px; color: #666; margin-top: 6px; padding: 6px; background: #fffbf0; border-left: 2px solid #FFC107; border-radius: 2px;">
+                                💡 낮은 값: 시간 정밀도 ↑, 높은 값: 주파수 정밀도 ↑
+                            </div>
+                        </div>
+
+                        <!-- 에지 처리 방식 -->
+                        <div>
+                            <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">
+                                에지 처리 방식:
+                            </label>
+                            <select id="waveletEdgeMode" style="width: 100%; padding: 6px 10px; font-size: 13px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer;">
+                                <option value="none">없음 (기본)</option>
+                                <option value="zero">Zero-padding (0으로 채움)</option>
+                                <option value="symmetric" selected>Symmetric (대칭 확장) ⭐</option>
+                                <option value="reflect">Reflect (반사)</option>
+                            </select>
+                            <div style="font-size: 11px; color: #666; margin-top: 6px; padding: 6px; background: #fffbf0; border-left: 2px solid #FFC107; border-radius: 2px;">
+                                💡 Symmetric은 경계 불연속성을 줄여 대부분의 경우 권장됩니다
+                            </div>
+                        </div>
+                    </div>
+                </details>
             </div>
             <!-- 선택 영역 신호처리 UI -->
             <div id="signalProcessingPanel" style="display: none; margin-top: 15px; padding: 15px; background: #fff3e0; border: 2px solid #FF9800; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">

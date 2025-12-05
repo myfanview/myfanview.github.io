@@ -256,6 +256,32 @@ class Dashboard {
         document.getElementById('exportGraphCSV')?.addEventListener('click', () => {
             this.exportSignalProcessingCSV();
         });
+
+        // Wavelet omega0 슬라이더 이벤트
+        const omega0Slider = document.getElementById('omega0Slider');
+        const omega0Value = document.getElementById('omega0Value');
+        if (omega0Slider && omega0Value) {
+            omega0Slider.addEventListener('input', (e) => {
+                omega0Value.textContent = parseFloat(e.target.value).toFixed(1);
+            });
+
+            // 값 변경 완료 시 그래프 재렌더링
+            omega0Slider.addEventListener('change', () => {
+                if (this.currentGraphType === 'wavelet') {
+                    this.renderGraph();
+                }
+            });
+        }
+
+        // Wavelet 에지 처리 방식 변경 이벤트
+        const waveletEdgeMode = document.getElementById('waveletEdgeMode');
+        if (waveletEdgeMode) {
+            waveletEdgeMode.addEventListener('change', () => {
+                if (this.currentGraphType === 'wavelet') {
+                    this.renderGraph();
+                }
+            });
+        }
     }
 
     /**
@@ -1014,7 +1040,13 @@ class Dashboard {
                     break;
 
                 case 'wavelet':
-                    result = SignalProcessor.performWavelet(processedSignal, null, 'morlet', sampleRate);
+                    // Wavelet 옵션 읽기
+                    const omega0Selected = parseFloat(document.getElementById('omega0Slider')?.value || 5);
+                    const edgeModeSelected = document.getElementById('waveletEdgeMode')?.value || 'symmetric';
+                    result = SignalProcessor.performWavelet(processedSignal, null, 'morlet', sampleRate, {
+                        omega0: omega0Selected,
+                        edgeMode: edgeModeSelected
+                    });
                     if (result) {
                         this._showSelectedWavelet(result, processedSignal, fullInfo, startIdx);
                     }
@@ -1526,7 +1558,14 @@ class Dashboard {
         const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
         const nyquistFreq = sampleRate / 2;
 
-        const waveletResult = SignalProcessor.performWavelet(processedSignal, null, 'morlet', sampleRate);
+        // Wavelet 옵션 읽기
+        const omega0 = parseFloat(document.getElementById('omega0Slider')?.value || 5);
+        const edgeMode = document.getElementById('waveletEdgeMode')?.value || 'symmetric';
+
+        const waveletResult = SignalProcessor.performWavelet(processedSignal, null, 'morlet', sampleRate, {
+            omega0: omega0,
+            edgeMode: edgeMode
+        });
         if (!waveletResult) {
             throw new Error('Wavelet 계산 실패');
         }
