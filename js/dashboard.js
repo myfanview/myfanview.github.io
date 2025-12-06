@@ -1045,6 +1045,12 @@ class Dashboard {
      * 신호처리 완료 후 UI 업데이트
      */
     _updateSignalProcessingUIAfterSuccess() {
+        // 패널을 명시적으로 표시 (display: block)
+        const panel = document.getElementById('signalProcessingPanel');
+        if (panel) {
+            panel.style.display = 'block';
+        }
+
         // 확인/취소 버튼 숨기기, 뒤로가기 버튼 표시
         const backButton = document.getElementById('backSignalProcessingBtn');
         const applyButton = document.getElementById('applySignalProcessingBtn');
@@ -1055,6 +1061,17 @@ class Dashboard {
         if (applyButton) applyButton.style.display = 'none';
         if (cancelButton) cancelButton.style.display = 'none';
         if (selectElement) selectElement.style.display = 'none';
+
+        // Wavelet 옵션 표시 (현재 신호처리 타입이 Wavelet인 경우)
+        const activeGraphType = this.activeSelectionProcessing?.graphType;
+        const selectionWaveletOptions = document.getElementById('selectionWaveletOptions');
+        if (selectionWaveletOptions) {
+            if (activeGraphType === 'wavelet') {
+                selectionWaveletOptions.style.display = 'block';
+            } else {
+                selectionWaveletOptions.style.display = 'none';
+            }
+        }
     }
 
     /**
@@ -1127,8 +1144,13 @@ class Dashboard {
             exportPanel.style.display = 'flex';
         }
 
-        // UI 숨김
-        this._hideSignalProcessingUI();
+        // ⚠️ 신호처리 성공 시에만 패널 유지, 실패 시 패널 닫기
+        // activeSelectionProcessing이 설정되면 신호처리가 성공한 것
+        // (실시간 수정을 위해 패널을 열어두어야 함)
+        if (!this.activeSelectionProcessing) {
+            // 신호처리 실패 시만 패널 닫기
+            this._hideSignalProcessingUI();
+        }
     }
 
     /**
