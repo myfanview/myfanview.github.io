@@ -359,6 +359,28 @@ class Dashboard {
                 }
             });
         }
+
+        // 선택영역 전처리 옵션 변경 이벤트 (DC 제거, 트렌드 제거)
+        // ⚠️ 중요: 이 리스너들이 없으면 전처리 옵션 변경 후 그래프가 업데이트되지 않음!
+        const preprocessRemoveDC = document.getElementById('preprocessRemoveDC');
+        if (preprocessRemoveDC) {
+            preprocessRemoveDC.addEventListener('change', () => {
+                // 신호처리 진행 중이면 재처리 (모든 신호처리 타입)
+                if (this.activeSelectionProcessing) {
+                    this._reprocessSelectedSignal();
+                }
+            });
+        }
+
+        const preprocessDetrend = document.getElementById('preprocessDetrend');
+        if (preprocessDetrend) {
+            preprocessDetrend.addEventListener('change', () => {
+                // 신호처리 진행 중이면 재처리 (모든 신호처리 타입)
+                if (this.activeSelectionProcessing) {
+                    this._reprocessSelectedSignal();
+                }
+            });
+        }
     }
 
     /**
@@ -1108,6 +1130,10 @@ class Dashboard {
         if (cancelButton) cancelButton.style.display = 'inline-block';
         if (selectElement) selectElement.style.display = 'inline-block';
 
+        // ⚠️ 중요: selectionEventBound를 false로 리셋해야 renderGraph에서 _bindSelectionEvent 호출됨
+        // 이것이 없으면 다시 영역 선택 후에도 선택 이벤트가 작동하지 않을 수 있음
+        this.selectionEventBound = false;
+
         // ⚠️ 중요: currentGraphType을 'timeseries'로 설정해야 다시 영역 선택 가능
         // renderGraph에서 'timeseries'일 때만 _bindSelectionEvent 호출되기 때문
         this.currentGraphType = 'timeseries';
@@ -1122,9 +1148,13 @@ class Dashboard {
         this.selectedRangeData = null;
 
         // 원본 그래프 렌더링
-        this.renderGraph();
-
-        console.log('[✓] 원본 그래프로 복귀 (currentGraphType = timeseries)');
+        try {
+            this.renderGraph();
+            console.log('[✓] 원본 그래프로 복귀 (currentGraphType = timeseries, selectionEventBound = false)');
+        } catch (error) {
+            console.error('[ERROR] renderGraph 호출 실패:', error);
+            this._showMessage('그래프 렌더링 실패: ' + error.message, 'error');
+        }
     }
 
     /**
