@@ -11,6 +11,7 @@ class Dashboard {
         this.waveletFrequencyMode = false;
         this.selectedRangeData = null;  // 선택된 영역 데이터 저장
         this.selectionEventBound = false;  // 선택 이벤트 바인딩 여부
+        this.activeSelectionProcessing = null;  // 현재 활성 선택영역 신호처리 상태
         this.githubConfig = {
             username: 'YOUR_USERNAME',
             repo: 'YOUR_REPO',
@@ -226,6 +227,11 @@ class Dashboard {
             this._hideSignalProcessingUI();
         });
 
+        // 뒤로가기 버튼 이벤트 (신호처리 후 원본 그래프로 복귀)
+        document.getElementById('backSignalProcessingBtn').addEventListener('click', () => {
+            this._backToOriginalGraph();
+        });
+
         // 전체 신호 전처리 체크박스 변경 시 그래프 재렌더링
         document.getElementById('fullPreprocessRemoveDC')?.addEventListener('change', () => {
             if (this._isSignalProcessingGraphType()) {
@@ -318,12 +324,39 @@ class Dashboard {
             });
         }
 
-        // 선택영역 Wavelet omega0 슬라이더 값 업데이트
+        // 선택영역 Wavelet omega0 슬라이더 값 업데이트 및 재처리
         const selectionOmega0Slider = document.getElementById('selectionOmega0Slider');
         const selectionOmega0Value = document.getElementById('selectionOmega0Value');
         if (selectionOmega0Slider && selectionOmega0Value) {
             selectionOmega0Slider.addEventListener('input', (e) => {
                 selectionOmega0Value.textContent = parseFloat(e.target.value).toFixed(1);
+            });
+
+            // 값 변경 완료 시 신호처리 재실행 (선택영역 신호처리 진행 중일 때만)
+            selectionOmega0Slider.addEventListener('change', () => {
+                if (this.activeSelectionProcessing && this.activeSelectionProcessing.graphType === 'wavelet') {
+                    this._reprocessSelectedSignal();
+                }
+            });
+        }
+
+        // 선택영역 Wavelet 에지 처리 방식 변경 이벤트
+        const selectionEdgeMode = document.getElementById('selectionEdgeMode');
+        if (selectionEdgeMode) {
+            selectionEdgeMode.addEventListener('change', () => {
+                if (this.activeSelectionProcessing && this.activeSelectionProcessing.graphType === 'wavelet') {
+                    this._reprocessSelectedSignal();
+                }
+            });
+        }
+
+        // 선택영역 Wavelet 나이퀴스트 필터 체크박스 이벤트
+        const selectionFilterNyquist = document.getElementById('selectionFilterNyquist');
+        if (selectionFilterNyquist) {
+            selectionFilterNyquist.addEventListener('change', () => {
+                if (this.activeSelectionProcessing && this.activeSelectionProcessing.graphType === 'wavelet') {
+                    this._reprocessSelectedSignal();
+                }
             });
         }
     }
@@ -1001,6 +1034,61 @@ class Dashboard {
     }
 
     /**
+     * 신호처리 완료 후 UI 업데이트
+     */
+    _updateSignalProcessingUIAfterSuccess() {
+        // 확인/취소 버튼 숨기기, 뒤로가기 버튼 표시
+        const backButton = document.getElementById('backSignalProcessingBtn');
+        const applyButton = document.getElementById('applySignalProcessingBtn');
+        const cancelButton = document.getElementById('cancelSignalProcessingBtn');
+        const selectElement = document.getElementById('signalProcessingType');
+
+        if (backButton) backButton.style.display = 'inline-block';
+        if (applyButton) applyButton.style.display = 'none';
+        if (cancelButton) cancelButton.style.display = 'none';
+        if (selectElement) selectElement.style.display = 'none';
+    }
+
+    /**
+     * 원본 그래프로 돌아가기 (신호처리 후 뒤로가기)
+     */
+    _backToOriginalGraph() {
+        // 활성 신호처리 상태 초기화
+        this.activeSelectionProcessing = null;
+
+        // 신호처리 선택 초기화
+        const signalProcessingType = document.getElementById('signalProcessingType');
+        if (signalProcessingType) {
+            signalProcessingType.value = '';
+        }
+
+        // Wavelet 옵션 숨기기
+        const selectionWaveletOptions = document.getElementById('selectionWaveletOptions');
+        if (selectionWaveletOptions) {
+            selectionWaveletOptions.style.display = 'none';
+        }
+
+        // 뒤로가기 버튼 숨기기, 확인/취소 버튼 표시 (선택 영역 다시 선택 가능하도록)
+        const backButton = document.getElementById('backSignalProcessingBtn');
+        const applyButton = document.getElementById('applySignalProcessingBtn');
+        const cancelButton = document.getElementById('cancelSignalProcessingBtn');
+        const selectElement = document.getElementById('signalProcessingType');
+        if (backButton) backButton.style.display = 'none';
+        if (applyButton) applyButton.style.display = 'inline-block';
+        if (cancelButton) cancelButton.style.display = 'inline-block';
+        if (selectElement) selectElement.style.display = 'inline-block';
+
+        // 신호처리 패널은 열어두고, selectedRangeData만 초기화
+        // (사용자가 다시 신호처리 옵션을 변경할 수 있도록)
+        this.selectedRangeData = null;
+
+        // 원본 그래프 렌더링
+        this.renderGraph();
+
+        console.log('[✓] 원본 그래프로 복귀');
+    }
+
+    /**
      * 신호처리 적용
      */
     _applySignalProcessing() {
@@ -1072,6 +1160,17 @@ class Dashboard {
                 case 'fft':
                     result = SignalProcessor.performFFT(processedSignal, sampleRate);
                     if (result) {
+                        // 활성 신호처리 상태 저장
+                        this.activeSelectionProcessing = {
+                            signal: processedSignal,
+                            graphType: graphType,
+                            options: {},
+                            result: result,
+                            originalSignal: signal,
+                            removeDC: removeDC,
+                            detrend: detrend,
+                            sampleRate: sampleRate
+                        };
                         this._showSelectedFFT(result, processedSignal, fullInfo, startIdx);
                     }
                     break;
@@ -1079,6 +1178,17 @@ class Dashboard {
                 case 'stft':
                     result = SignalProcessor.performSTFT(processedSignal, 128, 64, sampleRate);
                     if (result) {
+                        // 활성 신호처리 상태 저장
+                        this.activeSelectionProcessing = {
+                            signal: processedSignal,
+                            graphType: graphType,
+                            options: {windowSize: 128, hopSize: 64},
+                            result: result,
+                            originalSignal: signal,
+                            removeDC: removeDC,
+                            detrend: detrend,
+                            sampleRate: sampleRate
+                        };
                         this._showSelectedSTFT(result, processedSignal, fullInfo, startIdx);
                     }
                     break;
@@ -1088,12 +1198,24 @@ class Dashboard {
                     const omega0Selected = parseFloat(document.getElementById('selectionOmega0Slider')?.value || 5);
                     const edgeModeSelected = document.getElementById('selectionEdgeMode')?.value || 'symmetric';
                     const filterNyquistSelected = document.getElementById('selectionFilterNyquist')?.checked !== false;
-                    result = SignalProcessor.performWavelet(processedSignal, null, 'morlet', sampleRate, {
+                    const waveletOptions = {
                         omega0: omega0Selected,
                         edgeMode: edgeModeSelected,
                         filterNyquist: filterNyquistSelected
-                    });
+                    };
+                    result = SignalProcessor.performWavelet(processedSignal, null, 'morlet', sampleRate, waveletOptions);
                     if (result) {
+                        // 활성 신호처리 상태 저장
+                        this.activeSelectionProcessing = {
+                            signal: processedSignal,
+                            graphType: graphType,
+                            options: waveletOptions,
+                            result: result,
+                            originalSignal: signal,
+                            removeDC: removeDC,
+                            detrend: detrend,
+                            sampleRate: sampleRate
+                        };
                         this._showSelectedWavelet(result, processedSignal, fullInfo, startIdx);
                     }
                     break;
@@ -1101,13 +1223,26 @@ class Dashboard {
                 case 'hilbert':
                     result = SignalProcessor.performHilbert(processedSignal, sampleRate);
                     if (result) {
+                        // 활성 신호처리 상태 저장
+                        this.activeSelectionProcessing = {
+                            signal: processedSignal,
+                            graphType: graphType,
+                            options: {},
+                            result: result,
+                            originalSignal: signal,
+                            removeDC: removeDC,
+                            detrend: detrend,
+                            sampleRate: sampleRate
+                        };
                         this._showSelectedHilbert(result, processedSignal, fullInfo, startIdx);
                     }
                     break;
             }
 
             if (result) {
+                // 신호처리 완료 후 UI 업데이트
                 this._showMessage(`✅ 선택 영역 신호처리 완료: ${fullInfo}`, 'success');
+                this._updateSignalProcessingUIAfterSuccess();
             }
 
         } catch (error) {
@@ -1289,6 +1424,89 @@ class Dashboard {
         };
 
         Plotly.newPlot('mainGraph', traces, layout, {responsive: true});
+    }
+
+    /**
+     * 선택영역 신호처리 재실행 (옵션 변경 시)
+     */
+    _reprocessSelectedSignal() {
+        if (!this.activeSelectionProcessing) {
+            console.warn('[경고] 활성 신호처리 없음');
+            return;
+        }
+
+        try {
+            const {signal, graphType, originalSignal, removeDC, detrend, sampleRate} = this.activeSelectionProcessing;
+
+            // 현재 선택된 옵션 읽기
+            let options = {};
+
+            if (graphType === 'wavelet') {
+                options = {
+                    omega0: parseFloat(document.getElementById('selectionOmega0Slider')?.value || 5),
+                    edgeMode: document.getElementById('selectionEdgeMode')?.value || 'symmetric',
+                    filterNyquist: document.getElementById('selectionFilterNyquist')?.checked !== false
+                };
+            } else if (graphType === 'stft') {
+                options = {windowSize: 128, hopSize: 64};
+            }
+
+            // 옵션 업데이트
+            this.activeSelectionProcessing.options = options;
+
+            let result = null;
+
+            // 신호처리 재실행
+            switch(graphType) {
+                case 'fft':
+                    result = SignalProcessor.performFFT(signal, sampleRate);
+                    break;
+
+                case 'stft':
+                    result = SignalProcessor.performSTFT(signal, options.windowSize, options.hopSize, sampleRate);
+                    break;
+
+                case 'wavelet':
+                    result = SignalProcessor.performWavelet(signal, null, 'morlet', sampleRate, options);
+                    break;
+
+                case 'hilbert':
+                    result = SignalProcessor.performHilbert(signal, sampleRate);
+                    break;
+            }
+
+            if (result) {
+                // 결과 업데이트
+                this.activeSelectionProcessing.result = result;
+
+                // 그래프 재렌더링
+                const info = this.selectedRangeData?.info || '선택영역';
+                const startIdx = this.selectedRangeData?.startIdx || 0;
+                const fullInfo = removeDC || detrend ?
+                    `${info} (${removeDC ? 'DC 제거' : ''} ${detrend ? '트렌드 제거' : ''})`.trim() : info;
+
+                switch(graphType) {
+                    case 'fft':
+                        this._showSelectedFFT(result, signal, fullInfo, startIdx);
+                        break;
+                    case 'stft':
+                        this._showSelectedSTFT(result, signal, fullInfo, startIdx);
+                        break;
+                    case 'wavelet':
+                        this._showSelectedWavelet(result, signal, fullInfo, startIdx);
+                        break;
+                    case 'hilbert':
+                        this._showSelectedHilbert(result, signal, fullInfo, startIdx);
+                        break;
+                }
+
+                console.log('[✓] 선택영역 신호처리 재실행 완료:', {graphType, options});
+            }
+
+        } catch (error) {
+            console.error('[ERROR] 신호처리 재실행 오류:', error);
+            this._showMessage('신호처리 재실행 실패: ' + error.message, 'error');
+        }
     }
 
     async _renderMultiSensorTimeseries() {
