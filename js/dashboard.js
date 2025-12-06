@@ -1017,6 +1017,14 @@ class Dashboard {
             console.error('[ERROR] signalProcessingType 요소를 찾을 수 없습니다');
         }
 
+        // 버튼 상태 초기화 (새 영역 선택 시 뒤로가기 버튼 숨기고 확인/취소 표시)
+        const backButton = document.getElementById('backSignalProcessingBtn');
+        const applyButton = document.getElementById('applySignalProcessingBtn');
+        const cancelButton = document.getElementById('cancelSignalProcessingBtn');
+        if (backButton) backButton.style.display = 'none';
+        if (applyButton) applyButton.style.display = 'inline-block';
+        if (cancelButton) cancelButton.style.display = 'inline-block';
+
         panel.style.display = 'block';
         console.log('[*] 신호처리 UI 패널 표시됨');
 
