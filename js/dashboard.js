@@ -1039,6 +1039,11 @@ class Dashboard {
         const panel = document.getElementById('signalProcessingPanel');
         panel.style.display = 'none';
         this.selectedRangeData = null;
+
+        // ⚠️ 중요: selectionEventBound를 false로 리셋해야 다시 영역 선택 가능
+        // renderGraph에서 selectionEventBound 상태를 확인하므로,
+        // false로 설정하면 다음 renderGraph 호출 시 _bindSelectionEvent가 다시 호출됨
+        this.selectionEventBound = false;
     }
 
     /**
@@ -1103,14 +1108,23 @@ class Dashboard {
         if (cancelButton) cancelButton.style.display = 'inline-block';
         if (selectElement) selectElement.style.display = 'inline-block';
 
-        // 신호처리 패널은 열어두고, selectedRangeData만 초기화
-        // (사용자가 다시 신호처리 옵션을 변경할 수 있도록)
+        // ⚠️ 중요: currentGraphType을 'timeseries'로 설정해야 다시 영역 선택 가능
+        // renderGraph에서 'timeseries'일 때만 _bindSelectionEvent 호출되기 때문
+        this.currentGraphType = 'timeseries';
+
+        // 그래프 타입 UI도 업데이트
+        const graphTypeSelect = document.getElementById('graphType');
+        if (graphTypeSelect) {
+            graphTypeSelect.value = 'timeseries';
+        }
+
+        // 신호처리 패널은 열어두고 (UI 상태 유지)
         this.selectedRangeData = null;
 
         // 원본 그래프 렌더링
         this.renderGraph();
 
-        console.log('[✓] 원본 그래프로 복귀');
+        console.log('[✓] 원본 그래프로 복귀 (currentGraphType = timeseries)');
     }
 
     /**
@@ -1466,9 +1480,31 @@ class Dashboard {
         }
 
         try {
-            const {signal, graphType, originalSignal, removeDC, detrend, sampleRate} = this.activeSelectionProcessing;
+            const {graphType, originalSignal, sampleRate} = this.activeSelectionProcessing;
 
-            // 현재 선택된 옵션 읽기
+            // ⚠️ 현재 선택된 전처리 옵션을 다시 읽기 (사용자가 변경했을 수 있음)
+            const currentRemoveDC = document.getElementById('preprocessRemoveDC')?.checked || false;
+            const currentDetrend = document.getElementById('preprocessDetrend')?.checked || false;
+
+            // originalSignal을 기반으로 새로 전처리 수행
+            let processedSignal = originalSignal;
+
+            if (currentRemoveDC) {
+                processedSignal = SignalProcessor.removeDC(processedSignal);
+                console.log('[전처리] DC 제거 적용');
+            }
+
+            if (currentDetrend) {
+                processedSignal = SignalProcessor.detrend(processedSignal);
+                console.log('[전처리] 선형 트렌드 제거 적용');
+            }
+
+            // activeSelectionProcessing의 signal을 새로 전처리된 신호로 업데이트
+            this.activeSelectionProcessing.signal = processedSignal;
+            this.activeSelectionProcessing.removeDC = currentRemoveDC;
+            this.activeSelectionProcessing.detrend = currentDetrend;
+
+            // 현재 선택된 신호처리 옵션 읽기
             let options = {};
 
             if (graphType === 'wavelet') {
@@ -1486,22 +1522,22 @@ class Dashboard {
 
             let result = null;
 
-            // 신호처리 재실행
+            // 신호처리 재실행 (전처리된 signal 사용)
             switch(graphType) {
                 case 'fft':
-                    result = SignalProcessor.performFFT(signal, sampleRate);
+                    result = SignalProcessor.performFFT(processedSignal, sampleRate);
                     break;
 
                 case 'stft':
-                    result = SignalProcessor.performSTFT(signal, options.windowSize, options.hopSize, sampleRate);
+                    result = SignalProcessor.performSTFT(processedSignal, options.windowSize, options.hopSize, sampleRate);
                     break;
 
                 case 'wavelet':
-                    result = SignalProcessor.performWavelet(signal, null, 'morlet', sampleRate, options);
+                    result = SignalProcessor.performWavelet(processedSignal, null, 'morlet', sampleRate, options);
                     break;
 
                 case 'hilbert':
-                    result = SignalProcessor.performHilbert(signal, sampleRate);
+                    result = SignalProcessor.performHilbert(processedSignal, sampleRate);
                     break;
             }
 
@@ -1512,25 +1548,25 @@ class Dashboard {
                 // 그래프 재렌더링
                 const info = this.selectedRangeData?.info || '선택영역';
                 const startIdx = this.selectedRangeData?.startIdx || 0;
-                const fullInfo = removeDC || detrend ?
-                    `${info} (${removeDC ? 'DC 제거' : ''} ${detrend ? '트렌드 제거' : ''})`.trim() : info;
+                const fullInfo = currentRemoveDC || currentDetrend ?
+                    `${info} (${currentRemoveDC ? 'DC 제거' : ''} ${currentDetrend ? '트렌드 제거' : ''})`.trim() : info;
 
                 switch(graphType) {
                     case 'fft':
-                        this._showSelectedFFT(result, signal, fullInfo, startIdx);
+                        this._showSelectedFFT(result, processedSignal, fullInfo, startIdx);
                         break;
                     case 'stft':
-                        this._showSelectedSTFT(result, signal, fullInfo, startIdx);
+                        this._showSelectedSTFT(result, processedSignal, fullInfo, startIdx);
                         break;
                     case 'wavelet':
-                        this._showSelectedWavelet(result, signal, fullInfo, startIdx);
+                        this._showSelectedWavelet(result, processedSignal, fullInfo, startIdx);
                         break;
                     case 'hilbert':
-                        this._showSelectedHilbert(result, signal, fullInfo, startIdx);
+                        this._showSelectedHilbert(result, processedSignal, fullInfo, startIdx);
                         break;
                 }
 
-                console.log('[✓] 선택영역 신호처리 재실행 완료:', {graphType, options});
+                console.log('[✓] 선택영역 신호처리 재실행 완료:', {graphType, options, removeDC: currentRemoveDC, detrend: currentDetrend});
             }
 
         } catch (error) {
