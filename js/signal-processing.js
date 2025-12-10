@@ -60,12 +60,138 @@ class SignalProcessor {
                 magnitude: magnitude,
                 phase: phase,
                 real: real,
-                imaginary: imaginary
+                imaginary: imaginary,
+
+                // 메타데이터 (대안 1: 정확한 FFT 길이 정보)
+                fftLength: n,                           // 실제 FFT 길이 (zero-padding 포함)
+                originalLength: signal.length,          // 원본 신호 길이
+                frequencyBins: Math.floor(n / 2),       // 주파수 빈 개수
+                frequencyResolution: sampleRate / n,    // 주파수 해상도 (Hz)
+                sampleRate: sampleRate                  // 샘플링 레이트 저장
             };
         } catch (error) {
             console.error('FFT 오류:', error);
             return null;
         }
+    }
+
+    /**
+     * 신호 특성에 따라 적절한 윈도우 크기 자동 계산
+     * @param {number} signalLength - 신호의 샘플 개수
+     * @param {number} sampleRate - 샘플링 레이트 (Hz)
+     * @param {object} options - 옵션 {
+     *   expectedFrequency: null,     // 신호의 기본 주파수 (Hz)
+     *   frequencyResolution: null,   // 원하는 주파수 해상도 (Hz)
+     *   cyclesPerWindow: 5,          // 각 윈도우에 포함할 주기 수
+     *   minFrameCount: 3,            // 최소 프레임 개수
+     *   maxFrameCount: 20,           // 최대 프레임 개수
+     *   minWindowSize: 32            // 최소 윈도우 크기 (2^5)
+     * }
+     * @returns {object} {
+     *   windowSize,      // 계산된 윈도우 크기
+     *   hopSize,         // 홉 크기 (windowSize / 2)
+     *   frameCount,      // 예상 프레임 개수
+     *   method,          // 사용된 방법
+     *   metadata: { ... }
+     * }
+     */
+    static _autoCalculateWindowSize(signalLength, sampleRate, options = {}) {
+        const opts = {
+            expectedFrequency: options.expectedFrequency || null,
+            frequencyResolution: options.frequencyResolution || null,
+            cyclesPerWindow: options.cyclesPerWindow || 5,
+            minFrameCount: options.minFrameCount || 3,
+            maxFrameCount: options.maxFrameCount || 20,
+            minWindowSize: options.minWindowSize || 32
+        };
+
+        let windowSize, method;
+        const metadata = {
+            samplesPerCycle: null,
+            idealWindowSize: null,
+            frequencyResolution: null,
+            warnings: []
+        };
+
+        // Step 1: 방법 결정 및 초기 계산
+        if (opts.expectedFrequency && opts.expectedFrequency > 0) {
+            // 방법 1: 신호 주파수 기반 (가장 정확)
+            method = 'frequency-based';
+            const samplesPerCycle = sampleRate / opts.expectedFrequency;
+            metadata.samplesPerCycle = samplesPerCycle;
+
+            // 각 윈도우에 N주기 포함
+            const idealSize = samplesPerCycle * opts.cyclesPerWindow;
+            metadata.idealWindowSize = idealSize;
+
+            // 2의 거듭제곱으로 반올림
+            windowSize = Math.pow(2, Math.ceil(Math.log2(idealSize)));
+
+        } else if (opts.frequencyResolution && opts.frequencyResolution > 0) {
+            // 방법 2: 주파수 해상도 기반
+            method = 'resolution-based';
+            metadata.frequencyResolution = opts.frequencyResolution;
+
+            // 필요한 FFT 길이: sampleRate / frequencyResolution
+            const idealSize = sampleRate / opts.frequencyResolution;
+            metadata.idealWindowSize = idealSize;
+
+            // 2의 거듭제곱으로 반올림
+            windowSize = Math.pow(2, Math.ceil(Math.log2(idealSize)));
+
+        } else {
+            // 방법 3: 적응형 (기본, 신호 길이 기반)
+            method = 'adaptive';
+            const frameCountTarget = 15;  // 목표 프레임 개수
+            const idealSize = signalLength / frameCountTarget;
+            metadata.idealWindowSize = idealSize;
+
+            // 2의 거듭제곱으로 반올림 (내림)
+            windowSize = Math.pow(2, Math.floor(Math.log2(idealSize)));
+        }
+
+        // Step 2: 신호 길이와의 호환성 검증
+        if (windowSize > signalLength) {
+            metadata.warnings.push(`신호가 윈도우보다 짧음: ${signalLength} < ${windowSize}`);
+            windowSize = Math.pow(2, Math.floor(Math.log2(signalLength)));
+        }
+
+        if (windowSize > signalLength / 2) {
+            metadata.warnings.push(`프레임이 너무 적을 수 있음: 윈도우=${windowSize}, 신호=${signalLength}`);
+            windowSize = Math.pow(2, Math.ceil(Math.log2(signalLength)) - 2);
+        }
+
+        if (windowSize < opts.minWindowSize) {
+            metadata.warnings.push(`최소 윈도우 크기로 조정: ${opts.minWindowSize}`);
+            windowSize = opts.minWindowSize;
+        }
+
+        // Step 3: 프레임 개수 계산
+        const hopSize = Math.floor(windowSize / 2);  // 50% overlap
+        const frameCount = Math.floor((signalLength - windowSize) / hopSize) + 1;
+
+        if (frameCount < opts.minFrameCount) {
+            metadata.warnings.push(`프레임 개수가 너무 적음: ${frameCount} < ${opts.minFrameCount}`);
+        }
+        if (frameCount > opts.maxFrameCount) {
+            metadata.warnings.push(`프레임 개수가 너무 많음: ${frameCount} > ${opts.maxFrameCount}`);
+        }
+
+        // Step 4: 메타데이터 최종화
+        metadata.frequencyResolution = sampleRate / windowSize;
+
+        console.log(`[Window Size] 방법=${method}, 크기=${windowSize}, 홉=${hopSize}, 프레임=${frameCount}, 주파수분해능=${metadata.frequencyResolution.toFixed(4)}Hz`);
+        if (metadata.warnings.length > 0) {
+            console.warn('[Window 경고]', metadata.warnings.join(' | '));
+        }
+
+        return {
+            windowSize: windowSize,
+            hopSize: hopSize,
+            frameCount: frameCount,
+            method: method,
+            metadata: metadata
+        };
     }
 
     /**
@@ -82,9 +208,21 @@ class SignalProcessor {
     /**
      * STFT (Short-Time Fourier Transform)
      * 시간-주파수 분석
-     * ml-dsp의 FFT 사용
+     * 대안 4: 주파수 배열을 직접 생성해서 반환
+     *
+     * @param {Array} signal - 입력 신호
+     * @param {number} windowSize - 윈도우 크기 (기본 256)
+     * @param {number} hopSize - 홉 크기 (기본 128, 50% overlap)
+     * @param {number} sampleRate - 샘플링 레이트 (Hz)
+     * @param {object} windowOptions - 윈도우 자동 계산 옵션 {
+     *   windowType: 'hann',  // 'rectangular', 'hann', 'hamming', 'blackman', 'kaiser'
+     *   expectedFrequency: null,
+     *   frequencyResolution: null,
+     *   ... (다른 _autoCalculateWindowSize 옵션)
+     * }
+     * @returns {object} STFT 결과 + 주파수 배열
      */
-    static performSTFT(signal, windowSize = 256, hopSize = 128, sampleRate = null) {
+    static performSTFT(signal, windowSize = 256, hopSize = 128, sampleRate = null, windowOptions = {}) {
         if (!signal || signal.length === 0) {
             console.error('STFT: 신호 데이터가 없습니다');
             return null;
@@ -97,9 +235,17 @@ class SignalProcessor {
 
         const result = [];
         const times = [];
+        let isFirstFrame = true;
 
-        // Hann 윈도우 생성
-        const window = this._hannWindow(windowSize);
+        // 윈도우 함수 타입 결정
+        const windowType = windowOptions.windowType || 'hann';
+        const kaisarBeta = windowOptions.kaiserBeta || 8.6;
+
+        // 윈도우 생성
+        const window = this.getWindow(windowType, windowSize, kaisarBeta);
+
+        // Zero-padding 길이 결정 (대안 4: 고정값 사용)
+        const fftLengthUsed = 512;
 
         for (let start = 0; start + windowSize <= signal.length; start += hopSize) {
             // 신호 절편 추출
@@ -108,8 +254,8 @@ class SignalProcessor {
             // 윈도우 적용
             const windowed = segment.map((x, i) => x * window[i]);
 
-            // 필요시 zero-padding
-            while (windowed.length < 512) {
+            // Zero-padding to fftLengthUsed
+            while (windowed.length < fftLengthUsed) {
                 windowed.push(0);
             }
 
@@ -118,7 +264,39 @@ class SignalProcessor {
 
             if (fft) {
                 // 양수 주파수만 추출
-                const magnitude = fft.magnitude.slice(0, fft.magnitude.length / 2);
+                let magnitude = fft.magnitude.slice(0, fft.magnitude.length / 2);
+
+                // 정규화 전 peak 값 (디버그용)
+                const peakBeforeNorm = Math.max(...magnitude);
+
+                // Magnitude 정규화
+                // DFT 정규화 공식:
+                //   - i=0 (DC): |X[0]| / N
+                //   - 0<i<N/2 (양수 주파수): 2×|X[i]| / N
+                //   - i=N/2 (Nyquist): |X[N/2]| / N
+                magnitude = magnitude.map((m, i) => {
+                    if (i === 0 || i === fftLengthUsed / 2) {
+                        return m / fftLengthUsed;  // DC와 Nyquist
+                    }
+                    return 2 * m / fftLengthUsed;  // 양수 주파수
+                });
+
+                // 정규화 후 peak 값 (디버그용)
+                const peakAfterNorm = Math.max(...magnitude);
+
+                // 첫 프레임에서 정규화 영향도 로그
+                if (isFirstFrame) {
+                    console.log('[STFT] 정규화 적용:', {
+                        signalLength: signal.length,
+                        windowSize: windowSize,
+                        windowType: windowType,
+                        fftSize: fftLengthUsed,
+                        peakBeforeNorm: peakBeforeNorm.toFixed(4),
+                        peakAfterNorm: peakAfterNorm.toFixed(6),
+                        normalizationFactor: (peakBeforeNorm / peakAfterNorm).toFixed(1) + 'x'
+                    });
+                    isFirstFrame = false;
+                }
 
                 // dB 스케일
                 const magnitudeDb = magnitude.map(m => 20 * Math.log10(Math.max(m, 1e-10)));
@@ -128,11 +306,34 @@ class SignalProcessor {
             }
         }
 
+        // 주파수 배열 한 번만 생성 (대안 4)
+        const frequencies = this.getFrequencies(fftLengthUsed, sampleRate)
+            .slice(0, fftLengthUsed / 2);
+
         return {
             spectrogram: result,
             times: times,
             windowSize: windowSize,
-            hopSize: hopSize
+            hopSize: hopSize,
+
+            // 대안 4: 주파수 배열 포함
+            frequencies: frequencies,
+
+            // 메타데이터
+            fftLength: fftLengthUsed,
+            sampleRate: sampleRate,
+            signalLength: signal.length,
+            frameCount: result.length,
+
+            // 계산 정보
+            frequencyResolution: sampleRate / fftLengthUsed,
+            nyquistFrequency: sampleRate / 2,
+
+            // 디버그 로깅
+            debug: {
+                message: `STFT 완료: 윈도우=${windowSize}/${windowType}, 홉=${hopSize}, 프레임=${result.length}, 주파수빈=${frequencies.length}`,
+                windowType: windowType
+            }
         };
     }
 
@@ -193,6 +394,8 @@ class SignalProcessor {
             }
 
             // IFFT 수행
+            // Hilbert Transform은 포락선 정확성이 중요하므로
+            // 정규화가 보장된 _simpleIFFT 사용 (O(n²) 복잡도이지만 신호가 짧음)
             const analyticSignalFull = this._simpleIFFT(analyticSpectrum);
 
             // 원래 길이로 자르기
@@ -445,6 +648,8 @@ class SignalProcessor {
      * 간단한 IFFT (역 푸리에 변환)
      * 복소수 배열 입력 필요 [[real, imag], ...]
      * DFT를 사용하여 IFFT 계산 (O(n²) 복잡도)
+     *
+     * Hilbert Transform 등에서 정확한 정규화가 필요한 경우 사용
      */
     static _simpleIFFT(complexArray) {
         const n = complexArray.length;
@@ -597,6 +802,186 @@ class SignalProcessor {
 
         // 트렌드 제거
         return signal.map((y, i) => y - (slope * i + intercept));
+    }
+
+    /**
+     * 윈도우 함수들
+     */
+
+    /**
+     * Rectangular 윈도우 (윈도우 없음 - 기본값)
+     * @param {number} size - 윈도우 크기
+     * @returns {Array<number>} 모두 1인 배열
+     */
+    static windowRectangular(size) {
+        return Array(size).fill(1);
+    }
+
+    /**
+     * Hann 윈도우
+     * w(n) = 0.5 * (1 - cos(2π*n / (N-1)))
+     * 특징: 가장 일반적, 균형잡힌 스펙트럼 누수 감소
+     * @param {number} size - 윈도우 크기
+     * @returns {Array<number>} Hann 윈도우
+     */
+    static windowHann(size) {
+        const window = [];
+        for (let n = 0; n < size; n++) {
+            window.push(0.5 * (1 - Math.cos(2 * Math.PI * n / (size - 1))));
+        }
+        return window;
+    }
+
+    /**
+     * Hamming 윈도우
+     * w(n) = 0.54 - 0.46 * cos(2π*n / (N-1))
+     * 특징: Hann과 유사, 부엽(sidelobe) 약간 높음
+     * @param {number} size - 윈도우 크기
+     * @returns {Array<number>} Hamming 윈도우
+     */
+    static windowHamming(size) {
+        const window = [];
+        for (let n = 0; n < size; n++) {
+            window.push(0.54 - 0.46 * Math.cos(2 * Math.PI * n / (size - 1)));
+        }
+        return window;
+    }
+
+    /**
+     * Blackman 윈도우
+     * w(n) = 0.42 - 0.5*cos(2π*n/(N-1)) + 0.08*cos(4π*n/(N-1))
+     * 특징: 강한 스펙트럼 누수 감소, 메인로브 넓음
+     * @param {number} size - 윈도우 크기
+     * @returns {Array<number>} Blackman 윈도우
+     */
+    static windowBlackman(size) {
+        const window = [];
+        for (let n = 0; n < size; n++) {
+            const a0 = 0.42;
+            const a1 = 0.5;
+            const a2 = 0.08;
+            window.push(
+                a0
+                - a1 * Math.cos(2 * Math.PI * n / (size - 1))
+                + a2 * Math.cos(4 * Math.PI * n / (size - 1))
+            );
+        }
+        return window;
+    }
+
+    /**
+     * Kaiser 윈도우 (조정 가능, 베셀 함수 사용)
+     * w(n) = I₀(β * √(1 - (2n/(N-1) - 1)²)) / I₀(β)
+     * 특징: β로 스펙트럼 누수와 해상도 조정 가능
+     * @param {number} size - 윈도우 크기
+     * @param {number} beta - Kaiser 파라미터 (기본 8.6)
+     *                        낮을수록 누수 작음, 높을수록 넓은 메인로브
+     * @returns {Array<number>} Kaiser 윈도우
+     */
+    static windowKaiser(size, beta = 8.6) {
+        // Modified Bessel function I₀ (0차 1종 베셀 함수)
+        const besselI0 = (x) => {
+            if (x === 0) return 1;
+            // Taylor series approximation
+            let sum = 1;
+            let term = 1;
+            for (let k = 1; k <= 20; k++) {
+                term *= (x / (2 * k)) * (x / (2 * k));
+                sum += term;
+                if (Math.abs(term) < 1e-15) break;
+            }
+            return sum;
+        };
+
+        const window = [];
+        const denominator = besselI0(beta);
+
+        for (let n = 0; n < size; n++) {
+            const arg = 1 - Math.pow((2 * n) / (size - 1) - 1, 2);
+            const numerator = besselI0(beta * Math.sqrt(Math.max(arg, 0)));
+            window.push(numerator / denominator);
+        }
+        return window;
+    }
+
+    /**
+     * 지정된 이름으로 윈도우 함수 선택
+     * @param {string} windowType - 윈도우 타입: 'rectangular', 'hann', 'hamming', 'blackman', 'kaiser'
+     * @param {number} size - 윈도우 크기
+     * @param {number} param - 추가 파라미터 (Kaiser의 beta 등)
+     * @returns {Array<number>} 윈도우 배열
+     */
+    static getWindow(windowType, size, param = null) {
+        if (!windowType || windowType === 'rectangular') {
+            return this.windowRectangular(size);
+        }
+
+        switch(windowType.toLowerCase()) {
+            case 'hann':
+                return this.windowHann(size);
+            case 'hamming':
+                return this.windowHamming(size);
+            case 'blackman':
+                return this.windowBlackman(size);
+            case 'kaiser':
+                return this.windowKaiser(size, param || 8.6);
+            default:
+                console.warn(`[Window] 알 수 없는 윈도우 타입: ${windowType}, Rectangular 사용`);
+                return this.windowRectangular(size);
+        }
+    }
+
+    /**
+     * 윈도우 함수 정보 조회
+     * @param {string} windowType - 윈도우 타입
+     * @returns {object} 윈도우 특성 정보
+     */
+    static getWindowInfo(windowType) {
+        const windowInfo = {
+            'rectangular': {
+                name: 'Rectangular (윈도우 없음)',
+                description: '',
+                mainLobeWidth: 4.0,
+                sideLobeLevel: -13,
+                recommended: '연속 신호, 같은 진폭 성분들'
+            },
+            'hann': {
+                name: 'Hann',
+                description: '',
+                mainLobeWidth: 8.0,
+                sideLobeLevel: -32,
+                recommended: '일반적인 신호처리 (⭐ 권장)'
+            },
+            'hamming': {
+                name: 'Hamming',
+                description: '',
+                mainLobeWidth: 8.0,
+                sideLobeLevel: -43,
+                recommended: '특정 주파수 감지가 중요한 경우'
+            },
+            'blackman': {
+                name: 'Blackman',
+                description: '',
+                mainLobeWidth: 12.0,
+                sideLobeLevel: -58,
+                recommended: '스펙트럼 누수 최소화 필요'
+            },
+            'kaiser': {
+                name: 'Kaiser',
+                description: '',
+                mainLobeWidth: 9.0,
+                sideLobeLevel: -50,
+                recommended: '정밀한 튜닝이 필요한 경우'
+            }
+        };
+
+        return windowInfo[windowType?.toLowerCase()] || {
+            name: '알 수 없음',
+            description: '',
+            mainLobeWidth: 0,
+            sideLobeLevel: 0,
+            recommended: ''
+        };
     }
 }
 

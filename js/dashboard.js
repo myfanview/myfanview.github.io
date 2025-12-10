@@ -176,9 +176,6 @@ class Dashboard {
             // 그래프 타입 변경 시 이벤트 바인딩 플래그 리셋
             this.selectionEventBound = false;
 
-            // 전처리 패널 표시/숨김
-            this._updateFullSignalPreprocessVisibility();
-
             this.renderGraph();
         });
 
@@ -230,19 +227,6 @@ class Dashboard {
         // 뒤로가기 버튼 이벤트 (신호처리 후 원본 그래프로 복귀)
         document.getElementById('backSignalProcessingBtn').addEventListener('click', () => {
             this._backToOriginalGraph();
-        });
-
-        // 전체 신호 전처리 체크박스 변경 시 그래프 재렌더링
-        document.getElementById('fullPreprocessRemoveDC')?.addEventListener('change', () => {
-            if (this._isSignalProcessingGraphType()) {
-                this.renderGraph();
-            }
-        });
-
-        document.getElementById('fullPreprocessDetrend')?.addEventListener('change', () => {
-            if (this._isSignalProcessingGraphType()) {
-                this.renderGraph();
-            }
         });
 
         // Export 버튼 이벤트 리스너 (선택 영역)
@@ -384,20 +368,6 @@ class Dashboard {
     }
 
     /**
-     * 전체 신호 전처리 패널 표시/숨김
-     */
-    _updateFullSignalPreprocessVisibility() {
-        const panel = document.getElementById('fullSignalPreprocessGroup');
-        if (panel) {
-            if (this._isSignalProcessingGraphType()) {
-                panel.style.display = 'block';
-            } else {
-                panel.style.display = 'none';
-            }
-        }
-    }
-
-    /**
      * 현재 그래프 타입이 신호처리 타입인지 확인
      */
     _isSignalProcessingGraphType() {
@@ -405,11 +375,12 @@ class Dashboard {
     }
 
     /**
-     * 전체 신호 전처리 적용
+     * 전체 신호 전처리 적용 (공통 전처리 옵션 사용)
      */
     _applyFullSignalPreprocessing(signal) {
-        const removeDC = document.getElementById('fullPreprocessRemoveDC')?.checked || false;
-        const detrend = document.getElementById('fullPreprocessDetrend')?.checked || false;
+        // 공통 전처리 옵션 읽기
+        const removeDC = document.getElementById('commonRemoveDC')?.checked || false;
+        const detrend = document.getElementById('commonDetrend')?.checked || false;
 
         let processedSignal = signal;
         let preprocessInfo = '';
@@ -417,19 +388,109 @@ class Dashboard {
         if (removeDC) {
             processedSignal = SignalProcessor.removeDC(processedSignal);
             preprocessInfo += 'DC 제거 ';
-            console.log('[전처리] DC 성분 제거 적용 (전체 신호)');
+            console.log('[전처리] DC 성분 제거 적용');
         }
 
         if (detrend) {
             processedSignal = SignalProcessor.detrend(processedSignal);
             preprocessInfo += '트렌드 제거 ';
-            console.log('[전처리] 선형 트렌드 제거 적용 (전체 신호)');
+            console.log('[전처리] 선형 트렌드 제거 적용');
         }
 
         return {
             processedSignal: processedSignal,
             preprocessInfo: preprocessInfo.trim()
         };
+    }
+
+    /**
+     * FFT/STFT 고급 옵션 읽기 (공통 전처리 + 특화 옵션)
+     * @returns {object} { windowType, kaiserBeta, removeDC, detrend }
+     */
+    _readFFTStftOptions() {
+        const windowType = document.getElementById('fftStftWindowType')?.value || 'hann';
+        const kaiserBeta = parseFloat(document.getElementById('kaiserBetaSlider')?.value) || 8.6;
+        // 공통 전처리 패널에서 읽기
+        const removeDC = document.getElementById('commonRemoveDC')?.checked || false;
+        const detrend = document.getElementById('commonDetrend')?.checked || false;
+
+        console.log('[FFT/STFT 옵션]', { windowType, kaiserBeta, removeDC, detrend });
+
+        return {
+            windowType: windowType,
+            kaiserBeta: kaiserBeta,
+            removeDC: removeDC,
+            detrend: detrend
+        };
+    }
+
+    /**
+     * FFT/STFT 옵션 이벤트 바인딩 (공통 전처리 + 특화 옵션)
+     */
+    _bindFFTStftOptionEvents() {
+        const windowSelect = document.getElementById('fftStftWindowType');
+        if (!windowSelect) return;
+
+        windowSelect.addEventListener('change', (e) => {
+            const windowType = e.target.value;
+
+            // 윈도우 정보 업데이트
+            const windowInfo = SignalProcessor.getWindowInfo(windowType);
+            const infoDiv = document.getElementById('fftStftWindowInfo');
+            const charDiv = document.getElementById('fftStftWindowCharacteristics');
+
+            if (infoDiv) {
+                // description이 비어있으면 " - "를 붙이지 않음
+                infoDiv.textContent = windowInfo.description
+                    ? `${windowInfo.name} - ${windowInfo.description}`
+                    : windowInfo.name;
+            }
+            if (charDiv) {
+                charDiv.textContent = `메인로브=${windowInfo.mainLobeWidth}, 부엽=${windowInfo.sideLobeLevel}dB, 권장=${windowInfo.recommended}`;
+            }
+
+            // Kaiser 파라미터 패널 표시/숨김
+            const kaiserPanel = document.getElementById('kaiserParamPanel');
+            if (kaiserPanel) {
+                kaiserPanel.style.display = (windowType === 'kaiser') ? 'block' : 'none';
+            }
+
+            console.log(`[윈도우 선택] ${windowType} - ${windowInfo.description}`);
+
+            // 그래프 재렌더링
+            this.renderGraph();
+        });
+
+        // Kaiser 파라미터 슬라이더
+        const kaiserSlider = document.getElementById('kaiserBetaSlider');
+        if (kaiserSlider) {
+            kaiserSlider.addEventListener('input', (e) => {
+                const value = e.target.value;
+                const valueSpan = document.getElementById('kaiserBetaValue');
+                if (valueSpan) {
+                    valueSpan.textContent = value;
+                }
+
+                // 그래프 재렌더링
+                this.renderGraph();
+            });
+        }
+
+        // 공통 DC 제거 체크박스
+        const commonRemoveDCCheck = document.getElementById('commonRemoveDC');
+        if (commonRemoveDCCheck) {
+            commonRemoveDCCheck.addEventListener('change', () => {
+                this.renderGraph();
+            });
+        }
+
+        // 공통 트렌드 제거 체크박스
+        const commonDetrendCheck = document.getElementById('commonDetrend');
+        if (commonDetrendCheck) {
+            commonDetrendCheck.addEventListener('change', () => {
+                this.renderGraph();
+            });
+        }
     }
 
     /**
@@ -660,6 +721,9 @@ class Dashboard {
         // checkbox 이벤트 바인딩
         this._bindSensorCheckboxes();
 
+        // FFT/STFT 옵션 이벤트 바인딩
+        this._bindFFTStftOptionEvents();
+
         // 메타데이터 업데이트
         const metadata = dataLoader.getMetadata();
         if (metadata) {
@@ -820,6 +884,26 @@ class Dashboard {
             const values = sensorData.map(r => r.value);
             const timestamps = sensorData.map(r => r.timestamp);
 
+            // 공통 전처리 패널 표시/숨김 (FFT/STFT/Wavelet/Hilbert)
+            const commonPreprocessPanel = document.getElementById('commonPreprocessPanel');
+            if (commonPreprocessPanel) {
+                if (['fft', 'stft', 'wavelet', 'hilbert'].includes(this.currentGraphType)) {
+                    commonPreprocessPanel.style.display = 'block';
+                } else {
+                    commonPreprocessPanel.style.display = 'none';
+                }
+            }
+
+            // FFT/STFT 특화 옵션 패널 표시/숨김
+            const fftStftPanel = document.getElementById('fftStftSpecificPanel');
+            if (fftStftPanel) {
+                if (['fft', 'stft'].includes(this.currentGraphType)) {
+                    fftStftPanel.style.display = 'block';
+                } else {
+                    fftStftPanel.style.display = 'none';
+                }
+            }
+
             // Wavelet 컨트롤 패널 숨김 (wavelet이 아닐 때)
             const waveletPanel = document.getElementById('waveletControlPanel');
             if (waveletPanel && this.currentGraphType !== 'wavelet') {
@@ -899,9 +983,9 @@ class Dashboard {
             // 분석 텍스트 업데이트
             this._updateAnalysisText(this.currentGraphType, values);
 
-            // 선택 이벤트 바인딩 (단일 센서 시계열 그래프에서만 영역 선택 가능)
+            // 선택 이벤트 바인딩 (시계열 그래프에서만)
             if (this.currentGraphType === 'timeseries') {
-                console.log('[*] 단일 센서 시계열: 신호처리 활성화');
+                console.log('[*] 선택 영역 신호처리 활성화: timeseries');
                 this._bindSelectionEvent(values);
             }
         } catch (error) {
@@ -1035,6 +1119,7 @@ class Dashboard {
         const select = document.getElementById('signalProcessingType');
         if (select) {
             select.value = '';
+            select.style.display = 'block';  // ← 드롭박스 표시
         } else {
             console.error('[ERROR] signalProcessingType 요소를 찾을 수 없습니다');
         }
@@ -1206,8 +1291,16 @@ class Dashboard {
             const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
 
             // 전처리 옵션 확인
-            const removeDC = document.getElementById('preprocessRemoveDC')?.checked || false;
-            const detrend = document.getElementById('preprocessDetrend')?.checked || false;
+            // 공통 전처리 옵션 읽기
+            const commonRemoveDC = document.getElementById('commonRemoveDC')?.checked || false;
+            const commonDetrend = document.getElementById('commonDetrend')?.checked || false;
+            // 선택영역 전용 전처리 옵션 읽기
+            const selectionRemoveDC = document.getElementById('preprocessRemoveDC')?.checked || false;
+            const selectionDetrend = document.getElementById('preprocessDetrend')?.checked || false;
+
+            // 공통 옵션 또는 선택영역 옵션 중 하나라도 체크되면 적용
+            const removeDC = commonRemoveDC || selectionRemoveDC;
+            const detrend = commonDetrend || selectionDetrend;
 
             // 전처리 적용
             let processedSignal = signal;
@@ -1216,13 +1309,13 @@ class Dashboard {
             if (removeDC) {
                 processedSignal = SignalProcessor.removeDC(processedSignal);
                 preprocessInfo += 'DC 제거 ';
-                console.log('[전처리] DC 성분 제거 적용');
+                console.log('[전처리] DC 성분 제거 적용 (공통 또는 선택영역)');
             }
 
             if (detrend) {
                 processedSignal = SignalProcessor.detrend(processedSignal);
                 preprocessInfo += '트렌드 제거 ';
-                console.log('[전처리] 선형 트렌드 제거 적용');
+                console.log('[전처리] 선형 트렌드 제거 적용 (공통 또는 선택영역)');
             }
 
             // 전처리 정보 추가
@@ -1232,38 +1325,63 @@ class Dashboard {
 
             switch(graphType) {
                 case 'fft':
-                    result = SignalProcessor.performFFT(processedSignal, sampleRate);
+                    // FFT/STFT 옵션 읽기 (윈도우 함수 등)
+                    const fftStftOptions = this._readFFTStftOptions();
+
+                    // 윈도우 함수 적용
+                    const window = SignalProcessor.getWindow(fftStftOptions.windowType, processedSignal.length, fftStftOptions.kaiserBeta);
+                    const windowedSignal = processedSignal.map((x, i) => x * window[i]);
+                    preprocessInfo += `윈도우=${fftStftOptions.windowType} `;
+
+                    result = SignalProcessor.performFFT(windowedSignal, sampleRate);
                     if (result) {
                         // 활성 신호처리 상태 저장
                         this.activeSelectionProcessing = {
                             signal: processedSignal,
                             graphType: graphType,
-                            options: {},
+                            options: {windowType: fftStftOptions.windowType, kaiserBeta: fftStftOptions.kaiserBeta},
                             result: result,
                             originalSignal: signal,
                             removeDC: removeDC,
                             detrend: detrend,
                             sampleRate: sampleRate
                         };
-                        this._showSelectedFFT(result, processedSignal, fullInfo, startIdx);
+                        // fullInfo 재구성 (윈도우 정보 추가)
+                        const updatedInfo = preprocessInfo ? `${info} (${preprocessInfo.trim()})` : info;
+                        this._showSelectedFFT(result, windowedSignal, updatedInfo, startIdx);
                     }
                     break;
 
                 case 'stft':
-                    result = SignalProcessor.performSTFT(processedSignal, 128, 64, sampleRate);
+                    // FFT/STFT 옵션 읽기
+                    const stftFftStftOptions = this._readFFTStftOptions();
+                    preprocessInfo += `윈도우=${stftFftStftOptions.windowType} `;
+
+                    result = SignalProcessor.performSTFT(
+                        processedSignal,
+                        128,
+                        64,
+                        sampleRate,
+                        {
+                            windowType: stftFftStftOptions.windowType,
+                            kaiserBeta: stftFftStftOptions.kaiserBeta
+                        }
+                    );
                     if (result) {
                         // 활성 신호처리 상태 저장
                         this.activeSelectionProcessing = {
                             signal: processedSignal,
                             graphType: graphType,
-                            options: {windowSize: 128, hopSize: 64},
+                            options: {windowSize: 128, hopSize: 64, windowType: stftFftStftOptions.windowType, kaiserBeta: stftFftStftOptions.kaiserBeta},
                             result: result,
                             originalSignal: signal,
                             removeDC: removeDC,
                             detrend: detrend,
                             sampleRate: sampleRate
                         };
-                        this._showSelectedSTFT(result, processedSignal, fullInfo, startIdx);
+                        // fullInfo 재구성 (윈도우 정보 추가)
+                        const updatedStftInfo = preprocessInfo ? `${info} (${preprocessInfo.trim()})` : info;
+                        this._showSelectedSTFT(result, processedSignal, updatedStftInfo, startIdx);
                     }
                     break;
 
@@ -1327,15 +1445,29 @@ class Dashboard {
 
     /**
      * 선택 영역 FFT 결과 표시
+     * 메타데이터 기반 폴백 로직 포함
      */
     _showSelectedFFT(fftResult, signal, info, startIdx) {
         const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
         const nyquistFreq = sampleRate / 2;
-        const freqs = SignalProcessor.getFrequencies(signal.length, sampleRate).slice(0, fftResult.magnitude.length);
-        const magnitudeDb = fftResult.magnitude.map(m => 20 * Math.log10(Math.max(m, 1e-10)));
+
+        // 대안 1: 메타데이터 기반 주파수 배열
+        let freqs;
+        if (fftResult.fftLength && fftResult.frequencyBins) {
+            freqs = SignalProcessor.getFrequencies(fftResult.fftLength, sampleRate)
+                .slice(0, fftResult.frequencyBins);
+            console.log(`[선택 FFT] 메타데이터 기반 (${freqs.length}개 빈)`);
+        } else {
+            freqs = SignalProcessor.getFrequencies(signal.length, sampleRate)
+                .slice(0, fftResult.magnitude.length);
+            console.warn('[선택 FFT] 폴백 로직 사용');
+        }
+
+        const magnitudeDb = fftResult.magnitude.slice(0, freqs.length)
+            .map(m => 20 * Math.log10(Math.max(m, 1e-10)));
 
         // 디버그 정보 콘솔 출력
-        console.log(`[선택 영역 FFT Debug] 샘플링 레이트: ${sampleRate.toFixed(2)} Hz | 나이퀴스트 주파수: ${nyquistFreq.toFixed(2)} Hz | 신호 길이: ${signal.length} 샘플`);
+        console.log(`[선택 영역 FFT Debug] 샘플링: ${sampleRate.toFixed(2)}Hz | 나이퀴스트: ${nyquistFreq.toFixed(2)}Hz | 신호: ${signal.length}샘플 | 주파수빈: ${freqs.length}`);
 
         const trace = {
             x: freqs,
@@ -1362,6 +1494,7 @@ class Dashboard {
 
     /**
      * 선택 영역 STFT 결과 표시
+     * 4단계 폴백 로직 포함
      */
     _showSelectedSTFT(stftResult, signal, info, startIdx) {
         const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
@@ -1378,10 +1511,48 @@ class Dashboard {
             normalized.map(row => row[colIndex])
         );
 
-        // 주파수 축 생성
-        const freqBins = transposed.length;
-        const nyquistFreq = sampleRate / 2;
-        const frequencies = Array.from({length: freqBins}, (_, i) => (i * nyquistFreq) / freqBins);
+        // 대안 4: 4단계 폴백 로직
+        let frequencies;
+
+        if (stftResult.frequencies && stftResult.frequencies.length > 0) {
+            // 1순위: STFT 결과에 저장된 주파수 배열
+            frequencies = stftResult.frequencies;
+            console.log(`[선택 STFT] 1순위: 저장된 주파수 배열 (${frequencies.length}개)`);
+
+        } else if (stftResult.fftLength && stftResult.sampleRate) {
+            // 2순위: FFT 길이로부터 계산
+            frequencies = SignalProcessor.getFrequencies(stftResult.fftLength, stftResult.sampleRate)
+                .slice(0, stftResult.fftLength / 2);
+            console.log(`[선택 STFT] 2순위: FFT 길이 계산 (${frequencies.length}개)`);
+
+        } else if (stftResult.windowSize && stftResult.sampleRate) {
+            // 3순위: 윈도우 크기로부터 추정
+            const estimatedFftLength = 512;
+            frequencies = SignalProcessor.getFrequencies(estimatedFftLength, stftResult.sampleRate)
+                .slice(0, estimatedFftLength / 2);
+            console.warn(`[선택 STFT] 3순위: 추정 (FFT=${estimatedFftLength}, ${frequencies.length}개)`);
+
+        } else {
+            // 4순위: 폴백 (부정확)
+            const freqBins = transposed.length;
+            const nyquistFreq = sampleRate / 2;
+            frequencies = Array.from({length: freqBins}, (_, i) => (i * nyquistFreq) / freqBins);
+            console.warn(`[선택 STFT] 4순위: 폴백 (${frequencies.length}개, 부정확 가능)`);
+        }
+
+        // 유효성 검사
+        if (frequencies.length !== transposed.length) {
+            console.warn(`[선택 STFT] 주파수(${frequencies.length}) != 높이(${transposed.length})`);
+            if (frequencies.length > transposed.length) {
+                frequencies = frequencies.slice(0, transposed.length);
+            } else {
+                const nyquistFreq = frequencies[frequencies.length - 1];
+                const freqResolution = frequencies[1] - frequencies[0];
+                while (frequencies.length < transposed.length) {
+                    frequencies.push(nyquistFreq + freqResolution);
+                }
+            }
+        }
 
         const trace = {
             z: transposed,  // [주파수][시간]
@@ -1449,6 +1620,47 @@ class Dashboard {
         };
 
         Plotly.newPlot('mainGraph', [trace], layout, {responsive: true});
+
+        // 선택영역 Wavelet 주파수모드 체크박스 표시
+        const selectionWaveletOptions = document.getElementById('selectionWaveletOptions');
+        if (selectionWaveletOptions) {
+            // 기존 주파수모드 토글 찾기
+            let frequencyToggle = selectionWaveletOptions.querySelector('#selectionWaveletFrequencyToggle');
+
+            if (!frequencyToggle) {
+                // 없으면 새로 생성
+                const toggleContainer = document.createElement('div');
+                toggleContainer.style.cssText = 'margin-bottom: 12px; display: flex; align-items: center; gap: 10px;';
+
+                frequencyToggle = document.createElement('input');
+                frequencyToggle.type = 'checkbox';
+                frequencyToggle.id = 'selectionWaveletFrequencyToggle';
+                frequencyToggle.style.cssText = 'width: 18px; height: 18px; cursor: pointer;';
+
+                const label = document.createElement('label');
+                label.htmlFor = 'selectionWaveletFrequencyToggle';
+                label.textContent = '주파수 모드';
+                label.style.cssText = 'cursor: pointer; margin-bottom: 0;';
+
+                toggleContainer.appendChild(frequencyToggle);
+                toggleContainer.appendChild(label);
+                selectionWaveletOptions.insertBefore(toggleContainer, selectionWaveletOptions.firstChild);
+            }
+
+            // 체크박스 상태 설정
+            frequencyToggle.checked = this.waveletFrequencyMode;
+
+            // 기존 이벤트 리스너 제거
+            const newToggle = frequencyToggle.cloneNode(true);
+            frequencyToggle.parentNode.replaceChild(newToggle, frequencyToggle);
+
+            // 새로운 이벤트 리스너 등록
+            newToggle.onchange = (e) => {
+                this.waveletFrequencyMode = e.target.checked;
+                // 그래프 재렌더링
+                this._showSelectedWavelet(waveletResult, signal, info, startIdx);
+            };
+        }
     }
 
     /**
@@ -1513,20 +1725,30 @@ class Dashboard {
             const {graphType, originalSignal, sampleRate} = this.activeSelectionProcessing;
 
             // ⚠️ 현재 선택된 전처리 옵션을 다시 읽기 (사용자가 변경했을 수 있음)
-            const currentRemoveDC = document.getElementById('preprocessRemoveDC')?.checked || false;
-            const currentDetrend = document.getElementById('preprocessDetrend')?.checked || false;
+            // 공통 전처리 옵션도 함께 읽기
+            const commonRemoveDC = document.getElementById('commonRemoveDC')?.checked || false;
+            const commonDetrend = document.getElementById('commonDetrend')?.checked || false;
+            const selectionRemoveDC = document.getElementById('preprocessRemoveDC')?.checked || false;
+            const selectionDetrend = document.getElementById('preprocessDetrend')?.checked || false;
+
+            // 공통 옵션 또는 선택영역 옵션 중 하나라도 체크되면 적용
+            const currentRemoveDC = commonRemoveDC || selectionRemoveDC;
+            const currentDetrend = commonDetrend || selectionDetrend;
 
             // originalSignal을 기반으로 새로 전처리 수행
             let processedSignal = originalSignal;
+            let preprocessInfo = '';
 
             if (currentRemoveDC) {
                 processedSignal = SignalProcessor.removeDC(processedSignal);
-                console.log('[전처리] DC 제거 적용');
+                preprocessInfo += 'DC 제거 ';
+                console.log('[전처리] DC 제거 적용 (공통 또는 선택영역)');
             }
 
             if (currentDetrend) {
                 processedSignal = SignalProcessor.detrend(processedSignal);
-                console.log('[전처리] 선형 트렌드 제거 적용');
+                preprocessInfo += '트렌드 제거 ';
+                console.log('[전처리] 선형 트렌드 제거 적용 (공통 또는 선택영역)');
             }
 
             // activeSelectionProcessing의 signal을 새로 전처리된 신호로 업데이트
@@ -1555,11 +1777,32 @@ class Dashboard {
             // 신호처리 재실행 (전처리된 signal 사용)
             switch(graphType) {
                 case 'fft':
-                    result = SignalProcessor.performFFT(processedSignal, sampleRate);
+                    // FFT/STFT 옵션 읽기 (윈도우 함수 등)
+                    const fftStftOptions = this._readFFTStftOptions();
+
+                    // 윈도우 함수 적용
+                    const window = SignalProcessor.getWindow(fftStftOptions.windowType, processedSignal.length, fftStftOptions.kaiserBeta);
+                    const windowedSignal = processedSignal.map((x, i) => x * window[i]);
+                    preprocessInfo += `윈도우=${fftStftOptions.windowType} `;
+
+                    result = SignalProcessor.performFFT(windowedSignal, sampleRate);
                     break;
 
                 case 'stft':
-                    result = SignalProcessor.performSTFT(processedSignal, options.windowSize, options.hopSize, sampleRate);
+                    // FFT/STFT 옵션 읽기
+                    const stftFftStftOptions = this._readFFTStftOptions();
+                    preprocessInfo += `윈도우=${stftFftStftOptions.windowType} `;
+
+                    result = SignalProcessor.performSTFT(
+                        processedSignal,
+                        options.windowSize,
+                        options.hopSize,
+                        sampleRate,
+                        {
+                            windowType: stftFftStftOptions.windowType,
+                            kaiserBeta: stftFftStftOptions.kaiserBeta
+                        }
+                    );
                     break;
 
                 case 'wavelet':
@@ -1578,8 +1821,7 @@ class Dashboard {
                 // 그래프 재렌더링
                 const info = this.selectedRangeData?.info || '선택영역';
                 const startIdx = this.selectedRangeData?.startIdx || 0;
-                const fullInfo = currentRemoveDC || currentDetrend ?
-                    `${info} (${currentRemoveDC ? 'DC 제거' : ''} ${currentDetrend ? '트렌드 제거' : ''})`.trim() : info;
+                const fullInfo = preprocessInfo ? `${info} (${preprocessInfo.trim()})` : info;
 
                 switch(graphType) {
                     case 'fft':
@@ -1789,20 +2031,51 @@ class Dashboard {
      * FFT 플롯 생성
      */
     _createFFTPlot(values) {
-        // 전처리 적용
-        const {processedSignal, preprocessInfo} = this._applyFullSignalPreprocessing(values);
+        // FFT/STFT 옵션 읽기
+        const fftStftOptions = this._readFFTStftOptions();
+
+        // 전처리 적용 (FFT/STFT 옵션 우선)
+        let processedSignal = values;
+        let preprocessInfo = '';
+
+        if (fftStftOptions.removeDC) {
+            processedSignal = SignalProcessor.removeDC(processedSignal);
+            preprocessInfo += 'DC제거 ';
+        }
+
+        if (fftStftOptions.detrend) {
+            processedSignal = SignalProcessor.detrend(processedSignal);
+            preprocessInfo += '트렌드제거 ';
+        }
+
+        // 윈도우 함수 적용
+        const window = SignalProcessor.getWindow(fftStftOptions.windowType, processedSignal.length, fftStftOptions.kaiserBeta);
+        const windowedSignal = processedSignal.map((x, i) => x * window[i]);
 
         // 샘플링 레이트 계산
         const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
         const nyquistFreq = sampleRate / 2;
 
-        const fftResult = SignalProcessor.performFFT(processedSignal, sampleRate);
+        const fftResult = SignalProcessor.performFFT(windowedSignal, sampleRate);
         if (!fftResult) {
             throw new Error('FFT 계산 실패');
         }
 
-        const freqs = SignalProcessor.getFrequencies(processedSignal.length, sampleRate).slice(0, fftResult.magnitude.length / 2);
-        const magnitude = fftResult.magnitude.slice(0, fftResult.magnitude.length / 2);
+        // 대안 1: 메타데이터 기반 주파수 배열 생성
+        let freqs;
+        if (fftResult.fftLength && fftResult.frequencyBins) {
+            // FFT 메타데이터 사용 (가장 정확)
+            freqs = SignalProcessor.getFrequencies(fftResult.fftLength, sampleRate)
+                .slice(0, fftResult.frequencyBins);
+            console.log(`[FFT] 메타데이터 기반 주파수 배열 (${freqs.length}개 빈)`);
+        } else {
+            // 폴백: 신호 길이 기반
+            freqs = SignalProcessor.getFrequencies(processedSignal.length, sampleRate)
+                .slice(0, fftResult.magnitude.length);
+            console.warn('[FFT] 메타데이터 부재, 신호 길이 기반 계산');
+        }
+
+        const magnitude = fftResult.magnitude.slice(0, freqs.length);
 
         // dB 스케일
         const magnitudeDb = magnitude.map(m => 20 * Math.log10(Math.max(m, 1e-10)));
@@ -1811,16 +2084,16 @@ class Dashboard {
         this.lastSignalProcessingResult = {
             frequencies: freqs,
             magnitude: magnitudeDb,
-            phase: fftResult.phase.slice(0, fftResult.phase.length / 2)
+            phase: fftResult.phase.slice(0, freqs.length)
         };
         this.lastProcessingType = 'fft';
         this.lastProcessingSensor = this.currentSensor;
 
         // 디버그 정보 콘솔 출력
-        console.log(`[FFT Debug] 샘플링 레이트: ${sampleRate.toFixed(2)} Hz | 나이퀴스트 주파수: ${nyquistFreq.toFixed(2)} Hz | 주파수 해상도: ${(freqs[1] - freqs[0]).toFixed(4)} Hz`);
-        if (preprocessInfo) {
-            console.log(`[FFT Debug] 전처리: ${preprocessInfo}`);
-        }
+        const windowInfo = SignalProcessor.getWindowInfo(fftStftOptions.windowType);
+        const displayInfo = `${preprocessInfo}윈도우=${fftStftOptions.windowType}`;
+        console.log(`[FFT Debug] 샘플링: ${sampleRate.toFixed(2)}Hz | 나이퀴스트: ${nyquistFreq.toFixed(2)}Hz | 해상도: ${(freqs[1] - freqs[0]).toFixed(4)}Hz | ${displayInfo}`);
+        console.log(`[FFT Debug] FFT길이=${fftResult.fftLength}, 주파수빈=${freqs.length}, 윈도우특성=${windowInfo.name}`);
 
         const trace = {
             x: freqs,
@@ -1833,8 +2106,7 @@ class Dashboard {
             hovertemplate: '<b>주파수:</b> %{x:.2f} Hz<br><b>크기:</b> %{y:.2f} dB<extra></extra>'
         };
 
-        const titleSuffix = preprocessInfo ? `<br><sub>샘플링: ${sampleRate.toFixed(2)} Hz | 나이퀴스트: ${nyquistFreq.toFixed(2)} Hz | 전처리: ${preprocessInfo}</sub>`
-                                           : `<br><sub>샘플링: ${sampleRate.toFixed(2)} Hz | 나이퀴스트: ${nyquistFreq.toFixed(2)} Hz</sub>`;
+        const titleSuffix = `<br><sub>샘플링: ${sampleRate.toFixed(2)} Hz | 나이퀴스트: ${nyquistFreq.toFixed(2)} Hz | ${displayInfo}</sub>`;
 
         const layout = {
             title: `${this.currentSensor} - FFT 스펙트럼${titleSuffix}`,
@@ -1852,13 +2124,38 @@ class Dashboard {
      * STFT 플롯 생성
      */
     _createSTFTPlot(values) {
+        // FFT/STFT 옵션 읽기
+        const fftStftOptions = this._readFFTStftOptions();
+
         // 전처리 적용
-        const {processedSignal, preprocessInfo} = this._applyFullSignalPreprocessing(values);
+        let processedSignal = values;
+        let preprocessInfo = '';
+
+        if (fftStftOptions.removeDC) {
+            processedSignal = SignalProcessor.removeDC(processedSignal);
+            preprocessInfo += 'DC제거 ';
+        }
+
+        if (fftStftOptions.detrend) {
+            processedSignal = SignalProcessor.detrend(processedSignal);
+            preprocessInfo += '트렌드제거 ';
+        }
 
         // 샘플링 레이트 계산
         const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
 
-        const stftResult = SignalProcessor.performSTFT(processedSignal, 128, 64, sampleRate);
+        // STFT 수행 (대안 4: windowOptions 전달, 주파수 배열 반환)
+        const stftResult = SignalProcessor.performSTFT(
+            processedSignal,
+            256,  // windowSize 기본값
+            128,  // hopSize (50% overlap)
+            sampleRate,
+            {
+                windowType: fftStftOptions.windowType,
+                kaiserBeta: fftStftOptions.kaiserBeta
+            }
+        );
+
         if (!stftResult) {
             throw new Error('STFT 계산 실패');
         }
@@ -1870,10 +2167,51 @@ class Dashboard {
             stftResult.spectrogram.map(row => row[colIndex])
         );
 
-        // 주파수 축 생성
-        const freqBins = transposed.length;
-        const nyquistFreq = sampleRate / 2;
-        const frequencies = Array.from({length: freqBins}, (_, i) => (i * nyquistFreq) / freqBins);
+        // 대안 4: 4단계 폴백 로직으로 주파수 배열 결정
+        let frequencies;
+
+        if (stftResult.frequencies && stftResult.frequencies.length > 0) {
+            // 1순위: STFT 결과에 저장된 주파수 배열 직접 사용
+            frequencies = stftResult.frequencies;
+            console.log(`[STFT] 1순위: 저장된 주파수 배열 사용 (${frequencies.length}개)`);
+
+        } else if (stftResult.fftLength && stftResult.sampleRate) {
+            // 2순위: FFT 길이와 샘플링 레이트로부터 계산
+            frequencies = SignalProcessor.getFrequencies(stftResult.fftLength, stftResult.sampleRate)
+                .slice(0, stftResult.fftLength / 2);
+            console.log(`[STFT] 2순위: FFT 길이로부터 계산 (${frequencies.length}개)`);
+
+        } else if (stftResult.windowSize && stftResult.sampleRate) {
+            // 3순위: 윈도우 크기로부터 추정
+            const estimatedFftLength = 512;
+            frequencies = SignalProcessor.getFrequencies(estimatedFftLength, stftResult.sampleRate)
+                .slice(0, estimatedFftLength / 2);
+            console.warn(`[STFT] 3순위: 추정 계산 (FFT=${estimatedFftLength}, ${frequencies.length}개 빈)`);
+
+        } else {
+            // 4순위: 폴백 (부정확할 수 있음)
+            const freqBins = transposed.length;
+            const nyquistFreq = sampleRate / 2;
+            frequencies = Array.from({length: freqBins}, (_, i) => (i * nyquistFreq) / freqBins);
+            console.warn(`[STFT] 4순위: 폴백 계산 (${frequencies.length}개, 부정확할 수 있음)`);
+        }
+
+        // 유효성 검사: 주파수 배열과 스펙트로그램 높이 일치 확인
+        if (frequencies.length !== transposed.length) {
+            console.warn(`[STFT 경고] 주파수 배열(${frequencies.length}) != 스펙트로그램 높이(${transposed.length})`);
+
+            // 강제 조정
+            if (frequencies.length > transposed.length) {
+                frequencies = frequencies.slice(0, transposed.length);
+            } else {
+                const nyquistFreq = frequencies[frequencies.length - 1];
+                const freqResolution = frequencies[1] - frequencies[0];
+                while (frequencies.length < transposed.length) {
+                    frequencies.push(nyquistFreq + freqResolution);
+                }
+            }
+            console.log(`[STFT] 주파수 배열 조정 완료: ${frequencies.length}개`);
+        }
 
         // 신호처리 결과 저장 (Export용)
         this.lastSignalProcessingResult = {
@@ -1884,6 +2222,10 @@ class Dashboard {
         this.lastProcessingType = 'stft';
         this.lastProcessingSensor = this.currentSensor;
 
+        // 디버그 정보
+        const windowInfo = SignalProcessor.getWindowInfo(fftStftOptions.windowType);
+        console.log(`[STFT Debug] 윈도우=${fftStftOptions.windowType} (${windowInfo.name}), 프레임=${stftResult.times.length}, 주파수분해능=${stftResult.frequencyResolution?.toFixed(4)}Hz`);
+
         const trace = {
             z: transposed,  // [주파수][시간]
             x: stftResult.times,  // 시간축
@@ -1893,7 +2235,8 @@ class Dashboard {
             hovertemplate: '<b>시간:</b> %{x:.2f}s<br><b>주파수:</b> %{y:.2f} Hz<br><b>크기:</b> %{z:.2f} dB<extra></extra>'
         };
 
-        const titleSuffix = preprocessInfo ? ` (전처리: ${preprocessInfo})` : '';
+        const displayInfo = `${preprocessInfo}윈도우=${fftStftOptions.windowType}`;
+        const titleSuffix = displayInfo ? ` (${displayInfo})` : '';
 
         const layout = {
             title: `${this.currentSensor} - STFT 스펙트로그램${titleSuffix}`,
@@ -2192,7 +2535,7 @@ class Dashboard {
                 if (sensorType === 'Temperature') {
                     analysisText = `평균: ${stats.mean.toFixed(2)}°C | 범위: ${stats.min.toFixed(1)}~${stats.max.toFixed(1)}°C | 변동폭: ${(stats.max - stats.min).toFixed(1)}°C`;
                 } else if (sensorType === 'Fan') {
-                    analysisText = `평균: ${stats.mean.toFixed(0)} RPM | 범위: ${stats.min.toFixed(0)}~${stats.max.toFixed(0)} RPM | 안정성: ${((1 - stats.stdDev/stats.mean) * 100).toFixed(1)}%`;
+                    analysisText = `평균: ${stats.mean.toFixed(0)} RPM | 범위: ${stats.min.toFixed(0)}~${stats.max.toFixed(0)} RPM`;
                 } else if (sensorType === 'Control') {
                     analysisText = `평균: ${stats.mean.toFixed(1)}% | 범위: ${stats.min.toFixed(1)}~${stats.max.toFixed(1)}% | 변동폭: ${(stats.max - stats.min).toFixed(1)}%`;
                 } else {
@@ -2201,37 +2544,53 @@ class Dashboard {
                 break;
 
             case 'fft':
-                const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
-                const fftResult = SignalProcessor.performFFT(values, sampleRate);
-                if (fftResult) {
-                    const maxMagIdx = fftResult.magnitude.indexOf(Math.max(...fftResult.magnitude));
-                    const peakFreq = (maxMagIdx * sampleRate) / values.length;
-                    analysisText = `피크 주파수: ${peakFreq.toFixed(2)} Hz (크기: ${fftResult.magnitude[maxMagIdx].toFixed(2)})`;
+                // 공통 전처리 적용
+                const {processedSignal: fftProcessedSignal} = this._applyFullSignalPreprocessing(values);
 
-                    if (sensorType === 'Fan') {
-                        analysisText += ` | 해석: 회전 기본 주파수`;
+                // FFT 옵션 읽기
+                const fftOptions = this._readFFTStftOptions();
+
+                // 윈도우 함수 적용
+                const fftWindow = SignalProcessor.getWindow(fftOptions.windowType, fftProcessedSignal.length, fftOptions.kaiserBeta);
+                const fftWindowedSignal = fftProcessedSignal.map((x, i) => x * fftWindow[i]);
+
+                const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+                const fftResult = SignalProcessor.performFFT(fftWindowedSignal, sampleRate);
+                if (fftResult && fftResult.magnitude.length > 0) {
+                    const maxMagIdx = fftResult.magnitude.indexOf(Math.max(...fftResult.magnitude));
+                    // 정확한 주파수 계산 (메타데이터 기반)
+                    let peakFreq;
+                    if (fftResult.fftLength && fftResult.frequencyBins) {
+                        const freqs = SignalProcessor.getFrequencies(fftResult.fftLength, sampleRate).slice(0, fftResult.frequencyBins);
+                        peakFreq = freqs[maxMagIdx] || 0;
+                    } else {
+                        peakFreq = (maxMagIdx * sampleRate) / fftWindowedSignal.length;
                     }
+                    // dB 스케일로 변환
+                    const peakMagnitude = 20 * Math.log10(Math.max(fftResult.magnitude[maxMagIdx], 1e-10));
+                    analysisText = `피크 주파수: ${peakFreq.toFixed(2)} Hz (크기: ${peakMagnitude.toFixed(2)} dB)`;
                 }
                 break;
 
             case 'stft':
                 analysisText = '시간-주파수 에너지 분포입니다. 밝은 색 영역이 높은 에너지를 나타냅니다.';
-                if (sensorType === 'Fan') {
-                    analysisText += ' 베어링 손상이 있으면 광대역 에너지가 증가합니다.';
-                }
                 break;
 
             case 'wavelet':
                 analysisText = '다중 스케일 신호 분석입니다. 밝은 색은 높은 에너지를 의미합니다.';
-                if (sensorType === 'Fan') {
-                    analysisText += ' 팬의 기계적 결함은 낮은 스케일에서 에너지 집중.';
-                }
                 break;
 
             case 'hilbert':
-                analysisText = `신호의 포락선을 추출했습니다. 포락선 범위: ${stats.min.toFixed(2)}~${stats.max.toFixed(2)}`;
-                if (sensorType === 'Fan') {
-                    analysisText += ' 포락선의 변동성이 크면 베어링 문제 가능성.';
+                // 공통 전처리 적용
+                const {processedSignal: hilbertProcessedSignal} = this._applyFullSignalPreprocessing(values);
+
+                const hilbertResult = SignalProcessor.performHilbert(hilbertProcessedSignal, 1000 / (dataLoader.data.sample_interval_ms || 100));
+                if (hilbertResult && hilbertResult.envelope && hilbertResult.envelope.length > 0) {
+                    const envelopeMin = Math.min(...hilbertResult.envelope);
+                    const envelopeMax = Math.max(...hilbertResult.envelope);
+                    analysisText = `신호의 포락선을 추출했습니다. 포락선 범위: ${envelopeMin.toFixed(2)}~${envelopeMax.toFixed(2)}`;
+                } else {
+                    analysisText = `신호의 포락선을 추출했습니다.`;
                 }
                 break;
 

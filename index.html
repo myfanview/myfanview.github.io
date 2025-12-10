@@ -83,22 +83,6 @@
                 </select>
             </div>
 
-            <!-- 전체 신호 전처리 옵션 (FFT/STFT/Wavelet/Hilbert 선택 시) -->
-            <div class="filter-group" id="fullSignalPreprocessGroup" style="display: none; padding: 10px; background: #f5f5f5; border-radius: 4px; border-left: 3px solid #FF9800;">
-                <label style="font-weight: 600; color: #555; margin-bottom: 8px; display: block;">🔧 전처리 옵션:</label>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px;">
-                        <input type="checkbox" id="fullPreprocessRemoveDC" style="cursor: pointer; width: 16px; height: 16px;">
-                        <span>DC 성분 제거</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px;">
-                        <input type="checkbox" id="fullPreprocessDetrend" style="cursor: pointer; width: 16px; height: 16px;">
-                        <span>선형 트렌드 제거</span>
-                    </label>
-                </div>
-                <div style="font-size: 11px; color: #666; margin-top: 6px;">💡 전체 신호에 전처리를 적용한 후 신호처리를 수행합니다</div>
-            </div>
-
             <div class="filter-group">
                 <label for="updateInterval">갱신 간격:</label>
                 <select id="updateInterval">
@@ -128,6 +112,70 @@
                 </div>
             </div>
             <div id="mainGraph" class="graph-container"></div>
+
+            <!-- 공통 전처리 패널 (FFT/STFT/Wavelet/Hilbert) -->
+            <div id="commonPreprocessPanel" style="display: none; margin-top: 15px; padding: 15px; background: #f5f5f5; border-radius: 4px; border-left: 3px solid #2196F3;">
+                <label style="font-weight: 600; color: #555; margin-bottom: 8px; display: block; font-size: 13px;">🔧 공통 전처리 옵션:</label>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #555;">
+                        <input type="checkbox" id="commonRemoveDC" style="cursor: pointer; width: 16px; height: 16px;">
+                        <span style="font-weight: 600;">DC 성분 제거</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #555;">
+                        <input type="checkbox" id="commonDetrend" style="cursor: pointer; width: 16px; height: 16px;">
+                        <span style="font-weight: 600;">선형 트렌드 제거</span>
+                    </label>
+                </div>
+                <div style="font-size: 11px; color: #666; margin-top: 6px; padding: 6px; background: #e3f2fd; border-left: 2px solid #2196F3; border-radius: 2px;">
+                    💡 DC 제거: 신호의 평균값을 제거하여 0 Hz 성분 감소<br>
+                    💡 트렌드 제거: 선형 변화를 제거하여 신호 안정화
+                </div>
+            </div>
+
+            <!-- FFT/STFT 특화 옵션 -->
+            <div id="fftStftSpecificPanel" style="display: none; margin-top: 15px; padding: 15px; background: #f5f5f5; border-radius: 4px; border-left: 3px solid #FF9800;">
+                <details style="margin-top: 0;">
+                    <summary style="cursor: pointer; font-weight: 600; color: #555; font-size: 13px; user-select: none;">⚙️ FFT/STFT 고급 설정</summary>
+                    <div style="margin-top: 12px; padding: 12px; background: white; border-radius: 4px;">
+                        <!-- 윈도우 함수 선택 -->
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">
+                                윈도우 함수:
+                            </label>
+                            <select id="fftStftWindowType" style="width: 100%; padding: 8px 10px; font-size: 12px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer;">
+                                <option value="rectangular">Rectangular (윈도우 없음)</option>
+                                <option value="hann" selected>Hann ⭐ (권장)</option>
+                                <option value="hamming">Hamming</option>
+                                <option value="blackman">Blackman</option>
+                                <option value="kaiser">Kaiser (조정 가능)</option>
+                            </select>
+                            <div style="font-size: 11px; color: #666; margin-top: 6px; padding: 8px; background: #e3f2fd; border-left: 2px solid #2196F3; border-radius: 2px;">
+                                <div style="margin-bottom: 4px;">📊 <strong>선택된 윈도우:</strong> <span id="fftStftWindowInfo" style="color: #1976D2; font-weight: 600;">Hann - 가장 일반적, 균형잡힌 스펙트럼 누수 감소</span></div>
+                                <div style="font-size: 10px; color: #666;">특성: <span id="fftStftWindowCharacteristics">메인로브=8.0, 부엽=-32dB</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Kaiser 파라미터 (Kaiser만 보임) -->
+                        <div id="kaiserParamPanel" style="margin-bottom: 15px; display: none;">
+                            <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">
+                                Kaiser β 파라미터: <span id="kaiserBetaValue" style="color: #FF9800; font-weight: 700;">8.6</span>
+                            </label>
+                            <input type="range" id="kaiserBetaSlider" min="3" max="15" step="0.5" value="8.6"
+                                   style="width: 100%; cursor: pointer;">
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #999; margin-top: 2px;">
+                                <span>누수 최소화 (3)</span>
+                                <span>균형 (8.6)</span>
+                                <span>해상도 최대화 (15)</span>
+                            </div>
+                            <div style="font-size: 11px; color: #666; margin-top: 6px; padding: 6px; background: #fffbf0; border-left: 2px solid #FFC107; border-radius: 2px;">
+                                💡 β 낮을수록: 스펙트럼 누수 ↓, 해상도 ↓<br>
+                                💡 β 높을수록: 스펙트럼 누수 ↑, 해상도 ↑
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </div>
+
             <!-- Wavelet 그래프 y축 전환 버튼 및 고급 옵션 -->
             <div id="waveletControlPanel" style="display: none; margin-top: 15px; padding: 15px; background: #f5f5f5; border-radius: 4px; border-left: 3px solid #9C27B0;">
                 <div style="margin-bottom: 12px;">
