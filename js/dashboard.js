@@ -1035,6 +1035,7 @@ class Dashboard {
         const select = document.getElementById('signalProcessingType');
         if (select) {
             select.value = '';
+            select.style.display = 'block';  // ← 드롭박스 표시
         } else {
             console.error('[ERROR] signalProcessingType 요소를 찾을 수 없습니다');
         }
@@ -1450,24 +1451,45 @@ class Dashboard {
 
         Plotly.newPlot('mainGraph', [trace], layout, {responsive: true});
 
-        // Wavelet 주파수모드 체크박스 표시
-        const waveletPanel = document.getElementById('waveletControlPanel');
-        if (waveletPanel) {
-            waveletPanel.style.display = 'block';
-            const toggle = document.getElementById('waveletFrequencyToggle');
-            if (toggle) {
-                toggle.checked = this.waveletFrequencyMode;
-                // 기존 이벤트 리스너 제거
-                const newToggle = toggle.cloneNode(true);
-                toggle.parentNode.replaceChild(newToggle, toggle);
+        // 선택영역 Wavelet 주파수모드 체크박스 표시
+        const selectionWaveletOptions = document.getElementById('selectionWaveletOptions');
+        if (selectionWaveletOptions) {
+            // 기존 주파수모드 토글 찾기
+            let frequencyToggle = selectionWaveletOptions.querySelector('#selectionWaveletFrequencyToggle');
 
-                // 새로운 이벤트 리스너 등록
-                newToggle.onchange = (e) => {
-                    this.waveletFrequencyMode = e.target.checked;
-                    // 그래프 재렌더링
-                    this._showSelectedWavelet(waveletResult, signal, info, startIdx);
-                };
+            if (!frequencyToggle) {
+                // 없으면 새로 생성
+                const toggleContainer = document.createElement('div');
+                toggleContainer.style.cssText = 'margin-bottom: 12px; display: flex; align-items: center; gap: 10px;';
+
+                frequencyToggle = document.createElement('input');
+                frequencyToggle.type = 'checkbox';
+                frequencyToggle.id = 'selectionWaveletFrequencyToggle';
+                frequencyToggle.style.cssText = 'width: 18px; height: 18px; cursor: pointer;';
+
+                const label = document.createElement('label');
+                label.htmlFor = 'selectionWaveletFrequencyToggle';
+                label.textContent = '주파수 모드';
+                label.style.cssText = 'cursor: pointer; margin-bottom: 0;';
+
+                toggleContainer.appendChild(frequencyToggle);
+                toggleContainer.appendChild(label);
+                selectionWaveletOptions.insertBefore(toggleContainer, selectionWaveletOptions.firstChild);
             }
+
+            // 체크박스 상태 설정
+            frequencyToggle.checked = this.waveletFrequencyMode;
+
+            // 기존 이벤트 리스너 제거
+            const newToggle = frequencyToggle.cloneNode(true);
+            frequencyToggle.parentNode.replaceChild(newToggle, frequencyToggle);
+
+            // 새로운 이벤트 리스너 등록
+            newToggle.onchange = (e) => {
+                this.waveletFrequencyMode = e.target.checked;
+                // 그래프 재렌더링
+                this._showSelectedWavelet(waveletResult, signal, info, startIdx);
+            };
         }
     }
 
