@@ -1,0 +1,5014 @@
+{
+  "metadata": {
+    "name": "Single Sinusoid (1Hz)",
+    "sampleRate": 100,
+    "sampleIntervalMs": 10.0,
+    "duration": 10.0,
+    "timestamp": "2025-12-10T12:20:26.950209",
+    "description": "Single sinusoidal signal at 1Hz with amplitude 10. Use this for FFT testing."
+  },
+  "sensors": {
+    "Test_Sinusoid_1Hz": [
+      {
+        "timestamp": "2025-12-10T12:20:26.941177",
+        "value": 0.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:26.951177",
+        "value": 0.6279051952931337,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:26.961177",
+        "value": 1.2533323356430426,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:26.971177",
+        "value": 1.873813145857246,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:26.981177",
+        "value": 2.486898871648548,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:26.991177",
+        "value": 3.090169943749474,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.001177",
+        "value": 3.681245526846779,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.011177",
+        "value": 4.257792915650727,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.021177",
+        "value": 4.817536741017153,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.031177",
+        "value": 5.358267949789966,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.041177",
+        "value": 5.877852522924732,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.051177",
+        "value": 6.374239897486897,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.061177",
+        "value": 6.845471059286886,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.071177",
+        "value": 7.289686274214116,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.081177",
+        "value": 7.705132427757892,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.091177",
+        "value": 8.090169943749475,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.101177",
+        "value": 8.443279255020151,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.111177",
+        "value": 8.763066800438637,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.121177",
+        "value": 9.048270524660197,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.131177",
+        "value": 9.297764858882513,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.141177",
+        "value": 9.510565162951535,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.151177",
+        "value": 9.68583161128631,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.161177",
+        "value": 9.822872507286887,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.171177",
+        "value": 9.921147013144779,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.181177",
+        "value": 9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.191177",
+        "value": 10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.201177",
+        "value": 9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.211177",
+        "value": 9.921147013144777,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.221177",
+        "value": 9.822872507286887,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.231177",
+        "value": 9.685831611286313,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.241177",
+        "value": 9.510565162951536,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.251177",
+        "value": 9.297764858882513,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.261177",
+        "value": 9.048270524660195,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.271177",
+        "value": 8.763066800438635,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.281177",
+        "value": 8.44327925502015,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.291177",
+        "value": 8.090169943749475,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.301177",
+        "value": 7.705132427757892,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.311177",
+        "value": 7.289686274214114,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.321177",
+        "value": 6.845471059286888,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.331177",
+        "value": 6.374239897486898,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.341177",
+        "value": 5.877852522924733,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.351177",
+        "value": 5.358267949789966,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.361177",
+        "value": 4.817536741017156,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.371177",
+        "value": 4.257792915650729,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.381177",
+        "value": 3.6812455268467814,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.391177",
+        "value": 3.090169943749475,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.401177",
+        "value": 2.486898871648548,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.411177",
+        "value": 1.8738131458572458,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.421177",
+        "value": 1.2533323356430452,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.431177",
+        "value": 0.6279051952931358,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.441177",
+        "value": 1.2246467991473533e-15,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.451177",
+        "value": -0.6279051952931335,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.461177",
+        "value": -1.2533323356430428,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.471177",
+        "value": -1.8738131458572478,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.481177",
+        "value": -2.4868988716485503,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.491177",
+        "value": -3.090169943749477,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.501177",
+        "value": -3.681245526846783,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.511177",
+        "value": -4.257792915650727,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.521177",
+        "value": -4.81753674101715,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.531177",
+        "value": -5.358267949789965,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.541177",
+        "value": -5.87785252292473,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.551177",
+        "value": -6.374239897486897,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.561177",
+        "value": -6.845471059286887,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.571177",
+        "value": -7.289686274214113,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.581177",
+        "value": -7.705132427757894,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.591177",
+        "value": -8.090169943749473,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.601177",
+        "value": -8.443279255020153,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.611177",
+        "value": -8.763066800438637,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.621177",
+        "value": -9.048270524660198,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.631177",
+        "value": -9.297764858882514,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.641177",
+        "value": -9.510565162951535,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.651177",
+        "value": -9.685831611286309,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.661177",
+        "value": -9.822872507286887,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.671177",
+        "value": -9.921147013144777,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.681177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.691177",
+        "value": -10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.701177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.711177",
+        "value": -9.921147013144779,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.721177",
+        "value": -9.822872507286887,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.731177",
+        "value": -9.68583161128631,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.741177",
+        "value": -9.510565162951536,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.751177",
+        "value": -9.297764858882513,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.761177",
+        "value": -9.048270524660197,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.771177",
+        "value": -8.763066800438633,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.781177",
+        "value": -8.443279255020155,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.791177",
+        "value": -8.090169943749476,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.801177",
+        "value": -7.705132427757896,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.811177",
+        "value": -7.289686274214116,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.821177",
+        "value": -6.84547105928689,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.831177",
+        "value": -6.374239897486897,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.841177",
+        "value": -5.877852522924734,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.851177",
+        "value": -5.358267949789964,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.861177",
+        "value": -4.817536741017153,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.871177",
+        "value": -4.257792915650722,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.881177",
+        "value": -3.6812455268467787,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.891177",
+        "value": -3.0901699437494763,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.901177",
+        "value": -2.4868988716485534,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.911177",
+        "value": -1.873813145857247,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.921177",
+        "value": -1.2533323356430466,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.931177",
+        "value": -0.6279051952931326,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.941177",
+        "value": -2.4492935982947065e-15,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.951177",
+        "value": 0.6279051952931278,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.961177",
+        "value": 1.2533323356430417,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.971177",
+        "value": 1.873813145857242,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.981177",
+        "value": 2.486898871648549,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:27.991177",
+        "value": 3.090169943749472,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.001177",
+        "value": 3.681245526846782,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.011177",
+        "value": 4.257792915650725,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.021177",
+        "value": 4.817536741017157,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.031177",
+        "value": 5.358267949789966,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.041177",
+        "value": 5.877852522924735,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.051177",
+        "value": 6.374239897486898,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.061177",
+        "value": 6.845471059286893,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.071177",
+        "value": 7.289686274214118,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.081177",
+        "value": 7.705132427757892,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.091177",
+        "value": 8.090169943749478,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.101177",
+        "value": 8.443279255020148,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.111177",
+        "value": 8.763066800438631,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.121177",
+        "value": 9.048270524660193,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.131177",
+        "value": 9.29776485888251,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.141177",
+        "value": 9.510565162951535,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.151177",
+        "value": 9.685831611286309,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.161177",
+        "value": 9.822872507286887,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.171177",
+        "value": 9.921147013144777,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.181177",
+        "value": 9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.191177",
+        "value": 10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.201177",
+        "value": 9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.211177",
+        "value": 9.921147013144779,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.221177",
+        "value": 9.822872507286887,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.231177",
+        "value": 9.68583161128631,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.241177",
+        "value": 9.510565162951536,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.251177",
+        "value": 9.297764858882516,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.261177",
+        "value": 9.048270524660193,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.271177",
+        "value": 8.763066800438633,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.281177",
+        "value": 8.443279255020151,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.291177",
+        "value": 8.090169943749476,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.301177",
+        "value": 7.705132427757886,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.311177",
+        "value": 7.28968627421411,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.321177",
+        "value": 6.845471059286884,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.331177",
+        "value": 6.3742398974868975,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.341177",
+        "value": 5.877852522924734,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.351177",
+        "value": 5.358267949789973,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.361177",
+        "value": 4.817536741017162,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.371177",
+        "value": 4.2577929156507395,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.381177",
+        "value": 3.6812455268467796,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.391177",
+        "value": 3.090169943749478,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.401177",
+        "value": 2.4868988716485547,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.411177",
+        "value": 1.873813145857257,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.421177",
+        "value": 1.253332335643039,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.431177",
+        "value": 0.6279051952931338,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.441177",
+        "value": 3.673940397442059e-15,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.451177",
+        "value": -0.6279051952931265,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.461177",
+        "value": -1.2533323356430317,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.471177",
+        "value": -1.8738131458572496,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.481177",
+        "value": -2.4868988716485476,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.491177",
+        "value": -3.0901699437494705,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.501177",
+        "value": -3.6812455268467725,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.511177",
+        "value": -4.257792915650732,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.521177",
+        "value": -4.817536741017156,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.531177",
+        "value": -5.3582679497899655,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.541177",
+        "value": -5.877852522924728,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.551177",
+        "value": -6.3742398974869054,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.561177",
+        "value": -6.845471059286892,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.571177",
+        "value": -7.289686274214118,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.581177",
+        "value": -7.705132427757892,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.591177",
+        "value": -8.090169943749473,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.601177",
+        "value": -8.443279255020157,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.611177",
+        "value": -8.76306680043863,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.621177",
+        "value": -9.04827052466019,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.631177",
+        "value": -9.297764858882513,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.641177",
+        "value": -9.510565162951535,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.651177",
+        "value": -9.685831611286309,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.661177",
+        "value": -9.822872507286885,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.671177",
+        "value": -9.921147013144779,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.681177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.691177",
+        "value": -10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.701177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.711177",
+        "value": -9.921147013144779,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.721177",
+        "value": -9.822872507286887,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.731177",
+        "value": -9.685831611286313,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.741177",
+        "value": -9.510565162951538,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.751177",
+        "value": -9.297764858882516,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.761177",
+        "value": -9.048270524660193,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.771177",
+        "value": -8.763066800438635,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.781177",
+        "value": -8.443279255020151,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.791177",
+        "value": -8.090169943749476,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.801177",
+        "value": -7.705132427757886,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.811177",
+        "value": -7.289686274214111,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.821177",
+        "value": -6.845471059286885,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.831177",
+        "value": -6.3742398974868975,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.841177",
+        "value": -5.8778525229247345,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.851177",
+        "value": -5.3582679497899575,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.861177",
+        "value": -4.817536741017163,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.871177",
+        "value": -4.25779291565074,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.881177",
+        "value": -3.681245526846781,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.891177",
+        "value": -3.090169943749479,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.901177",
+        "value": -2.486898871648556,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.911177",
+        "value": -1.873813145857258,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.921177",
+        "value": -1.2533323356430401,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.931177",
+        "value": -0.6279051952931352,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.941177",
+        "value": -4.898587196589413e-15,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.951177",
+        "value": 0.627905195293143,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.961177",
+        "value": 1.2533323356430304,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.971177",
+        "value": 1.8738131458572485,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.981177",
+        "value": 2.4868988716485467,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:28.991177",
+        "value": 3.0901699437494523,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.001177",
+        "value": 3.681245526846771,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.011177",
+        "value": 4.2577929156507155,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.021177",
+        "value": 4.817536741017154,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.031177",
+        "value": 5.3582679497899495,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.041177",
+        "value": 5.8778525229247265,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.051177",
+        "value": 6.374239897486891,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.061177",
+        "value": 6.845471059286891,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.071177",
+        "value": 7.289686274214104,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.081177",
+        "value": 7.705132427757891,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.091177",
+        "value": 8.090169943749471,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.101177",
+        "value": 8.443279255020155,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.111177",
+        "value": 8.76306680043863,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.121177",
+        "value": 9.048270524660197,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.131177",
+        "value": 9.297764858882513,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.141177",
+        "value": 9.51056516295154,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.151177",
+        "value": 9.685831611286309,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.161177",
+        "value": 9.822872507286888,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.171177",
+        "value": 9.921147013144779,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.181177",
+        "value": 9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.191177",
+        "value": 10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.201177",
+        "value": 9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.211177",
+        "value": 9.921147013144779,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.221177",
+        "value": 9.822872507286887,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.231177",
+        "value": 9.685831611286313,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.241177",
+        "value": 9.510565162951533,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.251177",
+        "value": 9.297764858882518,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.261177",
+        "value": 9.0482705246602,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.271177",
+        "value": 8.763066800438635,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.281177",
+        "value": 8.443279255020162,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.291177",
+        "value": 8.090169943749478,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.301177",
+        "value": 7.705132427757898,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.311177",
+        "value": 7.289686274214112,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.321177",
+        "value": 6.845471059286899,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.331177",
+        "value": 6.374239897486898,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.341177",
+        "value": 5.877852522924735,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.351177",
+        "value": 5.358267949789958,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.361177",
+        "value": 4.817536741017165,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.371177",
+        "value": 4.257792915650725,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.381177",
+        "value": 3.681245526846782,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.391177",
+        "value": 3.090169943749463,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.401177",
+        "value": 2.486898871648557,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.411177",
+        "value": 1.8738131458572418,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.421177",
+        "value": 1.2533323356430415,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.431177",
+        "value": 0.6279051952931186,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.441177",
+        "value": 6.123233995736766e-15,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.451177",
+        "value": -0.6279051952931418,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.461177",
+        "value": -1.2533323356430293,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.471177",
+        "value": -1.8738131458572471,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.481177",
+        "value": -2.4868988716485454,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.491177",
+        "value": -3.090169943749485,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.501177",
+        "value": -3.681245526846787,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.511177",
+        "value": -4.257792915650699,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.521177",
+        "value": -4.817536741017153,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.531177",
+        "value": -5.358267949789965,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.541177",
+        "value": -5.877852522924726,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.551177",
+        "value": -6.3742398974868895,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.561177",
+        "value": -6.8454710592868775,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.571177",
+        "value": -7.2896862742141035,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.581177",
+        "value": -7.705132427757901,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.591177",
+        "value": -8.09016994374946,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.601177",
+        "value": -8.443279255020155,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.611177",
+        "value": -8.763066800438638,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.621177",
+        "value": -9.048270524660197,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.631177",
+        "value": -9.297764858882513,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.641177",
+        "value": -9.510565162951535,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.651177",
+        "value": -9.685831611286309,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.661177",
+        "value": -9.82287250728689,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.671177",
+        "value": -9.921147013144777,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.681177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.691177",
+        "value": -10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.701177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.711177",
+        "value": -9.921147013144777,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.721177",
+        "value": -9.822872507286887,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.731177",
+        "value": -9.685831611286313,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.741177",
+        "value": -9.510565162951538,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.751177",
+        "value": -9.297764858882518,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.761177",
+        "value": -9.048270524660202,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.771177",
+        "value": -8.763066800438645,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.781177",
+        "value": -8.443279255020162,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.791177",
+        "value": -8.090169943749467,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.801177",
+        "value": -7.70513242775791,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.811177",
+        "value": -7.289686274214113,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.821177",
+        "value": -6.845471059286886,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.831177",
+        "value": -6.3742398974869,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.841177",
+        "value": -5.877852522924737,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.851177",
+        "value": -5.358267949789975,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.861177",
+        "value": -4.8175367410171654,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.871177",
+        "value": -4.25779291565071,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.881177",
+        "value": -3.6812455268467996,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.891177",
+        "value": -3.090169943749464,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.901177",
+        "value": -2.486898871648541,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.911177",
+        "value": -1.873813145857243,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.921177",
+        "value": -1.2533323356430426,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.931177",
+        "value": -0.6279051952931375,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.941177",
+        "value": -7.347880794884118e-15,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.951177",
+        "value": 0.6279051952931582,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.961177",
+        "value": 1.2533323356430282,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.971177",
+        "value": 1.8738131458572636,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.981177",
+        "value": 2.4868988716485267,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:29.991177",
+        "value": 3.090169943749484,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.001177",
+        "value": 3.681245526846786,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.011177",
+        "value": 4.25779291565073,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.021177",
+        "value": 4.817536741017152,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.031177",
+        "value": 5.358267949789964,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.041177",
+        "value": 5.877852522924725,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.051177",
+        "value": 6.374239897486889,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.061177",
+        "value": 6.845471059286876,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.071177",
+        "value": 7.289686274214102,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.081177",
+        "value": 7.705132427757901,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.091177",
+        "value": 8.090169943749459,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.101177",
+        "value": 8.443279255020155,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.111177",
+        "value": 8.763066800438637,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.121177",
+        "value": 9.048270524660195,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.131177",
+        "value": 9.297764858882513,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.141177",
+        "value": 9.510565162951533,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.151177",
+        "value": 9.685831611286309,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.161177",
+        "value": 9.82287250728689,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.171177",
+        "value": 9.921147013144775,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.181177",
+        "value": 9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.191177",
+        "value": 10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.201177",
+        "value": 9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.211177",
+        "value": 9.921147013144777,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.221177",
+        "value": 9.822872507286887,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.231177",
+        "value": 9.685831611286313,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.241177",
+        "value": 9.510565162951538,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.251177",
+        "value": 9.297764858882518,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.261177",
+        "value": 9.048270524660186,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.271177",
+        "value": 8.763066800438645,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.281177",
+        "value": 8.443279255020164,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.291177",
+        "value": 8.09016994374947,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.301177",
+        "value": 7.705132427757912,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.311177",
+        "value": 7.289686274214113,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.321177",
+        "value": 6.845471059286887,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.331177",
+        "value": 6.374239897486901,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.341177",
+        "value": 5.877852522924738,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.351177",
+        "value": 5.358267949789976,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.361177",
+        "value": 4.817536741017166,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.371177",
+        "value": 4.257792915650712,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.381177",
+        "value": 3.681245526846801,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.391177",
+        "value": 3.0901699437494656,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.401177",
+        "value": 2.4868988716485423,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.411177",
+        "value": 1.873813145857244,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.421177",
+        "value": 1.253332335643044,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.431177",
+        "value": 0.6279051952931387,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.441177",
+        "value": 8.572527594031473e-15,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.451177",
+        "value": -0.627905195293157,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.461177",
+        "value": -1.2533323356430268,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.471177",
+        "value": -1.873813145857262,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.481177",
+        "value": -2.486898871648526,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.491177",
+        "value": -3.090169943749483,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.501177",
+        "value": -3.6812455268467845,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.511177",
+        "value": -4.257792915650728,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.521177",
+        "value": -4.817536741017151,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.531177",
+        "value": -5.358267949789962,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.541177",
+        "value": -5.877852522924725,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.551177",
+        "value": -6.374239897486888,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.561177",
+        "value": -6.845471059286875,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.571177",
+        "value": -7.289686274214102,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.581177",
+        "value": -7.7051324277579,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.591177",
+        "value": -8.090169943749459,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.601177",
+        "value": -8.443279255020155,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.611177",
+        "value": -8.763066800438637,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.621177",
+        "value": -9.048270524660195,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.631177",
+        "value": -9.297764858882513,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.641177",
+        "value": -9.510565162951533,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.651177",
+        "value": -9.685831611286309,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.661177",
+        "value": -9.82287250728689,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.671177",
+        "value": -9.921147013144775,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.681177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.691177",
+        "value": -10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.701177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.711177",
+        "value": -9.921147013144777,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.721177",
+        "value": -9.822872507286887,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.731177",
+        "value": -9.685831611286313,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.741177",
+        "value": -9.510565162951538,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.751177",
+        "value": -9.29776485888252,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.761177",
+        "value": -9.048270524660186,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.771177",
+        "value": -8.763066800438645,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.781177",
+        "value": -8.443279255020164,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.791177",
+        "value": -8.09016994374947,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.801177",
+        "value": -7.705132427757912,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.811177",
+        "value": -7.289686274214114,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.821177",
+        "value": -6.845471059286888,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.831177",
+        "value": -6.374239897486902,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.841177",
+        "value": -5.877852522924739,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.851177",
+        "value": -5.358267949789978,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.861177",
+        "value": -4.817536741017168,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.871177",
+        "value": -4.257792915650713,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.881177",
+        "value": -3.681245526846802,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.891177",
+        "value": -3.0901699437494665,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.901177",
+        "value": -2.4868988716485436,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.911177",
+        "value": -1.8738131458572456,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.921177",
+        "value": -1.253332335643045,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.931177",
+        "value": -0.62790519529314,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.941177",
+        "value": -9.797174393178826e-15,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.951177",
+        "value": 0.6279051952931204,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.961177",
+        "value": 1.2533323356430608,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.971177",
+        "value": 1.873813145857261,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.981177",
+        "value": 2.4868988716485245,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:30.991177",
+        "value": 3.090169943749448,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.001177",
+        "value": 3.6812455268467836,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.011177",
+        "value": 4.257792915650727,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.021177",
+        "value": 4.81753674101715,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.031177",
+        "value": 5.358267949789961,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.041177",
+        "value": 5.8778525229246945,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.051177",
+        "value": 6.374239897486914,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.061177",
+        "value": 6.845471059286874,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.071177",
+        "value": 7.289686274214101,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.081177",
+        "value": 7.705132427757877,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.091177",
+        "value": 8.09016994374948,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.101177",
+        "value": 8.443279255020153,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.111177",
+        "value": 8.763066800438637,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.121177",
+        "value": 9.048270524660179,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.131177",
+        "value": 9.297764858882525,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.141177",
+        "value": 9.510565162951533,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.151177",
+        "value": 9.685831611286307,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.161177",
+        "value": 9.822872507286885,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.171177",
+        "value": 9.921147013144779,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.181177",
+        "value": 9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.191177",
+        "value": 10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.201177",
+        "value": 9.980267284282718,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.211177",
+        "value": 9.921147013144774,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.221177",
+        "value": 9.822872507286887,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.231177",
+        "value": 9.685831611286313,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.241177",
+        "value": 9.510565162951538,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.251177",
+        "value": 9.297764858882505,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.261177",
+        "value": 9.048270524660188,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.271177",
+        "value": 8.763066800438645,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.281177",
+        "value": 8.443279255020164,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.291177",
+        "value": 8.09016994374947,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.301177",
+        "value": 7.70513242775789,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.311177",
+        "value": 7.289686274214116,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.321177",
+        "value": 6.84547105928689,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.331177",
+        "value": 6.374239897486929,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.341177",
+        "value": 5.877852522924711,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.351177",
+        "value": 5.358267949789979,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.361177",
+        "value": 4.817536741017168,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.371177",
+        "value": 4.257792915650746,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.381177",
+        "value": 3.68124552684677,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.391177",
+        "value": 3.090169943749468,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.401177",
+        "value": 2.4868988716485445,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.411177",
+        "value": 1.8738131458572815,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.421177",
+        "value": 1.253332335643011,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.431177",
+        "value": 0.6279051952931413,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.441177",
+        "value": 1.1021821192326179e-14,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.451177",
+        "value": -0.6279051952931192,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.461177",
+        "value": -1.25333233564306,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.471177",
+        "value": -1.8738131458572598,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.481177",
+        "value": -2.486898871648523,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.491177",
+        "value": -3.090169943749447,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.501177",
+        "value": -3.6812455268467827,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.511177",
+        "value": -4.257792915650726,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.521177",
+        "value": -4.8175367410171495,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.531177",
+        "value": -5.35826794978996,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.541177",
+        "value": -5.877852522924751,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.551177",
+        "value": -6.3742398974869126,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.561177",
+        "value": -6.845471059286873,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.571177",
+        "value": -7.2896862742141,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.581177",
+        "value": -7.705132427757876,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.591177",
+        "value": -8.090169943749478,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.601177",
+        "value": -8.443279255020151,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.611177",
+        "value": -8.763066800438637,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.621177",
+        "value": -9.048270524660179,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.631177",
+        "value": -9.297764858882525,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.641177",
+        "value": -9.510565162951533,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.651177",
+        "value": -9.685831611286307,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.661177",
+        "value": -9.822872507286883,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.671177",
+        "value": -9.921147013144779,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.681177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.691177",
+        "value": -10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.701177",
+        "value": -9.980267284282718,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.711177",
+        "value": -9.921147013144774,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.721177",
+        "value": -9.822872507286887,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.731177",
+        "value": -9.685831611286313,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.741177",
+        "value": -9.51056516295154,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.751177",
+        "value": -9.297764858882507,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.761177",
+        "value": -9.048270524660188,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.771177",
+        "value": -8.763066800438647,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.781177",
+        "value": -8.443279255020165,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.791177",
+        "value": -8.090169943749471,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.801177",
+        "value": -7.70513242775789,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.811177",
+        "value": -7.289686274214117,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.821177",
+        "value": -6.845471059286891,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.831177",
+        "value": -6.37423989748693,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.841177",
+        "value": -5.877852522924712,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.851177",
+        "value": -5.35826794978998,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.861177",
+        "value": -4.817536741017169,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.871177",
+        "value": -4.2577929156507475,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.881177",
+        "value": -3.6812455268467708,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.891177",
+        "value": -3.090169943749469,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.901177",
+        "value": -2.486898871648546,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.911177",
+        "value": -1.8738131458572826,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.921177",
+        "value": -1.2533323356430124,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.931177",
+        "value": -0.6279051952931425,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.941177",
+        "value": -1.2246467991473532e-14,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.951177",
+        "value": 0.627905195293118,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.961177",
+        "value": 1.2533323356430583,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.971177",
+        "value": 1.8738131458572584,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.981177",
+        "value": 2.4868988716485223,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:31.991177",
+        "value": 3.0901699437494456,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.001177",
+        "value": 3.6812455268467814,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.011177",
+        "value": 4.257792915650725,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.021177",
+        "value": 4.817536741017149,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.031177",
+        "value": 5.358267949789958,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.041177",
+        "value": 5.8778525229247505,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.051177",
+        "value": 6.374239897486885,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.061177",
+        "value": 6.845471059286899,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.071177",
+        "value": 7.289686274214099,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.081177",
+        "value": 7.705132427757853,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.091177",
+        "value": 8.090169943749498,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.101177",
+        "value": 8.443279255020151,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.111177",
+        "value": 8.763066800438619,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.121177",
+        "value": 9.048270524660193,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.131177",
+        "value": 9.297764858882523,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.141177",
+        "value": 9.510565162951533,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.151177",
+        "value": 9.685831611286316,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.161177",
+        "value": 9.822872507286883,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.171177",
+        "value": 9.921147013144779,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.181177",
+        "value": 9.980267284282714,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.191177",
+        "value": 10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.201177",
+        "value": 9.980267284282718,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.211177",
+        "value": 9.921147013144779,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.221177",
+        "value": 9.822872507286881,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.231177",
+        "value": 9.685831611286313,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.241177",
+        "value": 9.51056516295155,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.251177",
+        "value": 9.29776485888252,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.261177",
+        "value": 9.04827052466019,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.271177",
+        "value": 8.763066800438647,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.281177",
+        "value": 8.443279255020146,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.291177",
+        "value": 8.09016994374945,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.301177",
+        "value": 7.705132427757891,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.311177",
+        "value": 7.289686274214141,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.321177",
+        "value": 6.845471059286892,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.331177",
+        "value": 6.374239897486932,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.341177",
+        "value": 5.8778525229247425,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.351177",
+        "value": 5.3582679497899495,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.361177",
+        "value": 4.817536741017171,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.371177",
+        "value": 4.25779291565078,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.381177",
+        "value": 3.6812455268467392,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.391177",
+        "value": 3.09016994374947,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.401177",
+        "value": 2.4868988716485814,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.411177",
+        "value": 1.8738131458572491,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.421177",
+        "value": 1.2533323356430135,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.431177",
+        "value": 0.6279051952931436,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.441177",
+        "value": 4.899825157862589e-14,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.451177",
+        "value": -0.6279051952931168,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.461177",
+        "value": -1.2533323356430572,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.471177",
+        "value": -1.8738131458572225,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.481177",
+        "value": -2.4868988716485556,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.491177",
+        "value": -3.0901699437494443,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.501177",
+        "value": -3.68124552684678,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.511177",
+        "value": -4.257792915650756,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.521177",
+        "value": -4.817536741017147,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.531177",
+        "value": -5.358267949789928,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.541177",
+        "value": -5.87785252292472,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.551177",
+        "value": -6.374239897486911,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.561177",
+        "value": -6.845471059286872,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.571177",
+        "value": -7.289686274214123,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.581177",
+        "value": -7.705132427757874,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.591177",
+        "value": -8.090169943749476,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.601177",
+        "value": -8.443279255020132,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.611177",
+        "value": -8.763066800438635,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.621177",
+        "value": -9.048270524660177,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.631177",
+        "value": -9.29776485888251,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.641177",
+        "value": -9.510565162951542,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.651177",
+        "value": -9.685831611286307,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.661177",
+        "value": -9.822872507286876,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.671177",
+        "value": -9.921147013144784,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.681177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.691177",
+        "value": -10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.701177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.711177",
+        "value": -9.921147013144774,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.721177",
+        "value": -9.822872507286888,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.731177",
+        "value": -9.685831611286323,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.741177",
+        "value": -9.51056516295154,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.751177",
+        "value": -9.297764858882507,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.761177",
+        "value": -9.048270524660204,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.771177",
+        "value": -8.76306680043863,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.781177",
+        "value": -8.443279255020165,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.791177",
+        "value": -8.090169943749473,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.801177",
+        "value": -7.705132427757869,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.811177",
+        "value": -7.289686274214118,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.821177",
+        "value": -6.845471059286918,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.831177",
+        "value": -6.3742398974869054,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.841177",
+        "value": -5.877852522924715,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.851177",
+        "value": -5.358267949789981,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.861177",
+        "value": -4.817536741017141,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.871177",
+        "value": -4.257792915650749,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.881177",
+        "value": -3.681245526846773,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.891177",
+        "value": -3.090169943749505,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.901177",
+        "value": -2.486898871648548,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.911177",
+        "value": -1.873813145857285,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.921177",
+        "value": -1.2533323356430497,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.931177",
+        "value": -0.6279051952931094,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.941177",
+        "value": -1.4695761589768237e-14,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.951177",
+        "value": 0.6279051952930801,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.961177",
+        "value": 1.2533323356430912,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.971177",
+        "value": 1.8738131458572562,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.981177",
+        "value": 2.48689887164852,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:32.991177",
+        "value": 3.090169943749477,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.001177",
+        "value": 3.681245526846812,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.011177",
+        "value": 4.257792915650723,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.021177",
+        "value": 4.817536741017115,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.031177",
+        "value": 5.358267949789957,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.041177",
+        "value": 5.877852522924748,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.051177",
+        "value": 6.374239897486883,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.061177",
+        "value": 6.845471059286896,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.071177",
+        "value": 7.289686274214098,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.081177",
+        "value": 7.705132427757896,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.091177",
+        "value": 8.090169943749498,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.101177",
+        "value": 8.443279255020151,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.111177",
+        "value": 8.763066800438617,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.121177",
+        "value": 9.048270524660191,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.131177",
+        "value": 9.297764858882523,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.141177",
+        "value": 9.510565162951531,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.151177",
+        "value": 9.685831611286314,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.161177",
+        "value": 9.822872507286883,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.171177",
+        "value": 9.921147013144779,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.181177",
+        "value": 9.980267284282714,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.191177",
+        "value": 10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.201177",
+        "value": 9.980267284282718,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.211177",
+        "value": 9.921147013144779,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.221177",
+        "value": 9.822872507286881,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.231177",
+        "value": 9.685831611286314,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.241177",
+        "value": 9.510565162951552,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.251177",
+        "value": 9.297764858882521,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.261177",
+        "value": 9.04827052466019,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.271177",
+        "value": 8.763066800438647,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.281177",
+        "value": 8.443279255020148,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.291177",
+        "value": 8.090169943749451,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.301177",
+        "value": 7.705132427757894,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.311177",
+        "value": 7.2896862742141435,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.321177",
+        "value": 6.845471059286893,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.331177",
+        "value": 6.374239897486879,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.341177",
+        "value": 5.877852522924743,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.351177",
+        "value": 5.358267949789952,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.361177",
+        "value": 4.8175367410171726,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.371177",
+        "value": 4.257792915650783,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.381177",
+        "value": 3.6812455268467414,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.391177",
+        "value": 3.0901699437494723,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.401177",
+        "value": 2.4868988716485836,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.411177",
+        "value": 1.8738131458572513,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.421177",
+        "value": 1.253332335643016,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.431177",
+        "value": 0.627905195293146,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.441177",
+        "value": -1.9606728399089415e-14,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.451177",
+        "value": -0.6279051952931143,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.461177",
+        "value": -1.2533323356430548,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.471177",
+        "value": -1.8738131458572203,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.481177",
+        "value": -2.486898871648553,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.491177",
+        "value": -3.0901699437494425,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.501177",
+        "value": -3.6812455268467783,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.511177",
+        "value": -4.257792915650754,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.521177",
+        "value": -4.817536741017145,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.531177",
+        "value": -5.3582679497899255,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.541177",
+        "value": -5.877852522924718,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.551177",
+        "value": -6.37423989748691,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.561177",
+        "value": -6.8454710592868695,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.571177",
+        "value": -7.289686274214121,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.581177",
+        "value": -7.705132427757918,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.591177",
+        "value": -8.090169943749476,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.601177",
+        "value": -8.44327925502013,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.611177",
+        "value": -8.763066800438633,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.621177",
+        "value": -9.048270524660175,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.631177",
+        "value": -9.297764858882509,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.641177",
+        "value": -9.510565162951542,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.651177",
+        "value": -9.685831611286307,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.661177",
+        "value": -9.822872507286876,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.671177",
+        "value": -9.921147013144784,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.681177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.691177",
+        "value": -10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.701177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.711177",
+        "value": -9.921147013144774,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.721177",
+        "value": -9.822872507286888,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.731177",
+        "value": -9.685831611286323,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.741177",
+        "value": -9.51056516295154,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.751177",
+        "value": -9.297764858882507,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.761177",
+        "value": -9.048270524660206,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.771177",
+        "value": -8.763066800438631,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.781177",
+        "value": -8.443279255020167,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.791177",
+        "value": -8.090169943749473,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.801177",
+        "value": -7.705132427757872,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.811177",
+        "value": -7.2896862742141195,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.821177",
+        "value": -6.845471059286919,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.831177",
+        "value": -6.374239897486907,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.841177",
+        "value": -5.877852522924716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.851177",
+        "value": -5.358267949789983,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.861177",
+        "value": -4.817536741017142,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.871177",
+        "value": -4.257792915650752,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.881177",
+        "value": -3.681245526846775,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.891177",
+        "value": -3.0901699437495074,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.901177",
+        "value": -2.4868988716485507,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.911177",
+        "value": -1.8738131458572878,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.921177",
+        "value": -1.2533323356430524,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.931177",
+        "value": -0.6279051952931118,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.941177",
+        "value": -1.7145055188062946e-14,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.951177",
+        "value": 0.6279051952930776,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.961177",
+        "value": 1.253332335643089,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.971177",
+        "value": 1.8738131458572538,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.981177",
+        "value": 2.4868988716485174,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:33.991177",
+        "value": 3.0901699437494745,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.001177",
+        "value": 3.68124552684681,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.011177",
+        "value": 4.257792915650721,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.021177",
+        "value": 4.817536741017113,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.031177",
+        "value": 5.358267949789955,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.041177",
+        "value": 5.877852522924746,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.051177",
+        "value": 6.374239897486881,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.061177",
+        "value": 6.845471059286895,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.071177",
+        "value": 7.2896862742140955,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.081177",
+        "value": 7.705132427757895,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.091177",
+        "value": 8.090169943749496,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.101177",
+        "value": 8.443279255020148,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.111177",
+        "value": 8.763066800438615,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.121177",
+        "value": 9.048270524660191,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.131177",
+        "value": 9.297764858882523,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.141177",
+        "value": 9.51056516295153,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.151177",
+        "value": 9.685831611286314,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.161177",
+        "value": 9.822872507286881,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.171177",
+        "value": 9.921147013144779,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.181177",
+        "value": 9.980267284282714,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.191177",
+        "value": 10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.201177",
+        "value": 9.980267284282718,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.211177",
+        "value": 9.921147013144779,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.221177",
+        "value": 9.822872507286881,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.231177",
+        "value": 9.685831611286314,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.241177",
+        "value": 9.510565162951552,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.251177",
+        "value": 9.297764858882523,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.261177",
+        "value": 9.048270524660191,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.271177",
+        "value": 8.763066800438649,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.281177",
+        "value": 8.443279255020148,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.291177",
+        "value": 8.090169943749453,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.301177",
+        "value": 7.705132427757895,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.311177",
+        "value": 7.289686274214144,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.321177",
+        "value": 6.845471059286895,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.331177",
+        "value": 6.374239897486881,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.341177",
+        "value": 5.877852522924746,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.351177",
+        "value": 5.358267949789955,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.361177",
+        "value": 4.817536741017175,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.371177",
+        "value": 4.257792915650785,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.381177",
+        "value": 3.6812455268467437,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.391177",
+        "value": 3.0901699437494745,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.401177",
+        "value": 2.4868988716485863,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.411177",
+        "value": 1.8738131458572538,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.421177",
+        "value": 1.2533323356430184,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.431177",
+        "value": 0.6279051952931486,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.441177",
+        "value": 5.3896838775215307e-14,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.451177",
+        "value": -0.6279051952931118,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.461177",
+        "value": -1.2533323356430524,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.471177",
+        "value": -1.8738131458572176,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.481177",
+        "value": -2.4868988716485507,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.491177",
+        "value": -3.0901699437494394,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.501177",
+        "value": -3.6812455268467756,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.511177",
+        "value": -4.257792915650752,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.521177",
+        "value": -4.817536741017142,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.531177",
+        "value": -5.358267949789923,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.541177",
+        "value": -5.877852522924716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.551177",
+        "value": -6.374239897486907,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.561177",
+        "value": -6.845471059286869,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.571177",
+        "value": -7.2896862742141195,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.581177",
+        "value": -7.705132427757917,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.591177",
+        "value": -8.090169943749473,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.601177",
+        "value": -8.44327925502013,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.611177",
+        "value": -8.763066800438633,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.621177",
+        "value": -9.048270524660175,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.631177",
+        "value": -9.297764858882507,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.641177",
+        "value": -9.51056516295154,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.651177",
+        "value": -9.685831611286305,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.661177",
+        "value": -9.822872507286874,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.671177",
+        "value": -9.921147013144783,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.681177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.691177",
+        "value": -10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.701177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.711177",
+        "value": -9.921147013144775,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.721177",
+        "value": -9.82287250728689,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.731177",
+        "value": -9.685831611286325,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.741177",
+        "value": -9.510565162951542,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.751177",
+        "value": -9.297764858882509,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.761177",
+        "value": -9.048270524660207,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.771177",
+        "value": -8.763066800438633,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.781177",
+        "value": -8.443279255020169,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.791177",
+        "value": -8.090169943749476,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.801177",
+        "value": -7.7051324277578725,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.811177",
+        "value": -7.289686274214121,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.821177",
+        "value": -6.845471059286922,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.831177",
+        "value": -6.37423989748691,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.841177",
+        "value": -5.877852522924718,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.851177",
+        "value": -5.358267949789985,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.861177",
+        "value": -4.817536741017145,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.871177",
+        "value": -4.25779291565069,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.881177",
+        "value": -3.6812455268467783,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.891177",
+        "value": -3.0901699437495096,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.901177",
+        "value": -2.486898871648553,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.911177",
+        "value": -1.87381314585729,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.921177",
+        "value": -1.2533323356430548,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.931177",
+        "value": -0.6279051952931143,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.941177",
+        "value": -1.9594348786357652e-14,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.951177",
+        "value": 0.6279051952930752,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.961177",
+        "value": 1.253332335643016,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.971177",
+        "value": 1.8738131458571816,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.981177",
+        "value": 2.4868988716485836,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:34.991177",
+        "value": 3.0901699437494723,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.001177",
+        "value": 3.6812455268468076,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.011177",
+        "value": 4.257792915650718,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.021177",
+        "value": 4.81753674101711,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.031177",
+        "value": 5.358267949789952,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.041177",
+        "value": 5.877852522924687,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.051177",
+        "value": 6.374239897486879,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.061177",
+        "value": 6.845471059286893,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.071177",
+        "value": 7.2896862742141435,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.081177",
+        "value": 7.705132427757894,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.091177",
+        "value": 8.090169943749494,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.101177",
+        "value": 8.443279255020148,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.111177",
+        "value": 8.763066800438615,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.121177",
+        "value": 9.04827052466019,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.131177",
+        "value": 9.297764858882495,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.141177",
+        "value": 9.510565162951508,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.151177",
+        "value": 9.685831611286314,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.161177",
+        "value": 9.822872507286895,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.171177",
+        "value": 9.921147013144779,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.181177",
+        "value": 9.980267284282714,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.191177",
+        "value": 10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.201177",
+        "value": 9.980267284282718,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.211177",
+        "value": 9.92114701314479,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.221177",
+        "value": 9.822872507286895,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.231177",
+        "value": 9.685831611286297,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.241177",
+        "value": 9.510565162951531,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.251177",
+        "value": 9.297764858882523,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.261177",
+        "value": 9.048270524660191,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.271177",
+        "value": 8.76306680043865,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.281177",
+        "value": 8.443279255020151,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.291177",
+        "value": 8.090169943749498,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.301177",
+        "value": 7.705132427757942,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.311177",
+        "value": 7.289686274214098,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.321177",
+        "value": 6.8454710592868455,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.331177",
+        "value": 6.374239897486883,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.341177",
+        "value": 5.877852522924748,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.351177",
+        "value": 5.358267949789957,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.361177",
+        "value": 4.817536741017177,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.371177",
+        "value": 4.257792915650787,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.381177",
+        "value": 3.681245526846812,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.391177",
+        "value": 3.0901699437495447,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.401177",
+        "value": 2.4868988716485196,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.411177",
+        "value": 1.8738131458572562,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.421177",
+        "value": 1.2533323356430206,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.431177",
+        "value": 0.6279051952931509,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.441177",
+        "value": -1.4708141202500006e-14,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.451177",
+        "value": -0.6279051952931094,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.461177",
+        "value": -1.2533323356429795,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.471177",
+        "value": -1.8738131458572151,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.481177",
+        "value": -2.486898871648617,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.491177",
+        "value": -3.090169943749505,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.501177",
+        "value": -3.681245526846773,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.511177",
+        "value": -4.257792915650749,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.521177",
+        "value": -4.817536741017141,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.531177",
+        "value": -5.358267949789921,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.541177",
+        "value": -5.877852522924715,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.551177",
+        "value": -6.37423989748685,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.561177",
+        "value": -6.845471059286918,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.571177",
+        "value": -7.289686274214118,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.581177",
+        "value": -7.705132427757915,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.591177",
+        "value": -8.090169943749473,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.601177",
+        "value": -8.443279255020128,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.611177",
+        "value": -8.76306680043863,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.621177",
+        "value": -9.048270524660175,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.631177",
+        "value": -9.297764858882507,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.641177",
+        "value": -9.51056516295154,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.651177",
+        "value": -9.685831611286323,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.661177",
+        "value": -9.822872507286888,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.671177",
+        "value": -9.921147013144783,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.681177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.691177",
+        "value": -10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.701177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.711177",
+        "value": -9.921147013144784,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.721177",
+        "value": -9.822872507286903,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.731177",
+        "value": -9.685831611286307,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.741177",
+        "value": -9.51056516295152,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.751177",
+        "value": -9.29776485888251,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.761177",
+        "value": -9.048270524660207,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.771177",
+        "value": -8.763066800438635,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.781177",
+        "value": -8.443279255020169,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.791177",
+        "value": -8.090169943749517,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.801177",
+        "value": -7.705132427757919,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.811177",
+        "value": -7.289686274214074,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.821177",
+        "value": -6.845471059286872,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.831177",
+        "value": -6.374239897486911,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.841177",
+        "value": -5.87785252292472,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.851177",
+        "value": -5.358267949789988,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.861177",
+        "value": -4.817536741017147,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.871177",
+        "value": -4.257792915650756,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.881177",
+        "value": -3.6812455268468462,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.891177",
+        "value": -3.0901699437494443,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.901177",
+        "value": -2.4868988716484868,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.911177",
+        "value": -1.8738131458572225,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.921177",
+        "value": -1.2533323356430572,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.931177",
+        "value": -0.6279051952931167,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.941177",
+        "value": -2.2043642384652358e-14,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.951177",
+        "value": 0.6279051952930726,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.961177",
+        "value": 1.2533323356430135,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.971177",
+        "value": 1.8738131458571792,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.981177",
+        "value": 2.4868988716485814,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:35.991177",
+        "value": 3.09016994374947,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.001177",
+        "value": 3.6812455268468054,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.011177",
+        "value": 4.257792915650716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.021177",
+        "value": 4.817536741017109,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.031177",
+        "value": 5.3582679497899495,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.041177",
+        "value": 5.877852522924685,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.051177",
+        "value": 6.374239897486877,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.061177",
+        "value": 6.845471059286892,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.071177",
+        "value": 7.289686274214141,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.081177",
+        "value": 7.705132427757891,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.091177",
+        "value": 8.090169943749492,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.101177",
+        "value": 8.443279255020146,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.111177",
+        "value": 8.763066800438612,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.121177",
+        "value": 9.04827052466019,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.131177",
+        "value": 9.297764858882493,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.141177",
+        "value": 9.51056516295155,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.151177",
+        "value": 9.685831611286314,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.161177",
+        "value": 9.822872507286895,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.171177",
+        "value": 9.921147013144779,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.181177",
+        "value": 9.980267284282714,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.191177",
+        "value": 10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.201177",
+        "value": 9.98026728428272,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.211177",
+        "value": 9.92114701314479,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.221177",
+        "value": 9.822872507286895,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.231177",
+        "value": 9.685831611286298,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.241177",
+        "value": 9.510565162951533,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.251177",
+        "value": 9.297764858882523,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.261177",
+        "value": 9.048270524660193,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.271177",
+        "value": 8.763066800438652,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.281177",
+        "value": 8.443279255020151,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.291177",
+        "value": 8.090169943749498,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.301177",
+        "value": 7.705132427757944,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.311177",
+        "value": 7.289686274214099,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.321177",
+        "value": 6.845471059286846,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.331177",
+        "value": 6.374239897486885,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.341177",
+        "value": 5.8778525229247505,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.351177",
+        "value": 5.358267949789958,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.361177",
+        "value": 4.81753674101718,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.371177",
+        "value": 4.257792915650789,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.381177",
+        "value": 3.6812455268468143,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.391177",
+        "value": 3.090169943749412,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.401177",
+        "value": 2.4868988716485223,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.411177",
+        "value": 1.8738131458572584,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.421177",
+        "value": 1.253332335643023,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.431177",
+        "value": 0.6279051952931535,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.441177",
+        "value": 5.879542597180471e-14,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.451177",
+        "value": -0.627905195293107,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.461177",
+        "value": -1.253332335642977,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.471177",
+        "value": -1.873813145857213,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.481177",
+        "value": -2.4868988716486147,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.491177",
+        "value": -3.090169943749503,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.501177",
+        "value": -3.6812455268467708,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.511177",
+        "value": -4.2577929156507475,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.521177",
+        "value": -4.817536741017138,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.531177",
+        "value": -5.358267949789919,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.541177",
+        "value": -5.877852522924712,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.551177",
+        "value": -6.374239897486849,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.561177",
+        "value": -6.845471059286917,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.571177",
+        "value": -7.289686274214117,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.581177",
+        "value": -7.705132427757913,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.591177",
+        "value": -8.090169943749471,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.601177",
+        "value": -8.443279255020126,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.611177",
+        "value": -8.76306680043863,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.621177",
+        "value": -9.048270524660174,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.631177",
+        "value": -9.297764858882507,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.641177",
+        "value": -9.51056516295154,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.651177",
+        "value": -9.685831611286321,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.661177",
+        "value": -9.822872507286887,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.671177",
+        "value": -9.921147013144783,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.681177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.691177",
+        "value": -10.0,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.701177",
+        "value": -9.980267284282716,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.711177",
+        "value": -9.921147013144784,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.721177",
+        "value": -9.822872507286903,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.731177",
+        "value": -9.685831611286307,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.741177",
+        "value": -9.51056516295152,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.751177",
+        "value": -9.29776485888251,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.761177",
+        "value": -9.048270524660209,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.771177",
+        "value": -8.763066800438637,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.781177",
+        "value": -8.443279255020173,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.791177",
+        "value": -8.09016994374952,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.801177",
+        "value": -7.705132427757921,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.811177",
+        "value": -7.289686274214075,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.821177",
+        "value": -6.845471059286873,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.831177",
+        "value": -6.3742398974869126,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.841177",
+        "value": -5.877852522924723,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.851177",
+        "value": -5.35826794978999,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.861177",
+        "value": -4.8175367410171495,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.871177",
+        "value": -4.257792915650758,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.881177",
+        "value": -3.6812455268468485,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.891177",
+        "value": -3.090169943749447,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.901177",
+        "value": -2.486898871648489,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.911177",
+        "value": -1.873813145857225,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.921177",
+        "value": -1.25333233564306,
+        "type": "Test Signal"
+      },
+      {
+        "timestamp": "2025-12-10T12:20:36.931177",
+        "value": -0.6279051952931192,
+        "type": "Test Signal"
+      }
+    ]
+  }
+}

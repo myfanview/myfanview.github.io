@@ -899,9 +899,9 @@ class Dashboard {
             // 분석 텍스트 업데이트
             this._updateAnalysisText(this.currentGraphType, values);
 
-            // 선택 이벤트 바인딩 (단일 센서 시계열 그래프에서만 영역 선택 가능)
-            if (this.currentGraphType === 'timeseries') {
-                console.log('[*] 단일 센서 시계열: 신호처리 활성화');
+            // 선택 이벤트 바인딩 (신호처리가 가능한 모든 그래프 타입에서)
+            if (['timeseries', 'fft', 'stft', 'wavelet', 'hilbert'].includes(this.currentGraphType)) {
+                console.log('[*] 신호처리 활성화:', this.currentGraphType);
                 this._bindSelectionEvent(values);
             }
         } catch (error) {
@@ -1449,6 +1449,26 @@ class Dashboard {
         };
 
         Plotly.newPlot('mainGraph', [trace], layout, {responsive: true});
+
+        // Wavelet 주파수모드 체크박스 표시
+        const waveletPanel = document.getElementById('waveletControlPanel');
+        if (waveletPanel) {
+            waveletPanel.style.display = 'block';
+            const toggle = document.getElementById('waveletFrequencyToggle');
+            if (toggle) {
+                toggle.checked = this.waveletFrequencyMode;
+                // 기존 이벤트 리스너 제거
+                const newToggle = toggle.cloneNode(true);
+                toggle.parentNode.replaceChild(newToggle, toggle);
+
+                // 새로운 이벤트 리스너 등록
+                newToggle.onchange = (e) => {
+                    this.waveletFrequencyMode = e.target.checked;
+                    // 그래프 재렌더링
+                    this._showSelectedWavelet(waveletResult, signal, info, startIdx);
+                };
+            }
+        }
     }
 
     /**
