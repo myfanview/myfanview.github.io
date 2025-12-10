@@ -2535,7 +2535,7 @@ class Dashboard {
                 if (sensorType === 'Temperature') {
                     analysisText = `평균: ${stats.mean.toFixed(2)}°C | 범위: ${stats.min.toFixed(1)}~${stats.max.toFixed(1)}°C | 변동폭: ${(stats.max - stats.min).toFixed(1)}°C`;
                 } else if (sensorType === 'Fan') {
-                    analysisText = `평균: ${stats.mean.toFixed(0)} RPM | 범위: ${stats.min.toFixed(0)}~${stats.max.toFixed(0)} RPM | 안정성: ${((1 - stats.stdDev/stats.mean) * 100).toFixed(1)}%`;
+                    analysisText = `평균: ${stats.mean.toFixed(0)} RPM | 범위: ${stats.min.toFixed(0)}~${stats.max.toFixed(0)} RPM`;
                 } else if (sensorType === 'Control') {
                     analysisText = `평균: ${stats.mean.toFixed(1)}% | 범위: ${stats.min.toFixed(1)}~${stats.max.toFixed(1)}% | 변동폭: ${(stats.max - stats.min).toFixed(1)}%`;
                 } else {

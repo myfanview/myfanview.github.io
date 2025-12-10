@@ -967,7 +967,7 @@ class SignalProcessor {
                 recommended: '스펙트럼 누수 최소화 필요'
             },
             'kaiser': {
-                name: 'Kaiser (β=8.6)',
+                name: 'Kaiser',
                 description: '',
                 mainLobeWidth: 9.0,
                 sideLobeLevel: -50,
