@@ -440,7 +440,10 @@ class Dashboard {
             const charDiv = document.getElementById('fftStftWindowCharacteristics');
 
             if (infoDiv) {
-                infoDiv.textContent = `${windowInfo.name} - ${windowInfo.description}`;
+                // description이 비어있으면 " - "를 붙이지 않음
+                infoDiv.textContent = windowInfo.description
+                    ? `${windowInfo.name} - ${windowInfo.description}`
+                    : windowInfo.name;
             }
             if (charDiv) {
                 charDiv.textContent = `메인로브=${windowInfo.mainLobeWidth}, 부엽=${windowInfo.sideLobeLevel}dB, 권장=${windowInfo.recommended}`;
@@ -2541,37 +2544,53 @@ class Dashboard {
                 break;
 
             case 'fft':
-                const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
-                const fftResult = SignalProcessor.performFFT(values, sampleRate);
-                if (fftResult) {
-                    const maxMagIdx = fftResult.magnitude.indexOf(Math.max(...fftResult.magnitude));
-                    const peakFreq = (maxMagIdx * sampleRate) / values.length;
-                    analysisText = `피크 주파수: ${peakFreq.toFixed(2)} Hz (크기: ${fftResult.magnitude[maxMagIdx].toFixed(2)})`;
+                // 공통 전처리 적용
+                const {processedSignal: fftProcessedSignal} = this._applyFullSignalPreprocessing(values);
 
-                    if (sensorType === 'Fan') {
-                        analysisText += ` | 해석: 회전 기본 주파수`;
+                // FFT 옵션 읽기
+                const fftOptions = this._readFFTStftOptions();
+
+                // 윈도우 함수 적용
+                const fftWindow = SignalProcessor.getWindow(fftOptions.windowType, fftProcessedSignal.length, fftOptions.kaiserBeta);
+                const fftWindowedSignal = fftProcessedSignal.map((x, i) => x * fftWindow[i]);
+
+                const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
+                const fftResult = SignalProcessor.performFFT(fftWindowedSignal, sampleRate);
+                if (fftResult && fftResult.magnitude.length > 0) {
+                    const maxMagIdx = fftResult.magnitude.indexOf(Math.max(...fftResult.magnitude));
+                    // 정확한 주파수 계산 (메타데이터 기반)
+                    let peakFreq;
+                    if (fftResult.fftLength && fftResult.frequencyBins) {
+                        const freqs = SignalProcessor.getFrequencies(fftResult.fftLength, sampleRate).slice(0, fftResult.frequencyBins);
+                        peakFreq = freqs[maxMagIdx] || 0;
+                    } else {
+                        peakFreq = (maxMagIdx * sampleRate) / fftWindowedSignal.length;
                     }
+                    // dB 스케일로 변환
+                    const peakMagnitude = 20 * Math.log10(Math.max(fftResult.magnitude[maxMagIdx], 1e-10));
+                    analysisText = `피크 주파수: ${peakFreq.toFixed(2)} Hz (크기: ${peakMagnitude.toFixed(2)} dB)`;
                 }
                 break;
 
             case 'stft':
                 analysisText = '시간-주파수 에너지 분포입니다. 밝은 색 영역이 높은 에너지를 나타냅니다.';
-                if (sensorType === 'Fan') {
-                    analysisText += ' 베어링 손상이 있으면 광대역 에너지가 증가합니다.';
-                }
                 break;
 
             case 'wavelet':
                 analysisText = '다중 스케일 신호 분석입니다. 밝은 색은 높은 에너지를 의미합니다.';
-                if (sensorType === 'Fan') {
-                    analysisText += ' 팬의 기계적 결함은 낮은 스케일에서 에너지 집중.';
-                }
                 break;
 
             case 'hilbert':
-                analysisText = `신호의 포락선을 추출했습니다. 포락선 범위: ${stats.min.toFixed(2)}~${stats.max.toFixed(2)}`;
-                if (sensorType === 'Fan') {
-                    analysisText += ' 포락선의 변동성이 크면 베어링 문제 가능성.';
+                // 공통 전처리 적용
+                const {processedSignal: hilbertProcessedSignal} = this._applyFullSignalPreprocessing(values);
+
+                const hilbertResult = SignalProcessor.performHilbert(hilbertProcessedSignal, 1000 / (dataLoader.data.sample_interval_ms || 100));
+                if (hilbertResult && hilbertResult.envelope && hilbertResult.envelope.length > 0) {
+                    const envelopeMin = Math.min(...hilbertResult.envelope);
+                    const envelopeMax = Math.max(...hilbertResult.envelope);
+                    analysisText = `신호의 포락선을 추출했습니다. 포락선 범위: ${envelopeMin.toFixed(2)}~${envelopeMax.toFixed(2)}`;
+                } else {
+                    analysisText = `신호의 포락선을 추출했습니다.`;
                 }
                 break;
 

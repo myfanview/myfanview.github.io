@@ -940,35 +940,35 @@ class SignalProcessor {
         const windowInfo = {
             'rectangular': {
                 name: 'Rectangular (윈도우 없음)',
-                description: '상자 형태, 스펙트럼 누수 크지만 주파수 해상도 우수',
+                description: '',
                 mainLobeWidth: 4.0,
                 sideLobeLevel: -13,
                 recommended: '연속 신호, 같은 진폭 성분들'
             },
             'hann': {
                 name: 'Hann',
-                description: '가장 일반적, 균형잡힌 스펙트럼 누수 감소',
+                description: '',
                 mainLobeWidth: 8.0,
                 sideLobeLevel: -32,
                 recommended: '일반적인 신호처리 (⭐ 권장)'
             },
             'hamming': {
                 name: 'Hamming',
-                description: 'Hann과 유사, 부엽이 약간 높음',
+                description: '',
                 mainLobeWidth: 8.0,
                 sideLobeLevel: -43,
                 recommended: '특정 주파수 감지가 중요한 경우'
             },
             'blackman': {
                 name: 'Blackman',
-                description: '강한 스펙트럼 누수 감소, 메인로브 넓음',
+                description: '',
                 mainLobeWidth: 12.0,
                 sideLobeLevel: -58,
                 recommended: '스펙트럼 누수 최소화 필요'
             },
             'kaiser': {
                 name: 'Kaiser (β=8.6)',
-                description: '파라미터 조정으로 누수와 해상도 트레이드오프 제어',
+                description: '',
                 mainLobeWidth: 9.0,
                 sideLobeLevel: -50,
                 recommended: '정밀한 튜닝이 필요한 경우'
