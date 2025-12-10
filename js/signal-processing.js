@@ -225,8 +225,10 @@ class SignalProcessor {
                 analyticSpectrum[i] = [0, 0];
             }
 
-            // IFFT 수행 - 최적화된 O(n log n) 알고리즘 사용
-            const analyticSignalFull = this._optimizedIFFT(analyticSpectrum);
+            // IFFT 수행
+            // Hilbert Transform은 포락선 정확성이 중요하므로
+            // 정규화가 보장된 _simpleIFFT 사용 (O(n²) 복잡도이지만 신호가 짧음)
+            const analyticSignalFull = this._simpleIFFT(analyticSpectrum);
 
             // 원래 길이로 자르기
             const analyticSignal = analyticSignalFull.slice(0, n);
@@ -475,64 +477,11 @@ class SignalProcessor {
     }
 
     /**
-     * 최적화된 IFFT (역 푸리에 변환)
-     * DSP.js의 FFT.inverse() 사용 (O(n log n) 복잡도)
-     * 복소수 배열 입력: [[real, imag], ...]
-     *
-     * FFT 라이브러리 미로드 시 _simpleIFFT로 자동 폴백
-     */
-    static _optimizedIFFT(complexArray) {
-        const n = complexArray.length;
-
-        // FFT 라이브러리 확인
-        if (typeof window.FFT === 'undefined') {
-            console.warn('[_optimizedIFFT] FFT 라이브러리가 없어 _simpleIFFT 사용');
-            return this._simpleIFFT(complexArray);
-        }
-
-        try {
-            const startTime = performance.now();
-
-            // 입력 형식 변환: [[r,i], [r,i], ...] → real[], imag[] 배열
-            const realArray = new Array(n);
-            const imagArray = new Array(n);
-
-            for (let i = 0; i < n; i++) {
-                realArray[i] = complexArray[i][0];
-                imagArray[i] = complexArray[i][1];
-            }
-
-            // DSP.js FFT 인스턴스 생성 및 역변환
-            // sampleRate는 inverse() 동작에 영향 없음 (정규화만 담당)
-            const fft = new window.FFT(n, 1);
-            fft.real = realArray;
-            fft.imag = imagArray;
-
-            // 역변환 수행
-            fft.inverse();
-
-            // 출력 형식 변환: real[], imag[] → [[r,i], [r,i], ...] 형식
-            const result = [];
-            for (let i = 0; i < n; i++) {
-                result.push([fft.real[i], fft.imag[i]]);
-            }
-
-            const endTime = performance.now();
-            console.log(`[_optimizedIFFT] 성능: ${(endTime - startTime).toFixed(2)}ms (O(n log n) 알고리즘)`);
-
-            return result;
-        } catch (error) {
-            console.warn('[_optimizedIFFT] 오류 발생, _simpleIFFT로 폴백:', error);
-            return this._simpleIFFT(complexArray);
-        }
-    }
-
-    /**
      * 간단한 IFFT (역 푸리에 변환)
      * 복소수 배열 입력 필요 [[real, imag], ...]
      * DFT를 사용하여 IFFT 계산 (O(n²) 복잡도)
      *
-     * @deprecated _optimizedIFFT 사용 권장
+     * Hilbert Transform 등에서 정확한 정규화가 필요한 경우 사용
      */
     static _simpleIFFT(complexArray) {
         const n = complexArray.length;
