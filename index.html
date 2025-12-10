@@ -83,22 +83,6 @@
                 </select>
             </div>
 
-            <!-- 전체 신호 전처리 옵션 (FFT/STFT/Wavelet/Hilbert 선택 시) -->
-            <div class="filter-group" id="fullSignalPreprocessGroup" style="display: none; padding: 10px; background: #f5f5f5; border-radius: 4px; border-left: 3px solid #FF9800;">
-                <label style="font-weight: 600; color: #555; margin-bottom: 8px; display: block;">🔧 전처리 옵션:</label>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px;">
-                        <input type="checkbox" id="fullPreprocessRemoveDC" style="cursor: pointer; width: 16px; height: 16px;">
-                        <span>DC 성분 제거</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px;">
-                        <input type="checkbox" id="fullPreprocessDetrend" style="cursor: pointer; width: 16px; height: 16px;">
-                        <span>선형 트렌드 제거</span>
-                    </label>
-                </div>
-                <div style="font-size: 11px; color: #666; margin-top: 6px;">💡 전체 신호에 전처리를 적용한 후 신호처리를 수행합니다</div>
-            </div>
-
             <div class="filter-group">
                 <label for="updateInterval">갱신 간격:</label>
                 <select id="updateInterval">

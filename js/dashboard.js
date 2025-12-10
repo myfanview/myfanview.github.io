@@ -176,9 +176,6 @@ class Dashboard {
             // 그래프 타입 변경 시 이벤트 바인딩 플래그 리셋
             this.selectionEventBound = false;
 
-            // 전처리 패널 표시/숨김
-            this._updateFullSignalPreprocessVisibility();
-
             this.renderGraph();
         });
 
@@ -230,19 +227,6 @@ class Dashboard {
         // 뒤로가기 버튼 이벤트 (신호처리 후 원본 그래프로 복귀)
         document.getElementById('backSignalProcessingBtn').addEventListener('click', () => {
             this._backToOriginalGraph();
-        });
-
-        // 전체 신호 전처리 체크박스 변경 시 그래프 재렌더링
-        document.getElementById('fullPreprocessRemoveDC')?.addEventListener('change', () => {
-            if (this._isSignalProcessingGraphType()) {
-                this.renderGraph();
-            }
-        });
-
-        document.getElementById('fullPreprocessDetrend')?.addEventListener('change', () => {
-            if (this._isSignalProcessingGraphType()) {
-                this.renderGraph();
-            }
         });
 
         // Export 버튼 이벤트 리스너 (선택 영역)
@@ -384,20 +368,6 @@ class Dashboard {
     }
 
     /**
-     * 전체 신호 전처리 패널 표시/숨김
-     */
-    _updateFullSignalPreprocessVisibility() {
-        const panel = document.getElementById('fullSignalPreprocessGroup');
-        if (panel) {
-            if (this._isSignalProcessingGraphType()) {
-                panel.style.display = 'block';
-            } else {
-                panel.style.display = 'none';
-            }
-        }
-    }
-
-    /**
      * 현재 그래프 타입이 신호처리 타입인지 확인
      */
     _isSignalProcessingGraphType() {
@@ -405,11 +375,12 @@ class Dashboard {
     }
 
     /**
-     * 전체 신호 전처리 적용
+     * 전체 신호 전처리 적용 (공통 전처리 옵션 사용)
      */
     _applyFullSignalPreprocessing(signal) {
-        const removeDC = document.getElementById('fullPreprocessRemoveDC')?.checked || false;
-        const detrend = document.getElementById('fullPreprocessDetrend')?.checked || false;
+        // 공통 전처리 옵션 읽기
+        const removeDC = document.getElementById('commonRemoveDC')?.checked || false;
+        const detrend = document.getElementById('commonDetrend')?.checked || false;
 
         let processedSignal = signal;
         let preprocessInfo = '';
@@ -417,13 +388,13 @@ class Dashboard {
         if (removeDC) {
             processedSignal = SignalProcessor.removeDC(processedSignal);
             preprocessInfo += 'DC 제거 ';
-            console.log('[전처리] DC 성분 제거 적용 (전체 신호)');
+            console.log('[전처리] DC 성분 제거 적용');
         }
 
         if (detrend) {
             processedSignal = SignalProcessor.detrend(processedSignal);
             preprocessInfo += '트렌드 제거 ';
-            console.log('[전처리] 선형 트렌드 제거 적용 (전체 신호)');
+            console.log('[전처리] 선형 트렌드 제거 적용');
         }
 
         return {
