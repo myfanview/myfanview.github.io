@@ -998,9 +998,9 @@ class Dashboard {
             // 분석 텍스트 업데이트
             this._updateAnalysisText(this.currentGraphType, values);
 
-            // 선택 이벤트 바인딩 (신호처리가 가능한 모든 그래프 타입에서)
-            if (['timeseries', 'fft', 'stft', 'wavelet', 'hilbert'].includes(this.currentGraphType)) {
-                console.log('[*] 신호처리 활성화:', this.currentGraphType);
+            // 선택 이벤트 바인딩 (시계열 그래프에서만)
+            if (this.currentGraphType === 'timeseries') {
+                console.log('[*] 선택 영역 신호처리 활성화: timeseries');
                 this._bindSelectionEvent(values);
             }
         } catch (error) {
