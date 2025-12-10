@@ -97,6 +97,7 @@ class SignalProcessor {
 
         const result = [];
         const times = [];
+        let isFirstFrame = true;
 
         // Hann 윈도우 생성
         const window = this._hannWindow(windowSize);
@@ -119,7 +120,38 @@ class SignalProcessor {
 
             if (fft) {
                 // 양수 주파수만 추출
-                const magnitude = fft.magnitude.slice(0, fft.magnitude.length / 2);
+                let magnitude = fft.magnitude.slice(0, fft.magnitude.length / 2);
+
+                // 정규화 전 peak 값 (디버그용)
+                const peakBeforeNorm = Math.max(...magnitude);
+
+                // Magnitude 정규화
+                // DFT 정규화 공식:
+                //   - i=0 (DC): |X[0]| / N
+                //   - 0<i<N/2 (양수 주파수): 2×|X[i]| / N
+                //   - i=N/2 (Nyquist): |X[N/2]| / N
+                magnitude = magnitude.map((m, i) => {
+                    if (i === 0 || i === fftSize / 2) {
+                        return m / fftSize;  // DC와 Nyquist
+                    }
+                    return 2 * m / fftSize;  // 양수 주파수
+                });
+
+                // 정규화 후 peak 값 (디버그용)
+                const peakAfterNorm = Math.max(...magnitude);
+
+                // 첫 프레임에서 정규화 영향도 로그
+                if (isFirstFrame) {
+                    console.log('[STFT] 정규화 적용:', {
+                        signalLength: signal.length,
+                        windowSize: windowSize,
+                        fftSize: fftSize,
+                        peakBeforeNorm: peakBeforeNorm.toFixed(4),
+                        peakAfterNorm: peakAfterNorm.toFixed(6),
+                        normalizationFactor: (peakBeforeNorm / peakAfterNorm).toFixed(1) + 'x'
+                    });
+                    isFirstFrame = false;
+                }
 
                 // dB 스케일
                 const magnitudeDb = magnitude.map(m => 20 * Math.log10(Math.max(m, 1e-10)));
