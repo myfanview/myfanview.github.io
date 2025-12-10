@@ -129,8 +129,27 @@
             </div>
             <div id="mainGraph" class="graph-container"></div>
 
-            <!-- FFT/STFT 고급 옵션 -->
-            <div id="fftStftOptionsPanel" style="display: none; margin-top: 15px; padding: 15px; background: #f5f5f5; border-radius: 4px; border-left: 3px solid #FF9800;">
+            <!-- 공통 전처리 패널 (FFT/STFT/Wavelet/Hilbert) -->
+            <div id="commonPreprocessPanel" style="display: none; margin-top: 15px; padding: 15px; background: #f5f5f5; border-radius: 4px; border-left: 3px solid #2196F3;">
+                <label style="font-weight: 600; color: #555; margin-bottom: 8px; display: block; font-size: 13px;">🔧 공통 전처리 옵션:</label>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #555;">
+                        <input type="checkbox" id="commonRemoveDC" style="cursor: pointer; width: 16px; height: 16px;">
+                        <span style="font-weight: 600;">DC 성분 제거</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #555;">
+                        <input type="checkbox" id="commonDetrend" style="cursor: pointer; width: 16px; height: 16px;">
+                        <span style="font-weight: 600;">선형 트렌드 제거</span>
+                    </label>
+                </div>
+                <div style="font-size: 11px; color: #666; margin-top: 6px; padding: 6px; background: #e3f2fd; border-left: 2px solid #2196F3; border-radius: 2px;">
+                    💡 DC 제거: 신호의 평균값을 제거하여 0 Hz 성분 감소<br>
+                    💡 트렌드 제거: 선형 변화를 제거하여 신호 안정화
+                </div>
+            </div>
+
+            <!-- FFT/STFT 특화 옵션 -->
+            <div id="fftStftSpecificPanel" style="display: none; margin-top: 15px; padding: 15px; background: #f5f5f5; border-radius: 4px; border-left: 3px solid #FF9800;">
                 <details style="margin-top: 0;">
                     <summary style="cursor: pointer; font-weight: 600; color: #555; font-size: 13px; user-select: none;">⚙️ FFT/STFT 고급 설정</summary>
                     <div style="margin-top: 12px; padding: 12px; background: white; border-radius: 4px;">
@@ -149,22 +168,6 @@
                             <div style="font-size: 11px; color: #666; margin-top: 6px; padding: 8px; background: #e3f2fd; border-left: 2px solid #2196F3; border-radius: 2px;">
                                 <div style="margin-bottom: 4px;">📊 <strong>선택된 윈도우:</strong> <span id="fftStftWindowInfo" style="color: #1976D2; font-weight: 600;">Hann - 가장 일반적, 균형잡힌 스펙트럼 누수 감소</span></div>
                                 <div style="font-size: 10px; color: #666;">특성: <span id="fftStftWindowCharacteristics">메인로브=8.0, 부엽=-32dB</span></div>
-                            </div>
-                        </div>
-
-                        <!-- DC 제거 및 트렌드 제거 -->
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #555; margin-bottom: 8px;">
-                                <input type="checkbox" id="fftStftRemoveDC" style="cursor: pointer; width: 16px; height: 16px;">
-                                <span style="font-weight: 600;">DC 성분 제거</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #555;">
-                                <input type="checkbox" id="fftStftDetrend" style="cursor: pointer; width: 16px; height: 16px;">
-                                <span style="font-weight: 600;">선형 트렌드 제거</span>
-                            </label>
-                            <div style="font-size: 11px; color: #666; margin-top: 6px; padding: 6px; background: #fff3e0; border-left: 2px solid #FF9800; border-radius: 2px;">
-                                💡 DC 제거: 신호의 평균값을 제거하여 0 Hz 성분 감소<br>
-                                💡 트렌드 제거: 선형 변화를 제거하여 신호 안정화
                             </div>
                         </div>
 

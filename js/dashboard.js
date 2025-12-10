@@ -433,14 +433,15 @@ class Dashboard {
     }
 
     /**
-     * FFT/STFT 고급 옵션 읽기
+     * FFT/STFT 고급 옵션 읽기 (공통 전처리 + 특화 옵션)
      * @returns {object} { windowType, kaiserBeta, removeDC, detrend }
      */
     _readFFTStftOptions() {
         const windowType = document.getElementById('fftStftWindowType')?.value || 'hann';
         const kaiserBeta = parseFloat(document.getElementById('kaiserBetaSlider')?.value) || 8.6;
-        const removeDC = document.getElementById('fftStftRemoveDC')?.checked || false;
-        const detrend = document.getElementById('fftStftDetrend')?.checked || false;
+        // 공통 전처리 패널에서 읽기
+        const removeDC = document.getElementById('commonRemoveDC')?.checked || false;
+        const detrend = document.getElementById('commonDetrend')?.checked || false;
 
         console.log('[FFT/STFT 옵션]', { windowType, kaiserBeta, removeDC, detrend });
 
@@ -453,7 +454,7 @@ class Dashboard {
     }
 
     /**
-     * FFT/STFT 옵션 이벤트 바인딩
+     * FFT/STFT 옵션 이벤트 바인딩 (공통 전처리 + 특화 옵션)
      */
     _bindFFTStftOptionEvents() {
         const windowSelect = document.getElementById('fftStftWindowType');
@@ -501,18 +502,18 @@ class Dashboard {
             });
         }
 
-        // DC 제거 체크박스
-        const removeDCCheck = document.getElementById('fftStftRemoveDC');
-        if (removeDCCheck) {
-            removeDCCheck.addEventListener('change', () => {
+        // 공통 DC 제거 체크박스
+        const commonRemoveDCCheck = document.getElementById('commonRemoveDC');
+        if (commonRemoveDCCheck) {
+            commonRemoveDCCheck.addEventListener('change', () => {
                 this.renderGraph();
             });
         }
 
-        // 트렌드 제거 체크박스
-        const detrendCheck = document.getElementById('fftStftDetrend');
-        if (detrendCheck) {
-            detrendCheck.addEventListener('change', () => {
+        // 공통 트렌드 제거 체크박스
+        const commonDetrendCheck = document.getElementById('commonDetrend');
+        if (commonDetrendCheck) {
+            commonDetrendCheck.addEventListener('change', () => {
                 this.renderGraph();
             });
         }
@@ -909,8 +910,18 @@ class Dashboard {
             const values = sensorData.map(r => r.value);
             const timestamps = sensorData.map(r => r.timestamp);
 
-            // FFT/STFT 옵션 패널 표시/숨김
-            const fftStftPanel = document.getElementById('fftStftOptionsPanel');
+            // 공통 전처리 패널 표시/숨김 (FFT/STFT/Wavelet/Hilbert)
+            const commonPreprocessPanel = document.getElementById('commonPreprocessPanel');
+            if (commonPreprocessPanel) {
+                if (['fft', 'stft', 'wavelet', 'hilbert'].includes(this.currentGraphType)) {
+                    commonPreprocessPanel.style.display = 'block';
+                } else {
+                    commonPreprocessPanel.style.display = 'none';
+                }
+            }
+
+            // FFT/STFT 특화 옵션 패널 표시/숨김
+            const fftStftPanel = document.getElementById('fftStftSpecificPanel');
             if (fftStftPanel) {
                 if (['fft', 'stft'].includes(this.currentGraphType)) {
                     fftStftPanel.style.display = 'block';
@@ -1306,8 +1317,16 @@ class Dashboard {
             const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
 
             // 전처리 옵션 확인
-            const removeDC = document.getElementById('preprocessRemoveDC')?.checked || false;
-            const detrend = document.getElementById('preprocessDetrend')?.checked || false;
+            // 공통 전처리 옵션 읽기
+            const commonRemoveDC = document.getElementById('commonRemoveDC')?.checked || false;
+            const commonDetrend = document.getElementById('commonDetrend')?.checked || false;
+            // 선택영역 전용 전처리 옵션 읽기
+            const selectionRemoveDC = document.getElementById('preprocessRemoveDC')?.checked || false;
+            const selectionDetrend = document.getElementById('preprocessDetrend')?.checked || false;
+
+            // 공통 옵션 또는 선택영역 옵션 중 하나라도 체크되면 적용
+            const removeDC = commonRemoveDC || selectionRemoveDC;
+            const detrend = commonDetrend || selectionDetrend;
 
             // 전처리 적용
             let processedSignal = signal;
@@ -1316,13 +1335,13 @@ class Dashboard {
             if (removeDC) {
                 processedSignal = SignalProcessor.removeDC(processedSignal);
                 preprocessInfo += 'DC 제거 ';
-                console.log('[전처리] DC 성분 제거 적용');
+                console.log('[전처리] DC 성분 제거 적용 (공통 또는 선택영역)');
             }
 
             if (detrend) {
                 processedSignal = SignalProcessor.detrend(processedSignal);
                 preprocessInfo += '트렌드 제거 ';
-                console.log('[전처리] 선형 트렌드 제거 적용');
+                console.log('[전처리] 선형 트렌드 제거 적용 (공통 또는 선택영역)');
             }
 
             // 전처리 정보 추가
@@ -1332,38 +1351,63 @@ class Dashboard {
 
             switch(graphType) {
                 case 'fft':
-                    result = SignalProcessor.performFFT(processedSignal, sampleRate);
+                    // FFT/STFT 옵션 읽기 (윈도우 함수 등)
+                    const fftStftOptions = this._readFFTStftOptions();
+
+                    // 윈도우 함수 적용
+                    const window = SignalProcessor.getWindow(fftStftOptions.windowType, processedSignal.length, fftStftOptions.kaiserBeta);
+                    const windowedSignal = processedSignal.map((x, i) => x * window[i]);
+                    preprocessInfo += `윈도우=${fftStftOptions.windowType} `;
+
+                    result = SignalProcessor.performFFT(windowedSignal, sampleRate);
                     if (result) {
                         // 활성 신호처리 상태 저장
                         this.activeSelectionProcessing = {
                             signal: processedSignal,
                             graphType: graphType,
-                            options: {},
+                            options: {windowType: fftStftOptions.windowType, kaiserBeta: fftStftOptions.kaiserBeta},
                             result: result,
                             originalSignal: signal,
                             removeDC: removeDC,
                             detrend: detrend,
                             sampleRate: sampleRate
                         };
-                        this._showSelectedFFT(result, processedSignal, fullInfo, startIdx);
+                        // fullInfo 재구성 (윈도우 정보 추가)
+                        const updatedInfo = preprocessInfo ? `${info} (${preprocessInfo.trim()})` : info;
+                        this._showSelectedFFT(result, windowedSignal, updatedInfo, startIdx);
                     }
                     break;
 
                 case 'stft':
-                    result = SignalProcessor.performSTFT(processedSignal, 128, 64, sampleRate);
+                    // FFT/STFT 옵션 읽기
+                    const stftFftStftOptions = this._readFFTStftOptions();
+                    preprocessInfo += `윈도우=${stftFftStftOptions.windowType} `;
+
+                    result = SignalProcessor.performSTFT(
+                        processedSignal,
+                        128,
+                        64,
+                        sampleRate,
+                        {
+                            windowType: stftFftStftOptions.windowType,
+                            kaiserBeta: stftFftStftOptions.kaiserBeta
+                        }
+                    );
                     if (result) {
                         // 활성 신호처리 상태 저장
                         this.activeSelectionProcessing = {
                             signal: processedSignal,
                             graphType: graphType,
-                            options: {windowSize: 128, hopSize: 64},
+                            options: {windowSize: 128, hopSize: 64, windowType: stftFftStftOptions.windowType, kaiserBeta: stftFftStftOptions.kaiserBeta},
                             result: result,
                             originalSignal: signal,
                             removeDC: removeDC,
                             detrend: detrend,
                             sampleRate: sampleRate
                         };
-                        this._showSelectedSTFT(result, processedSignal, fullInfo, startIdx);
+                        // fullInfo 재구성 (윈도우 정보 추가)
+                        const updatedStftInfo = preprocessInfo ? `${info} (${preprocessInfo.trim()})` : info;
+                        this._showSelectedSTFT(result, processedSignal, updatedStftInfo, startIdx);
                     }
                     break;
 
@@ -1707,20 +1751,30 @@ class Dashboard {
             const {graphType, originalSignal, sampleRate} = this.activeSelectionProcessing;
 
             // ⚠️ 현재 선택된 전처리 옵션을 다시 읽기 (사용자가 변경했을 수 있음)
-            const currentRemoveDC = document.getElementById('preprocessRemoveDC')?.checked || false;
-            const currentDetrend = document.getElementById('preprocessDetrend')?.checked || false;
+            // 공통 전처리 옵션도 함께 읽기
+            const commonRemoveDC = document.getElementById('commonRemoveDC')?.checked || false;
+            const commonDetrend = document.getElementById('commonDetrend')?.checked || false;
+            const selectionRemoveDC = document.getElementById('preprocessRemoveDC')?.checked || false;
+            const selectionDetrend = document.getElementById('preprocessDetrend')?.checked || false;
+
+            // 공통 옵션 또는 선택영역 옵션 중 하나라도 체크되면 적용
+            const currentRemoveDC = commonRemoveDC || selectionRemoveDC;
+            const currentDetrend = commonDetrend || selectionDetrend;
 
             // originalSignal을 기반으로 새로 전처리 수행
             let processedSignal = originalSignal;
+            let preprocessInfo = '';
 
             if (currentRemoveDC) {
                 processedSignal = SignalProcessor.removeDC(processedSignal);
-                console.log('[전처리] DC 제거 적용');
+                preprocessInfo += 'DC 제거 ';
+                console.log('[전처리] DC 제거 적용 (공통 또는 선택영역)');
             }
 
             if (currentDetrend) {
                 processedSignal = SignalProcessor.detrend(processedSignal);
-                console.log('[전처리] 선형 트렌드 제거 적용');
+                preprocessInfo += '트렌드 제거 ';
+                console.log('[전처리] 선형 트렌드 제거 적용 (공통 또는 선택영역)');
             }
 
             // activeSelectionProcessing의 signal을 새로 전처리된 신호로 업데이트
@@ -1749,11 +1803,32 @@ class Dashboard {
             // 신호처리 재실행 (전처리된 signal 사용)
             switch(graphType) {
                 case 'fft':
-                    result = SignalProcessor.performFFT(processedSignal, sampleRate);
+                    // FFT/STFT 옵션 읽기 (윈도우 함수 등)
+                    const fftStftOptions = this._readFFTStftOptions();
+
+                    // 윈도우 함수 적용
+                    const window = SignalProcessor.getWindow(fftStftOptions.windowType, processedSignal.length, fftStftOptions.kaiserBeta);
+                    const windowedSignal = processedSignal.map((x, i) => x * window[i]);
+                    preprocessInfo += `윈도우=${fftStftOptions.windowType} `;
+
+                    result = SignalProcessor.performFFT(windowedSignal, sampleRate);
                     break;
 
                 case 'stft':
-                    result = SignalProcessor.performSTFT(processedSignal, options.windowSize, options.hopSize, sampleRate);
+                    // FFT/STFT 옵션 읽기
+                    const stftFftStftOptions = this._readFFTStftOptions();
+                    preprocessInfo += `윈도우=${stftFftStftOptions.windowType} `;
+
+                    result = SignalProcessor.performSTFT(
+                        processedSignal,
+                        options.windowSize,
+                        options.hopSize,
+                        sampleRate,
+                        {
+                            windowType: stftFftStftOptions.windowType,
+                            kaiserBeta: stftFftStftOptions.kaiserBeta
+                        }
+                    );
                     break;
 
                 case 'wavelet':
@@ -1772,8 +1847,7 @@ class Dashboard {
                 // 그래프 재렌더링
                 const info = this.selectedRangeData?.info || '선택영역';
                 const startIdx = this.selectedRangeData?.startIdx || 0;
-                const fullInfo = currentRemoveDC || currentDetrend ?
-                    `${info} (${currentRemoveDC ? 'DC 제거' : ''} ${currentDetrend ? '트렌드 제거' : ''})`.trim() : info;
+                const fullInfo = preprocessInfo ? `${info} (${preprocessInfo.trim()})` : info;
 
                 switch(graphType) {
                     case 'fft':
