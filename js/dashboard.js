@@ -425,6 +425,42 @@ class Dashboard {
     }
 
     /**
+     * 선택 영역 FFT/STFT 고급 옵션 읽기
+     * @returns {object} { windowType, kaiserBeta }
+     */
+    _readSelectionFFTStftOptions() {
+        const windowType = document.getElementById('selectionFftStftWindowType')?.value || 'hann';
+        const kaiserBeta = parseFloat(document.getElementById('selectionKaiserBetaSlider')?.value) || 8.6;
+
+        console.log('[선택 영역 FFT/STFT 옵션]', { windowType, kaiserBeta });
+
+        return {
+            windowType: windowType,
+            kaiserBeta: kaiserBeta
+        };
+    }
+
+    /**
+     * 선택 영역 FFT/STFT 윈도우 함수 변경 이벤트 바인딩
+     */
+    _bindSelectionFftStftWindowChange() {
+        const windowSelect = document.getElementById('selectionFftStftWindowType');
+        if (!windowSelect) return;
+
+        windowSelect.addEventListener('change', (e) => {
+            const windowType = e.target.value;
+            const kaiserPanel = document.getElementById('selectionKaiserParamPanel');
+
+            // Kaiser 파라미터 패널 표시/숨김
+            if (kaiserPanel) {
+                kaiserPanel.style.display = (windowType === 'kaiser') ? 'block' : 'none';
+            }
+
+            console.log(`[선택 영역 FFT/STFT 윈도우] ${windowType} 선택`);
+        });
+    }
+
+    /**
      * FFT/STFT 옵션 이벤트 바인딩 (공통 전처리 + 특화 옵션)
      */
     _bindFFTStftOptionEvents() {
@@ -1120,6 +1156,32 @@ class Dashboard {
         if (select) {
             select.value = '';
             select.style.display = 'block';  // ← 드롭박스 표시
+
+            // 신호처리 타입 변경 시 옵션 패널 표시/숨김 이벤트 바인딩
+            if (!select.selectionTypeChangeEventBound) {
+                select.addEventListener('change', (e) => {
+                    const processingType = e.target.value;
+                    const fftStftPanel = document.getElementById('selectionFftStftOptions');
+                    const waveletPanel = document.getElementById('selectionWaveletOptions');
+
+                    // 옵션 패널 표시/숨김
+                    if (fftStftPanel) {
+                        fftStftPanel.style.display = (processingType === 'fft' || processingType === 'stft') ? 'block' : 'none';
+                    }
+                    if (waveletPanel) {
+                        waveletPanel.style.display = (processingType === 'wavelet') ? 'block' : 'none';
+                    }
+
+                    // FFT/STFT 윈도우 함수 선택 이벤트 바인딩 (첫 번째만)
+                    if ((processingType === 'fft' || processingType === 'stft') && !this.selectionFftStftWindowChangeEventBound) {
+                        this._bindSelectionFftStftWindowChange();
+                        this.selectionFftStftWindowChangeEventBound = true;
+                    }
+
+                    console.log(`[선택 영역 신호처리] 타입 변경: ${processingType}`);
+                });
+                select.selectionTypeChangeEventBound = true;
+            }
         } else {
             console.error('[ERROR] signalProcessingType 요소를 찾을 수 없습니다');
         }
@@ -1131,6 +1193,12 @@ class Dashboard {
         if (backButton) backButton.style.display = 'none';
         if (applyButton) applyButton.style.display = 'inline-block';
         if (cancelButton) cancelButton.style.display = 'inline-block';
+
+        // 옵션 패널 초기화 (숨김)
+        const fftStftPanel = document.getElementById('selectionFftStftOptions');
+        const waveletPanel = document.getElementById('selectionWaveletOptions');
+        if (fftStftPanel) fftStftPanel.style.display = 'none';
+        if (waveletPanel) waveletPanel.style.display = 'none';
 
         panel.style.display = 'block';
         console.log('[*] 신호처리 UI 패널 표시됨');
@@ -1174,9 +1242,21 @@ class Dashboard {
         if (cancelButton) cancelButton.style.display = 'none';
         if (selectElement) selectElement.style.display = 'none';
 
-        // Wavelet 옵션 표시 (현재 신호처리 타입이 Wavelet인 경우)
+        // 현재 신호처리 타입 확인
         const activeGraphType = this.activeSelectionProcessing?.graphType;
+        const selectionFftStftOptions = document.getElementById('selectionFftStftOptions');
         const selectionWaveletOptions = document.getElementById('selectionWaveletOptions');
+
+        // FFT/STFT 옵션 표시 (현재 신호처리 타입이 FFT 또는 STFT인 경우)
+        if (selectionFftStftOptions) {
+            if (activeGraphType === 'fft' || activeGraphType === 'stft') {
+                selectionFftStftOptions.style.display = 'block';
+            } else {
+                selectionFftStftOptions.style.display = 'none';
+            }
+        }
+
+        // Wavelet 옵션 표시 (현재 신호처리 타입이 Wavelet인 경우)
         if (selectionWaveletOptions) {
             if (activeGraphType === 'wavelet') {
                 selectionWaveletOptions.style.display = 'block';
@@ -1199,8 +1279,12 @@ class Dashboard {
             signalProcessingType.value = '';
         }
 
-        // Wavelet 옵션 숨기기
+        // FFT/STFT, Wavelet 옵션 숨기기
+        const selectionFftStftOptions = document.getElementById('selectionFftStftOptions');
         const selectionWaveletOptions = document.getElementById('selectionWaveletOptions');
+        if (selectionFftStftOptions) {
+            selectionFftStftOptions.style.display = 'none';
+        }
         if (selectionWaveletOptions) {
             selectionWaveletOptions.style.display = 'none';
         }
@@ -1325,8 +1409,8 @@ class Dashboard {
 
             switch(graphType) {
                 case 'fft':
-                    // FFT/STFT 옵션 읽기 (윈도우 함수 등)
-                    const fftStftOptions = this._readFFTStftOptions();
+                    // 선택 영역 FFT/STFT 옵션 읽기 (윈도우 함수 등)
+                    const fftStftOptions = this._readSelectionFFTStftOptions();
 
                     // 윈도우 함수 적용
                     const window = SignalProcessor.getWindow(fftStftOptions.windowType, processedSignal.length, fftStftOptions.kaiserBeta);
@@ -1353,8 +1437,8 @@ class Dashboard {
                     break;
 
                 case 'stft':
-                    // FFT/STFT 옵션 읽기
-                    const stftFftStftOptions = this._readFFTStftOptions();
+                    // 선택 영역 FFT/STFT 옵션 읽기
+                    const stftFftStftOptions = this._readSelectionFFTStftOptions();
                     preprocessInfo += `윈도우=${stftFftStftOptions.windowType} `;
 
                     result = SignalProcessor.performSTFT(
