@@ -456,8 +456,33 @@ class Dashboard {
                 kaiserPanel.style.display = (windowType === 'kaiser') ? 'block' : 'none';
             }
 
+            // FFT 또는 STFT 신호처리 진행 중이면 재처리
+            if (this.activeSelectionProcessing &&
+                (this.activeSelectionProcessing.graphType === 'fft' ||
+                 this.activeSelectionProcessing.graphType === 'stft')) {
+                this._reprocessSelectedSignal();
+            }
+
             console.log(`[선택 영역 FFT/STFT 윈도우] ${windowType} 선택`);
         });
+
+        // Kaiser β 슬라이더 값 업데이트 및 재처리
+        const kaiserBetaSlider = document.getElementById('selectionKaiserBetaSlider');
+        const kaiserBetaValue = document.getElementById('selectionKaiserBetaValue');
+        if (kaiserBetaSlider && kaiserBetaValue) {
+            kaiserBetaSlider.addEventListener('input', (e) => {
+                kaiserBetaValue.textContent = parseFloat(e.target.value).toFixed(1);
+            });
+
+            // 값 변경 완료 시 신호처리 재실행 (FFT/STFT 진행 중일 때만)
+            kaiserBetaSlider.addEventListener('change', () => {
+                if (this.activeSelectionProcessing &&
+                    (this.activeSelectionProcessing.graphType === 'fft' ||
+                     this.activeSelectionProcessing.graphType === 'stft')) {
+                    this._reprocessSelectedSignal();
+                }
+            });
+        }
     }
 
     /**
