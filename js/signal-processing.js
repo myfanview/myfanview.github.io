@@ -942,36 +942,31 @@ class SignalProcessor {
                 name: 'Rectangular (윈도우 없음)',
                 description: '',
                 mainLobeWidth: 4.0,
-                sideLobeLevel: -13,
-                recommended: '연속 신호, 같은 진폭 성분들'
+                sideLobeLevel: -13
             },
             'hann': {
                 name: 'Hann',
                 description: '',
                 mainLobeWidth: 8.0,
-                sideLobeLevel: -32,
-                recommended: '일반적인 신호처리 (⭐ 권장)'
+                sideLobeLevel: -32
             },
             'hamming': {
                 name: 'Hamming',
                 description: '',
                 mainLobeWidth: 8.0,
-                sideLobeLevel: -43,
-                recommended: '특정 주파수 감지가 중요한 경우'
+                sideLobeLevel: -43
             },
             'blackman': {
                 name: 'Blackman',
                 description: '',
                 mainLobeWidth: 12.0,
-                sideLobeLevel: -58,
-                recommended: '스펙트럼 누수 최소화 필요'
+                sideLobeLevel: -58
             },
             'kaiser': {
                 name: 'Kaiser',
                 description: '',
                 mainLobeWidth: 9.0,
-                sideLobeLevel: -50,
-                recommended: '정밀한 튜닝이 필요한 경우'
+                sideLobeLevel: -50
             }
         };
 
@@ -979,8 +974,7 @@ class SignalProcessor {
             name: '알 수 없음',
             description: '',
             mainLobeWidth: 0,
-            sideLobeLevel: 0,
-            recommended: ''
+            sideLobeLevel: 0
         };
     }
 }

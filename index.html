@@ -144,7 +144,7 @@
                             </label>
                             <select id="fftStftWindowType" style="width: 100%; padding: 8px 10px; font-size: 12px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer;">
                                 <option value="rectangular">Rectangular (윈도우 없음)</option>
-                                <option value="hann" selected>Hann ⭐ (권장)</option>
+                                <option value="hann" selected>Hann</option>
                                 <option value="hamming">Hamming</option>
                                 <option value="blackman">Blackman</option>
                                 <option value="kaiser">Kaiser (조정 가능)</option>
@@ -217,12 +217,9 @@
                             <select id="waveletEdgeMode" style="width: 100%; padding: 6px 10px; font-size: 13px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer;">
                                 <option value="none">없음 (기본)</option>
                                 <option value="zero">Zero-padding (0으로 채움)</option>
-                                <option value="symmetric" selected>Symmetric (대칭 확장) ⭐</option>
+                                <option value="symmetric" selected>Symmetric (대칭 확장)</option>
                                 <option value="reflect">Reflect (반사)</option>
                             </select>
-                            <div style="font-size: 11px; color: #666; margin-top: 6px; padding: 6px; background: #fffbf0; border-left: 2px solid #FFC107; border-radius: 2px;">
-                                💡 Symmetric은 경계 불연속성을 줄여 대부분의 경우 권장됩니다
-                            </div>
                         </div>
 
                         <!-- 나이퀴스트 필터 -->
@@ -272,7 +269,7 @@
                             </label>
                             <select id="selectionFftStftWindowType" style="width: 100%; padding: 6px; font-size: 12px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer;">
                                 <option value="rectangular">Rectangular (윈도우 없음)</option>
-                                <option value="hann" selected>Hann ⭐ (권장)</option>
+                                <option value="hann" selected>Hann</option>
                                 <option value="hamming">Hamming</option>
                                 <option value="blackman">Blackman</option>
                                 <option value="kaiser">Kaiser (조정 가능)</option>
@@ -307,7 +304,7 @@
                             <select id="selectionEdgeMode" style="width: 100%; padding: 6px; font-size: 12px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer;">
                                 <option value="none">없음</option>
                                 <option value="zero">Zero-padding</option>
-                                <option value="symmetric" selected>Symmetric ⭐</option>
+                                <option value="symmetric" selected>Symmetric</option>
                                 <option value="reflect">Reflect</option>
                             </select>
                         </div>

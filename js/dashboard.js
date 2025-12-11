@@ -482,7 +482,7 @@ class Dashboard {
                     : windowInfo.name;
             }
             if (charDiv) {
-                charDiv.textContent = `메인로브=${windowInfo.mainLobeWidth}, 부엽=${windowInfo.sideLobeLevel}dB, 권장=${windowInfo.recommended}`;
+                charDiv.textContent = `메인로브=${windowInfo.mainLobeWidth}, 부엽=${windowInfo.sideLobeLevel}dB`;
             }
 
             // Kaiser 파라미터 패널 표시/숨김
