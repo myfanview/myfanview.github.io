@@ -365,6 +365,90 @@ class Dashboard {
                 }
             });
         }
+
+        // STFT 공통 설정 슬라이더 (window size)
+        const stftWindowSize = document.getElementById('stftWindowSize');
+        const stftWindowSizeValue = document.getElementById('stftWindowSizeValue');
+        if (stftWindowSize && stftWindowSizeValue) {
+            stftWindowSize.addEventListener('input', (e) => {
+                const windowSize = parseInt(e.target.value);
+                stftWindowSizeValue.textContent = windowSize;
+                // 오버랩 재계산
+                const hopSize = parseInt(document.getElementById('stftHopSize')?.value || 128);
+                const overlap = Math.round(100 * (windowSize - hopSize) / windowSize);
+                const overlapSpan = document.getElementById('stftOverlapValue');
+                if (overlapSpan) overlapSpan.textContent = overlap;
+            });
+
+            stftWindowSize.addEventListener('change', () => {
+                if (this.currentGraphType === 'stft') {
+                    this.renderGraph();
+                }
+            });
+        }
+
+        // STFT 공통 설정 슬라이더 (hop size)
+        const stftHopSize = document.getElementById('stftHopSize');
+        const stftHopSizeValue = document.getElementById('stftHopSizeValue');
+        if (stftHopSize && stftHopSizeValue) {
+            stftHopSize.addEventListener('input', (e) => {
+                const hopSize = parseInt(e.target.value);
+                stftHopSizeValue.textContent = hopSize;
+                // 오버랩 재계산
+                const windowSize = parseInt(document.getElementById('stftWindowSize')?.value || 256);
+                const overlap = Math.round(100 * (windowSize - hopSize) / windowSize);
+                const overlapSpan = document.getElementById('stftOverlapValue');
+                if (overlapSpan) overlapSpan.textContent = overlap;
+            });
+
+            stftHopSize.addEventListener('change', () => {
+                if (this.currentGraphType === 'stft') {
+                    this.renderGraph();
+                }
+            });
+        }
+
+        // STFT 선택영역 설정 슬라이더 (window size)
+        const selectionStftWindowSize = document.getElementById('selectionStftWindowSize');
+        const selectionStftWindowSizeValue = document.getElementById('selectionStftWindowSizeValue');
+        if (selectionStftWindowSize && selectionStftWindowSizeValue) {
+            selectionStftWindowSize.addEventListener('input', (e) => {
+                const windowSize = parseInt(e.target.value);
+                selectionStftWindowSizeValue.textContent = windowSize;
+                // 오버랩 재계산
+                const hopSize = parseInt(document.getElementById('selectionStftHopSize')?.value || 128);
+                const overlap = Math.round(100 * (windowSize - hopSize) / windowSize);
+                const overlapSpan = document.getElementById('selectionStftOverlapValue');
+                if (overlapSpan) overlapSpan.textContent = overlap;
+            });
+
+            selectionStftWindowSize.addEventListener('change', () => {
+                if (this.activeSelectionProcessing && this.activeSelectionProcessing.graphType === 'stft') {
+                    this._reprocessSelectedSignal();
+                }
+            });
+        }
+
+        // STFT 선택영역 설정 슬라이더 (hop size)
+        const selectionStftHopSize = document.getElementById('selectionStftHopSize');
+        const selectionStftHopSizeValue = document.getElementById('selectionStftHopSizeValue');
+        if (selectionStftHopSize && selectionStftHopSizeValue) {
+            selectionStftHopSize.addEventListener('input', (e) => {
+                const hopSize = parseInt(e.target.value);
+                selectionStftHopSizeValue.textContent = hopSize;
+                // 오버랩 재계산
+                const windowSize = parseInt(document.getElementById('selectionStftWindowSize')?.value || 256);
+                const overlap = Math.round(100 * (windowSize - hopSize) / windowSize);
+                const overlapSpan = document.getElementById('selectionStftOverlapValue');
+                if (overlapSpan) overlapSpan.textContent = overlap;
+            });
+
+            selectionStftHopSize.addEventListener('change', () => {
+                if (this.activeSelectionProcessing && this.activeSelectionProcessing.graphType === 'stft') {
+                    this._reprocessSelectedSignal();
+                }
+            });
+        }
     }
 
     /**
@@ -1466,10 +1550,14 @@ class Dashboard {
                     const stftFftStftOptions = this._readSelectionFFTStftOptions();
                     preprocessInfo += `윈도우=${stftFftStftOptions.windowType} `;
 
+                    // 선택영역 STFT window/hop size 설정 읽기
+                    const stftWindowSize = parseInt(document.getElementById('selectionStftWindowSize')?.value) || 256;
+                    const stftHopSize = parseInt(document.getElementById('selectionStftHopSize')?.value) || 128;
+
                     result = SignalProcessor.performSTFT(
                         processedSignal,
-                        128,
-                        64,
+                        stftWindowSize,
+                        stftHopSize,
                         sampleRate,
                         {
                             windowType: stftFftStftOptions.windowType,
@@ -1481,7 +1569,7 @@ class Dashboard {
                         this.activeSelectionProcessing = {
                             signal: processedSignal,
                             graphType: graphType,
-                            options: {windowSize: 128, hopSize: 64, windowType: stftFftStftOptions.windowType, kaiserBeta: stftFftStftOptions.kaiserBeta},
+                            options: {windowSize: stftWindowSize, hopSize: stftHopSize, windowType: stftFftStftOptions.windowType, kaiserBeta: stftFftStftOptions.kaiserBeta},
                             result: result,
                             originalSignal: signal,
                             removeDC: removeDC,
@@ -1875,7 +1963,10 @@ class Dashboard {
                     filterNyquist: document.getElementById('selectionFilterNyquist')?.checked !== false
                 };
             } else if (graphType === 'stft') {
-                options = {windowSize: 128, hopSize: 64};
+                // 선택영역 STFT window/hop size 설정 읽기
+                const stftWindowSize = parseInt(document.getElementById('selectionStftWindowSize')?.value) || 256;
+                const stftHopSize = parseInt(document.getElementById('selectionStftHopSize')?.value) || 128;
+                options = {windowSize: stftWindowSize, hopSize: stftHopSize};
             }
 
             // 옵션 업데이트
@@ -2253,11 +2344,15 @@ class Dashboard {
         // 샘플링 레이트 계산
         const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
 
-        // STFT 수행 (대안 4: windowOptions 전달, 주파수 배열 반환)
+        // STFT 윈도우/홉 크기 읽기 (사용자 커스터마이징)
+        const stftWindowSize = parseInt(document.getElementById('stftWindowSize')?.value) || 256;
+        const stftHopSize = parseInt(document.getElementById('stftHopSize')?.value) || 128;
+
+        // STFT 수행
         const stftResult = SignalProcessor.performSTFT(
             processedSignal,
-            256,  // windowSize 기본값
-            128,  // hopSize (50% overlap)
+            stftWindowSize,
+            stftHopSize,
             sampleRate,
             {
                 windowType: fftStftOptions.windowType,

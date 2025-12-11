@@ -172,6 +172,41 @@
                                 💡 β 높을수록: 스펙트럼 누수 ↑, 해상도 ↑
                             </div>
                         </div>
+
+                        <!-- STFT 윈도우/홉 크기 설정 -->
+                        <div style="margin-bottom: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                            <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">
+                                STFT 윈도우 크기: <span id="stftWindowSizeValue" style="color: #FF9800; font-weight: 700;">256</span>
+                            </label>
+                            <input type="range" id="stftWindowSize" min="32" max="512" step="32" value="256"
+                                   style="width: 100%; cursor: pointer;">
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #999; margin-top: 2px;">
+                                <span>시간 해상도 (32)</span>
+                                <span>균형 (256)</span>
+                                <span>주파수 해상도 (512)</span>
+                            </div>
+                            <div style="font-size: 11px; color: #666; margin-top: 6px; padding: 6px; background: #fffbf0; border-left: 2px solid #FFC107; border-radius: 2px;">
+                                💡 작을수록: 시간 해상도 ↑, 주파수 해상도 ↓<br>
+                                💡 클수록: 시간 해상도 ↓, 주파수 해상도 ↑
+                            </div>
+                        </div>
+
+                        <!-- STFT 홉 크기 설정 -->
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">
+                                STFT 홉 크기: <span id="stftHopSizeValue" style="color: #FF9800; font-weight: 700;">128</span> (오버랩: <span id="stftOverlapValue" style="color: #FF9800;">50</span>%)
+                            </label>
+                            <input type="range" id="stftHopSize" min="16" max="256" step="16" value="128"
+                                   style="width: 100%; cursor: pointer;">
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #999; margin-top: 2px;">
+                                <span>많은 오버랩 (16)</span>
+                                <span>50% 오버랩 (128)</span>
+                                <span>적은 오버랩 (256)</span>
+                            </div>
+                            <div style="font-size: 11px; color: #666; margin-top: 6px; padding: 6px; background: #e8f5e9; border-left: 2px solid #4CAF50; border-radius: 2px;">
+                                ✓ 홉 크기 = 윈도우 크기 / 2 권장 (50% 오버랩)
+                            </div>
+                        </div>
                     </div>
                 </details>
             </div>
@@ -282,6 +317,24 @@
                             </label>
                             <input type="range" id="selectionKaiserBetaSlider" min="3" max="15" step="0.5" value="8.6" style="width: 100%; cursor: pointer;">
                             <div style="font-size: 10px; color: #999; margin-top: 2px;">누수 (3) ← 균형 (8.6) → 해상도 (15)</div>
+                        </div>
+                    </div>
+
+                    <!-- STFT 윈도우/홉 크기 설정 -->
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #FFB74D;">
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; font-size: 12px; color: #555; margin-bottom: 4px; font-weight: 600;">
+                                윈도우 크기: <span id="selectionStftWindowSizeValue" style="color: #FF9800;">256</span>
+                            </label>
+                            <input type="range" id="selectionStftWindowSize" min="32" max="512" step="32" value="256" style="width: 100%; cursor: pointer;">
+                            <div style="font-size: 10px; color: #999; margin-top: 2px;">32 (시간) ← 256 (균형) → 512 (주파수)</div>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 12px; color: #555; margin-bottom: 4px; font-weight: 600;">
+                                홉 크기: <span id="selectionStftHopSizeValue" style="color: #FF9800;">128</span> (오버랩: <span id="selectionStftOverlapValue" style="color: #FF9800;">50</span>%)
+                            </label>
+                            <input type="range" id="selectionStftHopSize" min="16" max="256" step="16" value="128" style="width: 100%; cursor: pointer;">
+                            <div style="font-size: 10px; color: #999; margin-top: 2px;">16 (많음) ← 128 (50%) → 256 (적음)</div>
                         </div>
                     </div>
                 </div>
