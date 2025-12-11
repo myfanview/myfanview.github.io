@@ -1886,8 +1886,8 @@ class Dashboard {
             // 신호처리 재실행 (전처리된 signal 사용)
             switch(graphType) {
                 case 'fft':
-                    // FFT/STFT 옵션 읽기 (윈도우 함수 등)
-                    const fftStftOptions = this._readFFTStftOptions();
+                    // 선택영역 FFT/STFT 옵션 읽기 (윈도우 함수 등)
+                    const fftStftOptions = this._readSelectionFFTStftOptions();
 
                     // 윈도우 함수 적용
                     const window = SignalProcessor.getWindow(fftStftOptions.windowType, processedSignal.length, fftStftOptions.kaiserBeta);
@@ -1898,8 +1898,8 @@ class Dashboard {
                     break;
 
                 case 'stft':
-                    // FFT/STFT 옵션 읽기
-                    const stftFftStftOptions = this._readFFTStftOptions();
+                    // 선택영역 FFT/STFT 옵션 읽기
+                    const stftFftStftOptions = this._readSelectionFFTStftOptions();
                     preprocessInfo += `윈도우=${stftFftStftOptions.windowType} `;
 
                     result = SignalProcessor.performSTFT(
