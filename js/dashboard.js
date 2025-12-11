@@ -365,6 +365,90 @@ class Dashboard {
                 }
             });
         }
+
+        // STFT 공통 설정 슬라이더 (window size)
+        const stftWindowSize = document.getElementById('stftWindowSize');
+        const stftWindowSizeValue = document.getElementById('stftWindowSizeValue');
+        if (stftWindowSize && stftWindowSizeValue) {
+            stftWindowSize.addEventListener('input', (e) => {
+                const windowSize = parseInt(e.target.value);
+                stftWindowSizeValue.textContent = windowSize;
+                // 오버랩 재계산
+                const hopSize = parseInt(document.getElementById('stftHopSize')?.value || 128);
+                const overlap = Math.round(100 * (windowSize - hopSize) / windowSize);
+                const overlapSpan = document.getElementById('stftOverlapValue');
+                if (overlapSpan) overlapSpan.textContent = overlap;
+            });
+
+            stftWindowSize.addEventListener('change', () => {
+                if (this.currentGraphType === 'stft') {
+                    this.renderGraph();
+                }
+            });
+        }
+
+        // STFT 공통 설정 슬라이더 (hop size)
+        const stftHopSize = document.getElementById('stftHopSize');
+        const stftHopSizeValue = document.getElementById('stftHopSizeValue');
+        if (stftHopSize && stftHopSizeValue) {
+            stftHopSize.addEventListener('input', (e) => {
+                const hopSize = parseInt(e.target.value);
+                stftHopSizeValue.textContent = hopSize;
+                // 오버랩 재계산
+                const windowSize = parseInt(document.getElementById('stftWindowSize')?.value || 256);
+                const overlap = Math.round(100 * (windowSize - hopSize) / windowSize);
+                const overlapSpan = document.getElementById('stftOverlapValue');
+                if (overlapSpan) overlapSpan.textContent = overlap;
+            });
+
+            stftHopSize.addEventListener('change', () => {
+                if (this.currentGraphType === 'stft') {
+                    this.renderGraph();
+                }
+            });
+        }
+
+        // STFT 선택영역 설정 슬라이더 (window size)
+        const selectionStftWindowSize = document.getElementById('selectionStftWindowSize');
+        const selectionStftWindowSizeValue = document.getElementById('selectionStftWindowSizeValue');
+        if (selectionStftWindowSize && selectionStftWindowSizeValue) {
+            selectionStftWindowSize.addEventListener('input', (e) => {
+                const windowSize = parseInt(e.target.value);
+                selectionStftWindowSizeValue.textContent = windowSize;
+                // 오버랩 재계산
+                const hopSize = parseInt(document.getElementById('selectionStftHopSize')?.value || 128);
+                const overlap = Math.round(100 * (windowSize - hopSize) / windowSize);
+                const overlapSpan = document.getElementById('selectionStftOverlapValue');
+                if (overlapSpan) overlapSpan.textContent = overlap;
+            });
+
+            selectionStftWindowSize.addEventListener('change', () => {
+                if (this.activeSelectionProcessing && this.activeSelectionProcessing.graphType === 'stft') {
+                    this._reprocessSelectedSignal();
+                }
+            });
+        }
+
+        // STFT 선택영역 설정 슬라이더 (hop size)
+        const selectionStftHopSize = document.getElementById('selectionStftHopSize');
+        const selectionStftHopSizeValue = document.getElementById('selectionStftHopSizeValue');
+        if (selectionStftHopSize && selectionStftHopSizeValue) {
+            selectionStftHopSize.addEventListener('input', (e) => {
+                const hopSize = parseInt(e.target.value);
+                selectionStftHopSizeValue.textContent = hopSize;
+                // 오버랩 재계산
+                const windowSize = parseInt(document.getElementById('selectionStftWindowSize')?.value || 256);
+                const overlap = Math.round(100 * (windowSize - hopSize) / windowSize);
+                const overlapSpan = document.getElementById('selectionStftOverlapValue');
+                if (overlapSpan) overlapSpan.textContent = overlap;
+            });
+
+            selectionStftHopSize.addEventListener('change', () => {
+                if (this.activeSelectionProcessing && this.activeSelectionProcessing.graphType === 'stft') {
+                    this._reprocessSelectedSignal();
+                }
+            });
+        }
     }
 
     /**
@@ -425,6 +509,67 @@ class Dashboard {
     }
 
     /**
+     * 선택 영역 FFT/STFT 고급 옵션 읽기
+     * @returns {object} { windowType, kaiserBeta }
+     */
+    _readSelectionFFTStftOptions() {
+        const windowType = document.getElementById('selectionFftStftWindowType')?.value || 'hann';
+        const kaiserBeta = parseFloat(document.getElementById('selectionKaiserBetaSlider')?.value) || 8.6;
+
+        console.log('[선택 영역 FFT/STFT 옵션]', { windowType, kaiserBeta });
+
+        return {
+            windowType: windowType,
+            kaiserBeta: kaiserBeta
+        };
+    }
+
+    /**
+     * 선택 영역 FFT/STFT 윈도우 함수 변경 이벤트 바인딩
+     */
+    _bindSelectionFftStftWindowChange() {
+        const windowSelect = document.getElementById('selectionFftStftWindowType');
+        if (!windowSelect) return;
+
+        windowSelect.addEventListener('change', (e) => {
+            const windowType = e.target.value;
+            const kaiserPanel = document.getElementById('selectionKaiserParamPanel');
+
+            // Kaiser 파라미터 패널 표시/숨김
+            if (kaiserPanel) {
+                kaiserPanel.style.display = (windowType === 'kaiser') ? 'block' : 'none';
+            }
+
+            // FFT 또는 STFT 신호처리 진행 중이면 재처리
+            if (this.activeSelectionProcessing &&
+                (this.activeSelectionProcessing.graphType === 'fft' ||
+                 this.activeSelectionProcessing.graphType === 'stft')) {
+                this._reprocessSelectedSignal();
+            }
+
+            console.log(`[선택 영역 FFT/STFT 윈도우] ${windowType} 선택`);
+        });
+
+        // Kaiser β 슬라이더 값 업데이트 및 재처리
+        const kaiserBetaSlider = document.getElementById('selectionKaiserBetaSlider');
+        const kaiserBetaValue = document.getElementById('selectionKaiserBetaValue');
+        if (kaiserBetaSlider && kaiserBetaValue) {
+            kaiserBetaSlider.addEventListener('input', (e) => {
+                kaiserBetaValue.textContent = parseFloat(e.target.value).toFixed(1);
+            });
+
+            // 값 변경 완료 시 신호처리 재실행 (FFT/STFT 진행 중일 때만)
+            kaiserBetaSlider.addEventListener('change', () => {
+                if (this.activeSelectionProcessing &&
+                    (this.activeSelectionProcessing.graphType === 'fft' ||
+                     this.activeSelectionProcessing.graphType === 'stft')) {
+                    this._reprocessSelectedSignal();
+                }
+            });
+        }
+    }
+
+    /**
      * FFT/STFT 옵션 이벤트 바인딩 (공통 전처리 + 특화 옵션)
      */
     _bindFFTStftOptionEvents() {
@@ -446,7 +591,7 @@ class Dashboard {
                     : windowInfo.name;
             }
             if (charDiv) {
-                charDiv.textContent = `메인로브=${windowInfo.mainLobeWidth}, 부엽=${windowInfo.sideLobeLevel}dB, 권장=${windowInfo.recommended}`;
+                charDiv.textContent = `메인로브=${windowInfo.mainLobeWidth}, 부엽=${windowInfo.sideLobeLevel}dB`;
             }
 
             // Kaiser 파라미터 패널 표시/숨김
@@ -1120,6 +1265,32 @@ class Dashboard {
         if (select) {
             select.value = '';
             select.style.display = 'block';  // ← 드롭박스 표시
+
+            // 신호처리 타입 변경 시 옵션 패널 표시/숨김 이벤트 바인딩
+            if (!select.selectionTypeChangeEventBound) {
+                select.addEventListener('change', (e) => {
+                    const processingType = e.target.value;
+                    const fftStftPanel = document.getElementById('selectionFftStftOptions');
+                    const waveletPanel = document.getElementById('selectionWaveletOptions');
+
+                    // 옵션 패널 표시/숨김
+                    if (fftStftPanel) {
+                        fftStftPanel.style.display = (processingType === 'fft' || processingType === 'stft') ? 'block' : 'none';
+                    }
+                    if (waveletPanel) {
+                        waveletPanel.style.display = (processingType === 'wavelet') ? 'block' : 'none';
+                    }
+
+                    // FFT/STFT 윈도우 함수 선택 이벤트 바인딩 (첫 번째만)
+                    if ((processingType === 'fft' || processingType === 'stft') && !this.selectionFftStftWindowChangeEventBound) {
+                        this._bindSelectionFftStftWindowChange();
+                        this.selectionFftStftWindowChangeEventBound = true;
+                    }
+
+                    console.log(`[선택 영역 신호처리] 타입 변경: ${processingType}`);
+                });
+                select.selectionTypeChangeEventBound = true;
+            }
         } else {
             console.error('[ERROR] signalProcessingType 요소를 찾을 수 없습니다');
         }
@@ -1131,6 +1302,12 @@ class Dashboard {
         if (backButton) backButton.style.display = 'none';
         if (applyButton) applyButton.style.display = 'inline-block';
         if (cancelButton) cancelButton.style.display = 'inline-block';
+
+        // 옵션 패널 초기화 (숨김)
+        const fftStftPanel = document.getElementById('selectionFftStftOptions');
+        const waveletPanel = document.getElementById('selectionWaveletOptions');
+        if (fftStftPanel) fftStftPanel.style.display = 'none';
+        if (waveletPanel) waveletPanel.style.display = 'none';
 
         panel.style.display = 'block';
         console.log('[*] 신호처리 UI 패널 표시됨');
@@ -1174,9 +1351,21 @@ class Dashboard {
         if (cancelButton) cancelButton.style.display = 'none';
         if (selectElement) selectElement.style.display = 'none';
 
-        // Wavelet 옵션 표시 (현재 신호처리 타입이 Wavelet인 경우)
+        // 현재 신호처리 타입 확인
         const activeGraphType = this.activeSelectionProcessing?.graphType;
+        const selectionFftStftOptions = document.getElementById('selectionFftStftOptions');
         const selectionWaveletOptions = document.getElementById('selectionWaveletOptions');
+
+        // FFT/STFT 옵션 표시 (현재 신호처리 타입이 FFT 또는 STFT인 경우)
+        if (selectionFftStftOptions) {
+            if (activeGraphType === 'fft' || activeGraphType === 'stft') {
+                selectionFftStftOptions.style.display = 'block';
+            } else {
+                selectionFftStftOptions.style.display = 'none';
+            }
+        }
+
+        // Wavelet 옵션 표시 (현재 신호처리 타입이 Wavelet인 경우)
         if (selectionWaveletOptions) {
             if (activeGraphType === 'wavelet') {
                 selectionWaveletOptions.style.display = 'block';
@@ -1199,8 +1388,12 @@ class Dashboard {
             signalProcessingType.value = '';
         }
 
-        // Wavelet 옵션 숨기기
+        // FFT/STFT, Wavelet 옵션 숨기기
+        const selectionFftStftOptions = document.getElementById('selectionFftStftOptions');
         const selectionWaveletOptions = document.getElementById('selectionWaveletOptions');
+        if (selectionFftStftOptions) {
+            selectionFftStftOptions.style.display = 'none';
+        }
         if (selectionWaveletOptions) {
             selectionWaveletOptions.style.display = 'none';
         }
@@ -1325,8 +1518,8 @@ class Dashboard {
 
             switch(graphType) {
                 case 'fft':
-                    // FFT/STFT 옵션 읽기 (윈도우 함수 등)
-                    const fftStftOptions = this._readFFTStftOptions();
+                    // 선택 영역 FFT/STFT 옵션 읽기 (윈도우 함수 등)
+                    const fftStftOptions = this._readSelectionFFTStftOptions();
 
                     // 윈도우 함수 적용
                     const window = SignalProcessor.getWindow(fftStftOptions.windowType, processedSignal.length, fftStftOptions.kaiserBeta);
@@ -1353,14 +1546,18 @@ class Dashboard {
                     break;
 
                 case 'stft':
-                    // FFT/STFT 옵션 읽기
-                    const stftFftStftOptions = this._readFFTStftOptions();
+                    // 선택 영역 FFT/STFT 옵션 읽기
+                    const stftFftStftOptions = this._readSelectionFFTStftOptions();
                     preprocessInfo += `윈도우=${stftFftStftOptions.windowType} `;
+
+                    // 선택영역 STFT window/hop size 설정 읽기
+                    const stftWindowSize = parseInt(document.getElementById('selectionStftWindowSize')?.value) || 256;
+                    const stftHopSize = parseInt(document.getElementById('selectionStftHopSize')?.value) || 128;
 
                     result = SignalProcessor.performSTFT(
                         processedSignal,
-                        128,
-                        64,
+                        stftWindowSize,
+                        stftHopSize,
                         sampleRate,
                         {
                             windowType: stftFftStftOptions.windowType,
@@ -1372,7 +1569,7 @@ class Dashboard {
                         this.activeSelectionProcessing = {
                             signal: processedSignal,
                             graphType: graphType,
-                            options: {windowSize: 128, hopSize: 64, windowType: stftFftStftOptions.windowType, kaiserBeta: stftFftStftOptions.kaiserBeta},
+                            options: {windowSize: stftWindowSize, hopSize: stftHopSize, windowType: stftFftStftOptions.windowType, kaiserBeta: stftFftStftOptions.kaiserBeta},
                             result: result,
                             originalSignal: signal,
                             removeDC: removeDC,
@@ -1766,7 +1963,10 @@ class Dashboard {
                     filterNyquist: document.getElementById('selectionFilterNyquist')?.checked !== false
                 };
             } else if (graphType === 'stft') {
-                options = {windowSize: 128, hopSize: 64};
+                // 선택영역 STFT window/hop size 설정 읽기
+                const stftWindowSize = parseInt(document.getElementById('selectionStftWindowSize')?.value) || 256;
+                const stftHopSize = parseInt(document.getElementById('selectionStftHopSize')?.value) || 128;
+                options = {windowSize: stftWindowSize, hopSize: stftHopSize};
             }
 
             // 옵션 업데이트
@@ -1777,8 +1977,8 @@ class Dashboard {
             // 신호처리 재실행 (전처리된 signal 사용)
             switch(graphType) {
                 case 'fft':
-                    // FFT/STFT 옵션 읽기 (윈도우 함수 등)
-                    const fftStftOptions = this._readFFTStftOptions();
+                    // 선택영역 FFT/STFT 옵션 읽기 (윈도우 함수 등)
+                    const fftStftOptions = this._readSelectionFFTStftOptions();
 
                     // 윈도우 함수 적용
                     const window = SignalProcessor.getWindow(fftStftOptions.windowType, processedSignal.length, fftStftOptions.kaiserBeta);
@@ -1789,8 +1989,8 @@ class Dashboard {
                     break;
 
                 case 'stft':
-                    // FFT/STFT 옵션 읽기
-                    const stftFftStftOptions = this._readFFTStftOptions();
+                    // 선택영역 FFT/STFT 옵션 읽기
+                    const stftFftStftOptions = this._readSelectionFFTStftOptions();
                     preprocessInfo += `윈도우=${stftFftStftOptions.windowType} `;
 
                     result = SignalProcessor.performSTFT(
@@ -2144,11 +2344,15 @@ class Dashboard {
         // 샘플링 레이트 계산
         const sampleRate = 1000 / (dataLoader.data.sample_interval_ms || 100);
 
-        // STFT 수행 (대안 4: windowOptions 전달, 주파수 배열 반환)
+        // STFT 윈도우/홉 크기 읽기 (사용자 커스터마이징)
+        const stftWindowSize = parseInt(document.getElementById('stftWindowSize')?.value) || 256;
+        const stftHopSize = parseInt(document.getElementById('stftHopSize')?.value) || 128;
+
+        // STFT 수행
         const stftResult = SignalProcessor.performSTFT(
             processedSignal,
-            256,  // windowSize 기본값
-            128,  // hopSize (50% overlap)
+            stftWindowSize,
+            stftHopSize,
             sampleRate,
             {
                 windowType: fftStftOptions.windowType,

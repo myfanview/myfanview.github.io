@@ -144,7 +144,7 @@
                             </label>
                             <select id="fftStftWindowType" style="width: 100%; padding: 8px 10px; font-size: 12px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer;">
                                 <option value="rectangular">Rectangular (윈도우 없음)</option>
-                                <option value="hann" selected>Hann ⭐ (권장)</option>
+                                <option value="hann" selected>Hann</option>
                                 <option value="hamming">Hamming</option>
                                 <option value="blackman">Blackman</option>
                                 <option value="kaiser">Kaiser (조정 가능)</option>
@@ -170,6 +170,41 @@
                             <div style="font-size: 11px; color: #666; margin-top: 6px; padding: 6px; background: #fffbf0; border-left: 2px solid #FFC107; border-radius: 2px;">
                                 💡 β 낮을수록: 스펙트럼 누수 ↓, 해상도 ↓<br>
                                 💡 β 높을수록: 스펙트럼 누수 ↑, 해상도 ↑
+                            </div>
+                        </div>
+
+                        <!-- STFT 윈도우/홉 크기 설정 -->
+                        <div style="margin-bottom: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                            <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">
+                                STFT 윈도우 크기: <span id="stftWindowSizeValue" style="color: #FF9800; font-weight: 700;">256</span>
+                            </label>
+                            <input type="range" id="stftWindowSize" min="32" max="512" step="32" value="256"
+                                   style="width: 100%; cursor: pointer;">
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #999; margin-top: 2px;">
+                                <span>시간 해상도 (32)</span>
+                                <span>균형 (256)</span>
+                                <span>주파수 해상도 (512)</span>
+                            </div>
+                            <div style="font-size: 11px; color: #666; margin-top: 6px; padding: 6px; background: #fffbf0; border-left: 2px solid #FFC107; border-radius: 2px;">
+                                💡 작을수록: 시간 해상도 ↑, 주파수 해상도 ↓<br>
+                                💡 클수록: 시간 해상도 ↓, 주파수 해상도 ↑
+                            </div>
+                        </div>
+
+                        <!-- STFT 홉 크기 설정 -->
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 600;">
+                                STFT 홉 크기: <span id="stftHopSizeValue" style="color: #FF9800; font-weight: 700;">128</span> (오버랩: <span id="stftOverlapValue" style="color: #FF9800;">50</span>%)
+                            </label>
+                            <input type="range" id="stftHopSize" min="16" max="256" step="16" value="128"
+                                   style="width: 100%; cursor: pointer;">
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #999; margin-top: 2px;">
+                                <span>많은 오버랩 (16)</span>
+                                <span>50% 오버랩 (128)</span>
+                                <span>적은 오버랩 (256)</span>
+                            </div>
+                            <div style="font-size: 11px; color: #666; margin-top: 6px; padding: 6px; background: #e8f5e9; border-left: 2px solid #4CAF50; border-radius: 2px;">
+                                ✓ 홉 크기 = 윈도우 크기 / 2 권장 (50% 오버랩)
                             </div>
                         </div>
                     </div>
@@ -217,12 +252,9 @@
                             <select id="waveletEdgeMode" style="width: 100%; padding: 6px 10px; font-size: 13px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer;">
                                 <option value="none">없음 (기본)</option>
                                 <option value="zero">Zero-padding (0으로 채움)</option>
-                                <option value="symmetric" selected>Symmetric (대칭 확장) ⭐</option>
+                                <option value="symmetric" selected>Symmetric (대칭 확장)</option>
                                 <option value="reflect">Reflect (반사)</option>
                             </select>
-                            <div style="font-size: 11px; color: #666; margin-top: 6px; padding: 6px; background: #fffbf0; border-left: 2px solid #FFC107; border-radius: 2px;">
-                                💡 Symmetric은 경계 불연속성을 줄여 대부분의 경우 권장됩니다
-                            </div>
                         </div>
 
                         <!-- 나이퀴스트 필터 -->
@@ -261,6 +293,52 @@
                     <button id="exportSelectionCSV" style="padding: 6px 16px; font-size: 13px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background 0.2s;">CSV</button>
                     <span style="font-size: 11px; color: #666;">신호처리 결과를 파일로 저장합니다</span>
                 </div>
+                <!-- FFT/STFT 전용 옵션 -->
+                <div id="selectionFftStftOptions" style="display: none; margin-top: 12px; padding: 12px; background: #fff3e0; border-radius: 4px; border-left: 3px solid #FF9800;">
+                    <div style="font-size: 13px; font-weight: 600; color: #555; margin-bottom: 10px;">⚙️ FFT/STFT 설정</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <!-- 윈도우 함수 선택 -->
+                        <div>
+                            <label style="display: block; font-size: 12px; color: #555; margin-bottom: 4px; font-weight: 600;">
+                                윈도우 함수:
+                            </label>
+                            <select id="selectionFftStftWindowType" style="width: 100%; padding: 6px; font-size: 12px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer;">
+                                <option value="rectangular">Rectangular (윈도우 없음)</option>
+                                <option value="hann" selected>Hann</option>
+                                <option value="hamming">Hamming</option>
+                                <option value="blackman">Blackman</option>
+                                <option value="kaiser">Kaiser (조정 가능)</option>
+                            </select>
+                        </div>
+                        <!-- Kaiser 파라미터 (Kaiser만 보임) -->
+                        <div id="selectionKaiserParamPanel" style="display: none;">
+                            <label style="display: block; font-size: 12px; color: #555; margin-bottom: 4px; font-weight: 600;">
+                                Kaiser β: <span id="selectionKaiserBetaValue" style="color: #FF9800; font-weight: 700;">8.6</span>
+                            </label>
+                            <input type="range" id="selectionKaiserBetaSlider" min="3" max="15" step="0.5" value="8.6" style="width: 100%; cursor: pointer;">
+                            <div style="font-size: 10px; color: #999; margin-top: 2px;">누수 (3) ← 균형 (8.6) → 해상도 (15)</div>
+                        </div>
+                    </div>
+
+                    <!-- STFT 윈도우/홉 크기 설정 -->
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #FFB74D;">
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; font-size: 12px; color: #555; margin-bottom: 4px; font-weight: 600;">
+                                윈도우 크기: <span id="selectionStftWindowSizeValue" style="color: #FF9800;">256</span>
+                            </label>
+                            <input type="range" id="selectionStftWindowSize" min="32" max="512" step="32" value="256" style="width: 100%; cursor: pointer;">
+                            <div style="font-size: 10px; color: #999; margin-top: 2px;">32 (시간) ← 256 (균형) → 512 (주파수)</div>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 12px; color: #555; margin-bottom: 4px; font-weight: 600;">
+                                홉 크기: <span id="selectionStftHopSizeValue" style="color: #FF9800;">128</span> (오버랩: <span id="selectionStftOverlapValue" style="color: #FF9800;">50</span>%)
+                            </label>
+                            <input type="range" id="selectionStftHopSize" min="16" max="256" step="16" value="128" style="width: 100%; cursor: pointer;">
+                            <div style="font-size: 10px; color: #999; margin-top: 2px;">16 (많음) ← 128 (50%) → 256 (적음)</div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Wavelet 전용 옵션 -->
                 <div id="selectionWaveletOptions" style="display: none; margin-top: 12px; padding: 12px; background: #f3e5f5; border-radius: 4px; border-left: 3px solid #9C27B0;">
                     <div style="font-size: 13px; font-weight: 600; color: #555; margin-bottom: 10px;">⚙️ Wavelet 설정</div>
@@ -279,7 +357,7 @@
                             <select id="selectionEdgeMode" style="width: 100%; padding: 6px; font-size: 12px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer;">
                                 <option value="none">없음</option>
                                 <option value="zero">Zero-padding</option>
-                                <option value="symmetric" selected>Symmetric ⭐</option>
+                                <option value="symmetric" selected>Symmetric</option>
                                 <option value="reflect">Reflect</option>
                             </select>
                         </div>
@@ -354,7 +432,7 @@
                     <li><strong>다중 센서:</strong> 동일 타입의 여러 센서를 선택하면 모두 하나의 그래프에 표시됩니다</li>
                     <li><strong>그래프 타입:</strong> 다양한 신호처리 방식 선택</li>
                     <li><strong>선택 영역 신호처리:</strong> 시계열 그래프에서 영역을 드래그하면 하단에 신호처리 메뉴가 나타납니다</li>
-                    <li><strong>FFT:</strong> 주파수 도메인 분석 (회전 불균형, 베어링 결함)</li>
+                    <li><strong>FFT:</strong> 주파수 도메인 분석</li>
                     <li><strong>STFT:</strong> 시간-주파수 2D 분석</li>
                     <li><strong>Wavelet:</strong> 다중 스케일 분석</li>
                     <li><strong>Hilbert:</strong> 신호 포락선 추출</li>
