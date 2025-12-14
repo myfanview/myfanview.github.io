@@ -218,7 +218,7 @@ def generate_sinusoid_test_data():
     print(f"    표준편차: {signal_1.std():.2f} RPM")
     print(f"    ▶ 테스트: FFT 실행 → 1Hz에서 피크 확인")
 
-    print(f"\n[2] 복합 주파수 성분 (1Hz + 3Hz + 5Hz)")
+    print(f"\n[2] 복합 주파수 성분 (1Hz + 3Hz + 7Hz)")
     print(f"    샘플 개수: {len(signal_2)}")
     print(f"    지속 시간: {len(signal_2)/sample_rate:.1f}초")
     print(f"    값 범위: [{signal_2.min():.2f}, {signal_2.max():.2f}] RPM")
@@ -227,8 +227,8 @@ def generate_sinusoid_test_data():
     print(f"    주파수 성분:")
     print(f"      - 1Hz (진폭 500 RPM)")
     print(f"      - 3Hz (진폭 250 RPM)")
-    print(f"      - 5Hz (진폭 150 RPM)")
-    print(f"    ▶ 테스트: STFT 실행 → 1Hz, 3Hz, 5Hz 세 개의 주파수 성분 확인")
+    print(f"      - 7Hz (진폭 150 RPM)")
+    print(f"    ▶ 테스트: STFT 실행 → 1Hz, 3Hz, 7Hz 세 개의 주파수 성분 확인")
 
     print(f"\n[3] 가변 속도 RPM (2Hz → 4Hz → 8Hz)")
     print(f"    샘플 개수: {len(signal_3)}")
