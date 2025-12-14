@@ -189,6 +189,10 @@ class Dashboard {
         document.getElementById('loadDataBtn').addEventListener('click', () => this.loadData());
         document.getElementById('exportBtn').addEventListener('click', () => this.exportData());
         document.getElementById('refreshBtn').addEventListener('click', () => this.renderGraph());
+        document.getElementById('sampleData1Btn').addEventListener('click', () => this.loadSample1Data());
+        document.getElementById('sampleData2Btn').addEventListener('click', () => this.loadSample2Data());
+        document.getElementById('sampleData3Btn').addEventListener('click', () => this.loadSample3Data());
+
 
         // 탭 클릭
         document.querySelectorAll('.tab-button').forEach(btn => {
@@ -784,6 +788,53 @@ class Dashboard {
         }
 
         this._showLoading(false);
+    }
+
+    /**
+     * [헬퍼] URL에서 데이터 로드 및 UI 갱신 공통 로직
+     */
+    async _loadSampleFromUrl(url, sampleName) {
+        this._showLoading(true);
+        try {
+            console.log(`[*] ${sampleName} 로드 시작: ${url}`);
+            
+            // dataLoader의 기존 loadFromUrl 메서드 활용
+            await dataLoader.loadFromUrl(url);
+            
+            // UI 및 그래프 갱신
+            this._updateUI();
+            this._showMessage(`${sampleName} 로드 완료`, 'success');
+            
+        } catch (error) {
+            console.error(`[ERROR] ${sampleName} 로드 실패:`, error);
+            this._showMessage(`${sampleName} 로드 실패: ` + error.message, 'error');
+        } finally {
+            this._showLoading(false);
+        }
+    }
+
+    /**
+     * Sample 1: Stable RPM 데이터 로드
+     */
+    async loadSample1Data() {
+        const url = 'https://raw.githubusercontent.com/myfanview/myfanview.github.io/main/test_data/test_data_fan_rpm_stable.json';
+        await this._loadSampleFromUrl(url, 'Sample 1 (Stable)');
+    }
+
+    /**
+     * Sample 2: Complex RPM 데이터 로드
+     */
+    async loadSample2Data() {
+        const url = 'https://raw.githubusercontent.com/myfanview/myfanview.github.io/main/test_data/test_data_fan_rpm_complex.json';
+        await this._loadSampleFromUrl(url, 'Sample 2 (Complex)');
+    }
+
+    /**
+     * Sample 3: Variable RPM 데이터 로드
+     */
+    async loadSample3Data() {
+        const url = 'https://raw.githubusercontent.com/myfanview/myfanview.github.io/main/test_data/test_data_fan_rpm_variable.json';
+        await this._loadSampleFromUrl(url, 'Sample 3 (Variable)');
     }
 
     /**

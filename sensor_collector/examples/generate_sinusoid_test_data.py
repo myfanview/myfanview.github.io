@@ -3,8 +3,8 @@
 
 신호처리 기능 테스트를 위해 다음 3가지 유형의 Fan RPM 데이터를 생성합니다:
 1. 안정적인 저주파 진동 (1Hz, RPM 진폭 ±500)
-2. 복합 주파수 성분 (1Hz + 3Hz + 5Hz 포함)
-3. 시간에 따라 변하는 RPM (1Hz → 2Hz → 0.5Hz)
+2. 복합 주파수 성분 (1Hz + 3Hz + 7Hz 포함)
+3. 시간에 따라 변하는 RPM (2Hz → 4Hz → 8Hz)
 
 생성 파일:
 - test_data_fan_rpm_stable.json: FFT 테스트용 (안정적 저주파)
@@ -55,15 +55,15 @@ def generate_sinusoid_test_data():
         })
 
     # ============================================
-    # 2. 복합 주파수 성분 (1Hz + 3Hz + 5Hz)
+    # 2. 복합 주파수 성분 (1Hz + 3Hz + 7Hz)
     # ============================================
-    print("[2] 복합 주파수 성분 (1Hz + 3Hz + 5Hz) 생성 중...")
+    print("[2] 복합 주파수 성분 (1Hz + 3Hz + 7Hz) 생성 중...")
     duration_2 = 10  # 10초
     t_2 = np.arange(0, duration_2, 1/sample_rate)
     signal_2 = base_rpm + (
         500 * np.sin(2 * np.pi * 1 * t_2) +    # 1Hz, 진폭 500
         250 * np.sin(2 * np.pi * 3 * t_2) +    # 3Hz, 진폭 250
-        150 * np.sin(2 * np.pi * 5 * t_2)      # 5Hz, 진폭 150
+        150 * np.sin(2 * np.pi * 7 * t_2)      # 7Hz, 진폭 150
     )
 
     data_2 = []
@@ -77,20 +77,20 @@ def generate_sinusoid_test_data():
         })
 
     # ============================================
-    # 3. 시간에 따라 변하는 RPM (1Hz → 2Hz → 0.5Hz)
+    # 3. 시간에 따라 변하는 RPM (2Hz → 4Hz → 8Hz)
     # ============================================
-    print("[3] 시간 변화 RPM (1Hz → 2Hz → 0.5Hz) 생성 중...")
+    print("[3] 시간 변화 RPM (2Hz → 4Hz → 8Hz) 생성 중...")
     duration_per_signal = 5  # 각 신호 5초씩
     segment_1_t = np.arange(0, duration_per_signal, 1/sample_rate)
     segment_2_t = np.arange(0, duration_per_signal, 1/sample_rate)
     segment_3_t = np.arange(0, duration_per_signal, 1/sample_rate)
 
-    # 세그먼트 1: 1Hz, 1500 RPM 기준
-    segment_1 = 1500 + 400 * np.sin(2 * np.pi * 1 * segment_1_t)
-    # 세그먼트 2: 2Hz, 2500 RPM 기준
-    segment_2 = 2500 + 400 * np.sin(2 * np.pi * 2 * segment_2_t)
-    # 세그먼트 3: 0.5Hz, 1800 RPM 기준
-    segment_3 = 1800 + 400 * np.sin(2 * np.pi * 0.5 * segment_3_t)
+    # 세그먼트 1: 2Hz, 1500 RPM 기준
+    segment_1 = 1500 + 400 * np.sin(2 * np.pi * 2 * segment_1_t)
+    # 세그먼트 2: 4Hz, 2500 RPM 기준
+    segment_2 = 2500 + 400 * np.sin(2 * np.pi * 4 * segment_2_t)
+    # 세그먼트 3: 8Hz, 1800 RPM 기준
+    segment_3 = 1800 + 400 * np.sin(2 * np.pi * 8 * segment_3_t)
 
     signal_3 = np.concatenate([segment_1, segment_2, segment_3])
 
@@ -144,7 +144,7 @@ def generate_sinusoid_test_data():
             "components": [
                 {"frequency": 1, "amplitude": 500},
                 {"frequency": 3, "amplitude": 250},
-                {"frequency": 5, "amplitude": 150}
+                {"frequency": 7, "amplitude": 150}
             ]
         },
         "sensors": {
@@ -170,7 +170,7 @@ def generate_sinusoid_test_data():
                 {
                     "name": "Low Speed (1Hz)",
                     "baseRPM": 1500,
-                    "frequency": 1,
+                    "frequency": 2,
                     "amplitude": 400,
                     "duration": duration_per_signal,
                     "startTime": 0
@@ -178,7 +178,7 @@ def generate_sinusoid_test_data():
                 {
                     "name": "High Speed (2Hz)",
                     "baseRPM": 2500,
-                    "frequency": 2,
+                    "frequency": 4,
                     "amplitude": 400,
                     "duration": duration_per_signal,
                     "startTime": duration_per_signal
@@ -186,7 +186,7 @@ def generate_sinusoid_test_data():
                 {
                     "name": "Medium Speed (0.5Hz)",
                     "baseRPM": 1800,
-                    "frequency": 0.5,
+                    "frequency": 8,
                     "amplitude": 400,
                     "duration": duration_per_signal,
                     "startTime": duration_per_signal * 2
@@ -230,7 +230,7 @@ def generate_sinusoid_test_data():
     print(f"      - 5Hz (진폭 150 RPM)")
     print(f"    ▶ 테스트: STFT 실행 → 1Hz, 3Hz, 5Hz 세 개의 주파수 성분 확인")
 
-    print(f"\n[3] 가변 속도 RPM (1Hz → 2Hz → 0.5Hz)")
+    print(f"\n[3] 가변 속도 RPM (2Hz → 4Hz → 8Hz)")
     print(f"    샘플 개수: {len(signal_3)}")
     print(f"    지속 시간: {len(signal_3)/sample_rate:.1f}초 ({duration_per_signal}s × 3)")
     print(f"    값 범위: [{signal_3.min():.2f}, {signal_3.max():.2f}] RPM")
